@@ -1,29 +1,21 @@
 angular.module('experience', [
   'ionic',
-  'experience.home'
+  'ngCordova',
+  'experience.controllers',
+  'experience.routes',
+  'experience.services'
 ])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
-    if (window.StatusBar) {
+    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+    // for form inputs)
+    if(window.cordova && window.cordova.plugins.Keyboard) {
+      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+    }
+    if(window.StatusBar) {
+      // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
   });
 })
-
-.config(function($stateProvider, $urlRouterProvider) {
-  $stateProvider
-
-  .state('home', {
-    url: '/home',
-    views: {
-      'content': {
-        templateUrl: 'templates/home.html',
-        controller: 'HomeController'
-      }
-    },
-  });
-
-  $urlRouterProvider.otherwise('/home');
-});
-
