@@ -1,10 +1,22 @@
 <ion-view title="Welcome">
-    <ion-content class="has-header" padding="true">
-        <form class="list">
-            <a ng-click="facebookLogin()" class="button button-positive button-block  icon-left ion-social-facebook">Use Facebook account</a>
-            <button class="button button-assertive button-block  icon-left ion-social-google">Use Google account</button>
-            <div class="spacer" style="width: 300px; height: 20px;"></div>
-            <a href="#/create-account" class="button  button-block ">Use Jumping account</a>
-        </form>
-    </ion-content>
+  <ion-content padding="true">
+    <form class="list">
+      <a ng-click="loginOAuth('facebook')" class="button button-positive button-block icon-left ion-social-facebook">Use Facebook account</a>
+      <a ng-click="loginOAuth('google')" class="button button-assertive button-block icon-left ion-social-google">Use Google account</a>
+      <a ui-sref="createAccount" class="button  button-block ">Use Jumping account</a>
+    </form>
+
+    <h1>User info</h1>
+    <ul>
+      <li>provider: {{ user.provider }}</li>
+      <li>email: {{ user.email }}</li>
+      <li>password: {{ user.password }}</li>
+      <li>name: {{ user.name }}</li>
+      <li>weight: {{ user.weight }}</li>
+      <li>birthday: {{ user.birthday }}</li>
+      <li>gender: {{ user.gender }}</li>
+      <li>units: {{ user.units }}</li>
+    </ul>
+
+  </ion-content>
 </ion-view>

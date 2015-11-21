@@ -1,14 +1,29 @@
 angular.module('experience.controllers', [])
 
-.controller('WelcomeController', function($scope, $cordovaOauth, OAuthKeyFB) {
+.controller('WelcomeController', function($scope, $state, userService) {
+  $scope.user = userService.model;
 
-    $scope.facebookLogin = function() {
-        $cordovaOauth.facebook(OAuthKeyFB, ["email", "public_profile"], {redirect_uri: "http://localhost/callback"}).then(function(result) {
-            alert("logged in");
-        }, function(error) {
-            alert("Error: " + error);
-        });
-    };
+  $scope.loginOAuth = function(provider) {
+    // pick methods by provider
+    if (provider == 'facebook') {
+      var oauth = userService.oauthFacebook;
+      var load = userService.loadFromFacebook;
+    } else {
+      var oauth = userService.oauthGoogle;
+      var load = userService.loadFromGoogle;
+    }
 
-    console.log('WelcomeController loaded');
+    // fire login
+    oauth()
+    .then(load)
+    .then(userService.saveState)
+    .then(function(model) {
+      $state.go('pairing');
+    }).catch(function(error) {
+      // TODO inform user
+    });
+  };
+})
+
+.controller('PairingController', function() {
 });
