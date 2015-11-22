@@ -1,28 +1,30 @@
 angular.module('experience.controllers', [])
 
-.controller('WelcomeController', function($scope, $state, userService) {
+.controller('WelcomeController', function($scope, $state, $cordovaToast, $log, userService) {
   $scope.user = userService.model;
 
-  $scope.loginOAuth = function(provider) {
-    // pick methods by provider
-    if (provider == 'facebook') {
-      var oauth = userService.oauthFacebook;
-      var load = userService.loadFromFacebook;
-    } else {
-      var oauth = userService.oauthGoogle;
-      var load = userService.loadFromGoogle;
-    }
-
-    // fire login
-    oauth()
-    .then(load)
+  $scope.loginFacebook = function() {
+    userService.loginFacebook()
+    .then(userService.loadFromFacebook)
     .then(userService.saveState)
-    .then(function(model) {
+    .then(function() {
       $state.go('pairing');
     }).catch(function(error) {
-      // TODO inform user
+      $cordovaToast.showShortCenter('Facebook login failed. Please try again.');
     });
   };
+
+  $scope.loginGoogle = function() {
+    userService.loginGoogle()
+    .then(userService.loadFromGoogle)
+    .then(userService.saveState)
+    .then(function() {
+      $state.go('pairing');
+    }).catch(function(error) {
+      $cordovaToast.showShortCenter('Google login failed. Please try again.');
+    });
+  };
+
 })
 
 .controller('PairingController', function() {

@@ -1,15 +1,11 @@
 angular.module('experience.services', [])
 
-.constant('OAuthKeyFacebook', '702447366556323')
-
-.constant('OAuthKeyGoogle', '457117701129-ljnme8uprvbe19fs14gbt9u3n037rspu.apps.googleusercontent.com')
-
-.factory('userService', function($rootScope, $cordovaOauth, $http, $log, OAuthKeyFacebook, OAuthKeyGoogle) {
+.factory('userService', function($rootScope, $http, $log, $cordovaFacebook, $q) {
 
   var service = {};
 
   service.model = {
-    provider: 'none',
+    provider: '',
     accessToken: '',
     expiresIn: '',
 
@@ -18,8 +14,8 @@ angular.module('experience.services', [])
     name: '',
     weight: 0,
     birthday: '',
-    gender: 'male',
-    units: 'metric',
+    gender: '',
+    units: '',
   };
 
   service.saveState = function() {
@@ -36,47 +32,49 @@ angular.module('experience.services', [])
     }
   };
 
-  // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-
-  service.oauthFacebook = function() {
-    return $cordovaOauth.facebook(
-      OAuthKeyFacebook, ['email', 'public_profile', 'user_birthday', 'user_friends']
-    ).then(function(result) {
+  service.loginFacebook = function() {
+    return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
+    .then(function(response) {
       service.model.provider = 'facebook';
-      service.model.accessToken = result.access_token;
-      service.model.expiresIn = result.expires_in;
+      service.model.accessToken = response.authResponse.accessToken;
+      service.model.expiresIn = response.authResponse.expiresIn;
       $log.info('logged in using Facebook');
-    }).catch(function(error) {
-      $log.error('Facebook oauth error: ' + error);
-      throw error;
     });
   };
 
-  service.oauthGoogle = function() {
-    return $cordovaOauth.google(
-      OAuthKeyGoogle, ['email', 'profile']
-    ).then(function(result) {
-      service.model.provider = 'google';
-      console.log(result);
-      $log.info('logged in using Google');
-    }).catch(function(error) {
-      $log.error('Google oauth error: ' + error);
-      throw error;
+  service.loginGoogle = function() {
+    return $q(function(resolve, reject) {
+      window.plugins.googleplus.login({offline: true}, function(response) {
+        service.model.provider = 'google';
+        service.model.accessToken = response.oauthToken;
+        service.model.expiresIn = 0;
+
+        service.model.email = response.email;
+        service.model.name = response.displayName;
+        service.model.gender = response.gender; // Android only
+        service.model.birthday = response.birthday; // Android only
+
+        $log.info('logged in using Google');
+        resolve(response);
+      }, reject);
     });
   };
+
+  // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 
   service.loadFromFacebook = function() {
     return $http.get('https://graph.facebook.com/v2.5/me', {
       params: {
         // TODO handle token expiration
         access_token: service.model.accessToken,
-        fields: 'email,name,birthday,gender',
+        fields: 'email,name,birthday,gender,locale',
       },
-    }).then(function(result) {
-      service.model.email = result.data.email;
-      service.model.name = result.data.name;
-      service.model.gender = result.data.gender;
-      service.model.birthday = result.data.birthday;
+    }).then(function(response) {
+      service.model.email = response.data.email;
+      service.model.name = response.data.name;
+      service.model.gender = response.data.gender;
+      service.model.birthday = response.data.birthday;
+      service.model.units = response.data.locale == 'en' ? 'imperial' : 'metric';
       $log.info('user data loaded from Facebook');
     }).catch(function(error) {
       $log.error('Facebook graph API error: ' + error);
@@ -85,6 +83,23 @@ angular.module('experience.services', [])
   };
 
   // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+
+  service.loadFromGoogle = function() {
+    return $http.get('https://www.googleapis.com/plus/v1/people/me', {
+      params: {
+        fields: 'emails,displayName,birthday,gender,language',
+      },
+      headers: {
+        Authorization: 'Bearer ' + service.model.accessToken,
+      },
+    }).then(function(response) {
+      service.model.units = response.language == 'en' ? 'imperial' : 'metric';
+      $log.info('user data loaded from Google');
+    }).catch(function(error) {
+      $log.error('Google API error: ' + error);
+      throw error;
+    });
+  };
 
   $rootScope.$on('savestate', service.saveState);
   $rootScope.$on('restorestate', service.restoreState);
