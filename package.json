@@ -24,11 +24,12 @@
       "variables": {
         "REVERSED_CLIENT_ID": "com.googleusercontent.apps.457117701129-1l9i4gdlnjgaglqugue3ksvg1ptvoc3o"
       },
-      "locator": "cordova-plugin-googleplus",
-      "id": "cordova-plugin-googleplus"
+      "locator": "https://github.com/phw/cordova-plugin-googleplus",
+      "id": "cordova-plugin-facebook4"
     }
   ],
   "cordovaPlatforms": [
-    "android"
+    "android",
+    "ios"
   ]
 }

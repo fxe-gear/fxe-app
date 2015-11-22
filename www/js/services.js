@@ -51,8 +51,9 @@ angular.module('experience.services', [])
 
         service.model.email = response.email;
         service.model.name = response.displayName;
-        service.model.gender = response.gender; // Android only
-        service.model.birthday = response.birthday; // Android only
+
+        if (response.gender) service.model.gender = response.gender; // Android only
+        if (response.birthday) service.model.birthday = response.birthday; // Android only
 
         $log.info('logged in using Google');
         resolve(response);
