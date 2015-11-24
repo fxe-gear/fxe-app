@@ -8,6 +8,12 @@ angular.module('experience.routes', [])
     controller: 'WelcomeController',
   });
 
+  $stateProvider.state('scanning', {
+    url: '/scanning',
+    templateUrl: 'templates/scanning.html',
+    controller: 'ScanningController',
+  });
+
   $stateProvider.state('pairing', {
     url: '/pairing',
     templateUrl: 'templates/pairing.html',

@@ -1,5 +1,14 @@
 <ion-view title="Pairing">
   <ion-content class="has-header" padding="true">
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+      <center>
+        <div class="led" style="background-color: {{ color }}; box-shadow: 0px 0px 8px 1px {{ color }};"></div>
+        <h1>Do you see <br> a <span class="color">{{ color }}</span> light?</h1>
+      </center>
+
+      <a ng-click="yes()" class="button button-positive button-block">Yes</a>
+      <a ng-click="no()" class="button button-assertive button-outline button-block">No</a>
+      <a ng-click="cannotRecognize()" class="button button-positive button-clear button-block">I cannot recognize the color</a>
+
   </ion-content>
 </ion-view>
