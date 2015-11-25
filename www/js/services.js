@@ -1,5 +1,24 @@
 angular.module('experience.services', [])
 
+.service('util', function() {
+  // Fisher–Yates shuffle
+  this.shuffle = function(array) {
+    var counter = array.length;
+    var temp;
+    var index;
+
+    while (counter > 0) {
+      index = Math.floor(Math.random() * counter);
+      counter--;
+      temp = array[counter];
+      array[counter] = array[index];
+      array[index] = temp;
+    }
+
+    return array;
+  };
+})
+
 .service('userService', function($rootScope, $http, $log, $cordovaFacebook, $q) {
 
   var model = {
@@ -208,6 +227,8 @@ angular.module('experience.services', [])
 
   var model = {
     experienceID: '',
+    connected: false,
+    paired: false,
   };
   this.model = model;
 
@@ -234,6 +255,7 @@ angular.module('experience.services', [])
 
   this.scan = function() {
     return $q(function(resolve, reject) {
+      $log.info('starting ble scan');
       $timeout(function() {
         $log.info('stopping ble scan, found device: ' + angular.toJson(deviceShort));
         resolve(deviceShort);
@@ -248,11 +270,23 @@ angular.module('experience.services', [])
     });
   };
 
+  this.setColor = function(color) {
+    return $q(function(resolve, reject) {
+      $log.info('setting color to ' + color);
+      $timeout(resolve, 100);
+    });
+  };
+
   this.connect = function(deviceID) {
     return $q(function(resolve, reject) {
+      // use stored experienceID, if not passed
+      if (typeof deviceID === 'undefined') deviceID = model.experienceID;
+      if (!deviceID) reject('device id to connect not provided');
       $log.info('connecting to ' + deviceID);
       $timeout(function() {
         $log.info('connected to ' + deviceID);
+        model.connected = true;
+        model.experienceID = deviceID;
         resolve(deviceFull);
       }, 1000);
     });
@@ -260,6 +294,8 @@ angular.module('experience.services', [])
 
   this.disconnect = function(deviceID) {
     return $q(function(resolve, reject) {
+      if (typeof deviceID === 'undefined') deviceID = model.experienceID;
+      if (!deviceID) reject('device id to connect not provided');
       $log.info('disconnecting from ' + deviceID);
       ble.disconnect(deviceID, resolve, reject);
     });

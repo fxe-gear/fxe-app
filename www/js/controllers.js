@@ -11,7 +11,8 @@ var WelcomeController = function($scope, $state, $ionicPopup, $log, userService)
       $state.go('scanning');
     }).catch(function(error) {
       $ionicPopup.alert({
-        title: 'Facebook login failed.<br>Please try again.',
+        title: 'Facebook login failed.',
+        template: 'Please try again.',
         okType: 'button-assertive',
       });
     });
@@ -25,7 +26,8 @@ var WelcomeController = function($scope, $state, $ionicPopup, $log, userService)
       $state.go('scanning');
     }).catch(function(error) {
       $ionicPopup.alert({
-        title: 'Google login failed.<br>Please try again.',
+        title: 'Google login failed.',
+        template: 'Please try again.',
         okType: 'button-assertive',
       });
     });
@@ -38,7 +40,7 @@ module.controller('WelcomeController', WelcomeController);
 // ------------------------------------------------------------------------------------------------
 
 var ScanningController = function($scope, $state, $ionicPopup, experienceService) {
-  init = function() {
+  var enter = function() {
     enableBluetooth()
     .then(scan)
     .then(connect)
@@ -49,7 +51,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     });
   };
 
-  enableBluetooth = function() {
+  var enableBluetooth = function() {
     $scope.working = true;
     $scope.status = 'Enabling bluetooth...';
     return experienceService.enable().catch(function(error) {
@@ -59,7 +61,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     });
   };
 
-  scan = function() {
+  var scan = function() {
     $scope.working = true;
     $scope.status = 'Scanning...';
     return experienceService.scan().catch(function() {
@@ -69,7 +71,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     });
   };
 
-  connect = function(device) {
+  var connect = function(device) {
     $scope.working = true;
     $scope.status = 'Connecting...';
     return experienceService.connect(device.id).catch(function() {
@@ -79,18 +81,15 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     });
   };
 
-  stopScan = function() {
+  var exit = function() {
     $scope.working = false;
     $scope.status = '';
     return experienceService.stopScan();
   };
 
-  $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
-    if (toState.controller == 'ScanningController') { // enter
-      init();
-    } else { // exit
-      stopScan();
-    }
+  $scope.$on('$stateChangeSuccess', function(e, toState) {
+    if (toState.controller == 'ScanningController') enter();
+    else exit();
   });
 };
 
@@ -99,27 +98,49 @@ module.controller('ScanningController', ScanningController);
 
 // ------------------------------------------------------------------------------------------------
 
-var PairingController = function($scope, $state, $ionicPopup, experienceService) {
+var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, experienceService, util) {
+  var colors = util.shuffle(['red', 'green', 'blue', 'yellow', 'white', 'cyan']);
+
+  $scope.stepCount = 4;
+  $scope.step = 0;
+
+  var setRandomColor = function() {
+    $scope.color = colors[$scope.step];
+    return experienceService.setColor($scope.color);
+  };
 
   $scope.yes = function() {
-    $ionicPopup.alert({title:'BAF!'});
+    // $ionicPopup.alert({title:experienceService.model.connected});
+    $scope.step++;
+    if ($scope.step == $scope.stepCount) {
+      experienceService.model.paired = true;
+      $ionicPopup.alert({title: 'YAY, paired!'});
+      // return $state.go('main');
+    } else return setRandomColor();
   };
 
   $scope.no = function() {
-    $ionicPopup.alert({title:'BAF!'});
+    $ionicPopup.alert({
+      title: 'Paring failed',
+      template: 'Sorry, we have unintentionally connected to another Experience. Please try it again.',
+      okType: 'button-energized',
+    })
+    .then(function() {
+      return experienceService.disconnect();
+    })
+    .then(function() {
+      $ionicHistory.goBack();
+    });
   };
 
   $scope.cannotRecognize = function() {
     // TODO
   };
 
-  getRandomColor = function() {
-    var colors = ['red', 'green', 'blue', 'yellow', 'white'];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  $scope.color = getRandomColor();
+  $scope.$on('$stateChangeSuccess', function(e, toState) {
+    if (toState.controller == 'PairingController') setRandomColor();
+  });
 };
 
-PairingController.$inject = ['$scope', '$state', '$ionicPopup', 'experienceService'];
+PairingController.$inject = ['$scope', '$state', '$ionicHistory', '$ionicPopup', 'experienceServiceMock', 'util'];
 module.controller('PairingController', PairingController);

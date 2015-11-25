@@ -2,6 +2,7 @@
   <ion-content class="has-header" padding="true">
 
       <center>
+        <small>step {{ step + 1 }} of {{ stepCount }}</small>
         <div class="led" style="background-color: {{ color }}; box-shadow: 0px 0px 8px 1px {{ color }};"></div>
         <h1>Do you see <br> a <span class="color">{{ color }}</span> light?</h1>
       </center>
@@ -9,6 +10,7 @@
       <a ng-click="yes()" class="button button-positive button-block">Yes</a>
       <a ng-click="no()" class="button button-assertive button-outline button-block">No</a>
       <a ng-click="cannotRecognize()" class="button button-positive button-clear button-block">I cannot recognize the color</a>
+
 
   </ion-content>
 </ion-view>
