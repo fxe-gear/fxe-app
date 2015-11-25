@@ -117,8 +117,8 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     if ($scope.step == $scope.stepCount) {
       experienceService.model.paired = true;
       experienceService.setColor(); // clear color
-      return $ionicPopup.alert({title: 'YAY, paired!'});
-      // return $state.go('main');
+      $ionicHistory.nextViewOptions({historyRoot: true});
+      return $state.go('main.start');
     } else return setRandomColor();
   };
 
@@ -147,3 +147,11 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
 
 PairingController.$inject = ['$scope', '$state', '$ionicHistory', '$ionicPopup', 'experienceServiceMock', 'util'];
 module.controller('PairingController', PairingController);
+
+// ------------------------------------------------------------------------------------------------
+
+var StartController = function() {
+};
+
+StartController.$inject = ['$scope'];
+module.controller('StartController', StartController);

@@ -1,10 +1,13 @@
-<ion-view title="Welcome">
+<ion-view title="Welcome" hide-nav-bar="true">
   <ion-content padding="true">
     <form class="list">
       <a ng-click="loginFacebook()" class="button button-positive button-block icon-left ion-social-facebook">Use Facebook account</a>
       <a ng-click="loginGoogle()" class="button button-assertive button-block icon-left ion-social-google">Use Google account</a>
       <a ui-sref="create-account" class="button button-block ">Use Jumping account</a>
+
+      <!-- tmp dev links -->
       <a ui-sref="scanning" class="button button-block button-clear">Skip to scanning</a>
+      <a ui-sref="main.jump" class="button button-block button-clear">Skip to jumping</a>
     </form>
 
     <h1>User info</h1>

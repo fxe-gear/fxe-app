@@ -18,7 +18,25 @@ angular.module('experience.routes', [])
     url: '/pairing',
     templateUrl: 'templates/pairing.html',
     controller: 'PairingController',
-  });
+  })
+
+  .state('main', {
+    url: '/main',
+    abstract: true,
+    templateUrl: 'templates/main/tabs.html',
+  })
+
+  .state('main.start', {
+    url: '/start',
+    views: {
+      tab1: {
+        templateUrl: 'templates/main/start.html',
+        controller: 'StartController',
+      },
+    },
+  })
+
+  ;
 
   // TODO different application flow
 
