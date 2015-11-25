@@ -1,10 +1,10 @@
 <ion-view title="Pairing">
-  <ion-content class="has-header" padding="true">
+  <ion-content class="has-header" padding="true" scroll="false">
 
       <center>
         <small>step {{ step + 1 }} of {{ stepCount }}</small>
         <div class="led" style="background-color: {{ color }}; box-shadow: 0px 0px 8px 1px {{ color }};"></div>
-        <h1>Do you see <br> a <span class="color">{{ color }}</span> light?</h1>
+        <h1>Do you see <br> a <span class="color">{{ colorName }}</span> light?</h1>
       </center>
 
       <a ng-click="yes()" class="button button-positive button-block">Yes</a>

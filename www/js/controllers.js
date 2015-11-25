@@ -99,13 +99,15 @@ module.controller('ScanningController', ScanningController);
 // ------------------------------------------------------------------------------------------------
 
 var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, experienceService, util) {
-  var colors = util.shuffle(['red', 'green', 'blue', 'yellow', 'white', 'cyan']);
+  var colors = {red: '#ff2222', green: '#22ff22', blue: '#2222ff', yellow: '#ffff22', white: '#ffffff', cyan: '#22ffff'};
+  var colorNamesShuffled = util.shuffle(Object.keys(colors));
 
   $scope.stepCount = 4;
   $scope.step = 0;
 
   var setRandomColor = function() {
-    $scope.color = colors[$scope.step];
+    $scope.colorName = colorNamesShuffled[$scope.step];
+    $scope.color = colors[$scope.colorName];
     return experienceService.setColor($scope.color);
   };
 
@@ -114,7 +116,8 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     $scope.step++;
     if ($scope.step == $scope.stepCount) {
       experienceService.model.paired = true;
-      $ionicPopup.alert({title: 'YAY, paired!'});
+      experienceService.setColor(); // clear color
+      return $ionicPopup.alert({title: 'YAY, paired!'});
       // return $state.go('main');
     } else return setRandomColor();
   };

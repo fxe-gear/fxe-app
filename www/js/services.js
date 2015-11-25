@@ -272,7 +272,8 @@ angular.module('experience.services', [])
 
   this.setColor = function(color) {
     return $q(function(resolve, reject) {
-      $log.info('setting color to ' + color);
+      if (typeof color === 'undefined') $log.info('clearing color');
+      else $log.info('setting color to ' + color);
       $timeout(resolve, 100);
     });
   };
@@ -295,7 +296,7 @@ angular.module('experience.services', [])
   this.disconnect = function(deviceID) {
     return $q(function(resolve, reject) {
       if (typeof deviceID === 'undefined') deviceID = model.experienceID;
-      if (!deviceID) reject('device id to connect not provided');
+      if (!deviceID) reject('device id to disconnect not provided');
       $log.info('disconnecting from ' + deviceID);
       ble.disconnect(deviceID, resolve, reject);
     });
