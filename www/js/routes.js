@@ -31,7 +31,16 @@ angular.module('experience.routes', [])
     views: {
       tab1: {
         templateUrl: 'templates/main/start.html',
-        controller: 'StartController',
+      },
+    },
+  })
+
+  .state('main.jumping', {
+    url: '/jumping',
+    views: {
+      tab1: {
+        templateUrl: 'templates/main/jumping.html',
+        controller: 'JumpingController',
       },
     },
   })

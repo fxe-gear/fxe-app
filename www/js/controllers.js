@@ -124,7 +124,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     $scope.step++;
     if ($scope.step == $scope.stepCount) {
       // on the end of pairing process
-      experienceService.model.paired = true;
+      experienceService.paired = true;
       experienceService.setColor(); // clear color
       $ionicHistory.nextViewOptions({historyRoot: true});
       return $state.go('main.start');
@@ -155,7 +155,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
 
   $scope.$on('$stateChangeSuccess', function(e, toState) {
     if (toState.controller == 'PairingController') setRandomColor(); // enter
-    else experienceService.disconnect(); // exit
+    else if (toState.controller == 'ScanningController')  experienceService.disconnect();
   });
 
   // interupt pairing when app is paused
@@ -172,8 +172,25 @@ module.controller('PairingController', PairingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var StartController = function() {
+var JumpingController = function($ionicPlatform, $scope, $state, experienceService) {
+  $scope.score = 0;
+  $scope.time = 0;
+
+  var init = function() {
+    experienceService.startMeasurement(function() {
+      console.log(experienceService.model.score);
+    });
+  };
+
+  $scope.stop = function() {
+    experienceService.stopMeasurement();
+    console.log('stopped');
+  };
+
+  $ionicPlatform.ready(function() {
+    init();
+  });
 };
 
-StartController.$inject = ['$scope'];
-module.controller('StartController', StartController);
+JumpingController.$inject = ['$ionicPlatform', '$scope', '$state', 'experienceService'];
+module.controller('JumpingController', JumpingController);

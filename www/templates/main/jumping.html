@@ -1,0 +1,15 @@
+<ion-view hide-nav-bar="true" title="Jump!">
+  <ion-content padding="true" scroll="false">
+
+    <center>
+      <small>Your score:</small>
+      <h1>{{ score }}</h1>
+      <small>Time:</small>
+      <h1>{{ time | secondsToDateTime | date:'HH:mm:ss' }}</h1>
+    </center>
+
+    <br>
+    <a ng-click="stop()" class="button button-royal button-block button-large icon-left ion-stop">Stop</a>
+
+  </ion-content>
+</ion-view>
