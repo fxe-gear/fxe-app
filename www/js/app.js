@@ -6,7 +6,7 @@ angular.module('experience', [
   'experience.services',
 ])
 
-.run(function($ionicPlatform, $rootScope) {
+.run(function($ionicPlatform, $rootScope, $state) {
   $ionicPlatform.ready(function() {
 
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -19,11 +19,19 @@ angular.module('experience', [
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+  });
 
-    $rootScope.$broadcast('restorestate');
+  document.addEventListener('resume', function(event) {
+    $rootScope.$broadcast('resume');
   });
 
   document.addEventListener('pause', function(event) {
-    $rootScope.$broadcast('savestate');
+    $rootScope.$broadcast('pause');
   });
+
+  // when live reload is triggered
+  window.onbeforeunload = function(e) {
+    $state.go('welcome');
+  };
+
 });

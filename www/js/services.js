@@ -121,18 +121,33 @@ angular.module('experience.services', [])
     });
   };
 
-  $rootScope.$on('savestate', this.saveState);
-  $rootScope.$on('restorestate', this.restoreState);
+  $rootScope.$on('pause', this.saveState);
+  $rootScope.$on('resume', this.restoreState);
 })
 
 // ------------------------------------------------------------------------------------------------
 
-.constant('experienceServiceUUID', '0000a5b6-0000-1000-8000-00805f9b34fb')
+.constant('experienceServiceUUID', '6b00')
+.constant('ledCharacteristicsUUID', '6b02')
 
-.service('experienceService', function($q, $log, experienceServiceUUID) {
+.service('experienceService', function($rootScope, $cordovaBLE, $q, $log, experienceServiceUUID, ledCharacteristicsUUID) {
+
+  var model = {
+    deviceID: '',
+    connected: false,
+    paired: false,
+  };
+  this.model = model;
 
   this.enable = function() {
     return $q(function(resolve, reject) {
+
+      if (typeof ble === 'undefined') {
+        // check for ble plugin
+        $log.error('ble module not avalible');
+        reject();
+      }
+
       ble.isEnabled(resolve, function() {
         if (typeof ble.enable === 'undefined') {
           // iOS doesn't have ble.enable
@@ -151,7 +166,7 @@ angular.module('experience.services', [])
     return $q(function(resolve, reject) {
       $log.info('starting ble scan');
       ble.startScan([experienceServiceUUID], function(device) {
-        $log.info('stopping ble scan, found device: ' + angular.toJson(device));
+        $log.info('stopping ble scan, found ' + device.id);
         ble.stopScan();
         resolve(device);
       }, reject);
@@ -165,145 +180,51 @@ angular.module('experience.services', [])
     });
   };
 
-  this.connect = function(deviceID) {
-    return $q(function(resolve, reject) {
-      $log.info('connecting to ' + deviceID);
-      ble.connect(deviceID, resolve, reject);
-    });
-  },
-
-  this.disconnect = function(deviceID) {
-    return $q(function(resolve, reject) {
-      $log.info('disconnecting from ' + deviceID);
-      ble.disconnect(deviceID, resolve, reject);
-    });
-  };
-})
-
-// ------------------------------------------------------------------------------------------------
-
-.service('experienceServiceMock', function($rootScope, $q, $log, $timeout) {
-
-  var deviceFull = {
-    name: 'Battery Demo',
-    id: '20:FF:D0:FF:D1:C0',
-    advertising: [2, 1, 6, 3, 3, 15, 24, 8, 9, 66, 97, 116, 116, 101, 114, 121],
-    rssi: -55,
-    services: ['1800', '1801', '180f'],
-    characteristics: [
-      {
-        service: '1800',
-        characteristic: '2a00',
-        properties: ['Read'],
-      },
-      {
-        service: '1800',
-        characteristic: '2a01',
-        properties: ['Read'],
-      },
-      {
-        service: '1801',
-        characteristic: '2a05',
-        properties: ['Read'],
-      },
-      {
-        service: '180f',
-        characteristic: '2a19',
-        properties: ['Read'],
-        descriptors: [
-          {uuid: '2901'},
-          {uuid: '2904'},
-        ],
-      },
-    ],
-  };
-
-  var deviceShort = {
-    name: deviceFull.name,
-    id: deviceFull.id,
-    advertising: deviceFull.advertising,
-    rssi: deviceFull.rssi,
-  };
-
-  var model = {
-    experienceID: '',
-    connected: false,
-    paired: false,
-  };
-  this.model = model;
-
-  this.saveState = function() {
-    $log.info('saving state of experienceService');
-    window.localStorage.experienceService = angular.toJson(model);
-  };
-
-  this.restoreState = function() {
-    $log.info('restoring state of experienceService');
-    if (window.localStorage.experienceService) {
-      prevState = angular.fromJson(window.localStorage.experienceService);
-      for (var attrname in prevState) model[attrname] = prevState[attrname]; // mustn't replace whole model object
-      $rootScope.$apply();
-    }
-  };
-
-  this.enable = function() {
-    return $q(function(resolve, reject) {
-      $log.info('enabling bluetooth');
-      $timeout(resolve, 1000);
-    });
-  };
-
-  this.scan = function() {
-    return $q(function(resolve, reject) {
-      $log.info('starting ble scan');
-      $timeout(function() {
-        $log.info('stopping ble scan, found device: ' + angular.toJson(deviceShort));
-        resolve(deviceShort);
-      }, 1000);
-    });
-  };
-
-  this.stopScan = function() {
-    return $q(function(resolve, reject) {
-      $log.info('stopping ble scan');
-      $timeout(resolve, 100);
-    });
-  };
-
   this.setColor = function(color) {
-    return $q(function(resolve, reject) {
-      if (typeof color === 'undefined') $log.info('clearing color');
-      else $log.info('setting color to ' + color);
-      $timeout(resolve, 100);
+    if (typeof color === 'undefined') color = '#000000';
+    $log.debug('setting color to ' + color);
+
+    var data = new Uint8Array(3);
+    data[0] = parseInt(color.substring(1, 3), 16); // red
+    data[1] = parseInt(color.substring(3, 5), 16); // green
+    data[2] = parseInt(color.substring(5, 7), 16); // blue
+    return $cordovaBLE.write(model.deviceID, experienceServiceUUID, ledCharacteristicsUUID, data.buffer).catch(function(error) {
+      $log.error(error);
+      throw error;
     });
   };
 
   this.connect = function(deviceID) {
-    return $q(function(resolve, reject) {
-      // use stored experienceID, if not passed
-      if (typeof deviceID === 'undefined') deviceID = model.experienceID;
-      if (!deviceID) reject('device id to connect not provided');
-      $log.info('connecting to ' + deviceID);
-      $timeout(function() {
-        $log.info('connected to ' + deviceID);
-        model.connected = true;
-        model.experienceID = deviceID;
-        resolve(deviceFull);
-      }, 1000);
-    });
-  },
-
-  this.disconnect = function(deviceID) {
-    return $q(function(resolve, reject) {
-      if (typeof deviceID === 'undefined') deviceID = model.experienceID;
-      if (!deviceID) reject('device id to disconnect not provided');
-      $log.info('disconnecting from ' + deviceID);
-      ble.disconnect(deviceID, resolve, reject);
+    // use stored deviceID, if not passed
+    $log.debug('connecting to ' + deviceID);
+    return $cordovaBLE.connect(deviceID).then(function(device) {
+      $log.info('connected to ' + deviceID);
+      model.connected = true;
+      model.deviceID = deviceID;
+      return device;
+    }).catch(function(error) {
+      $log.error('connecting to ' + deviceID + ' failed');
+      throw error;
     });
   };
 
-  $rootScope.$on('savestate', this.saveState);
-  $rootScope.$on('restorestate', this.restoreState);
+  this.reconnect = function() {
+    if (!model.paired) throw 'unable to reconnect, no device is paired';
+    return connect(model.deviceID);
+  };
+
+  this.disconnect = function() {
+    if (!model.connected) return;
+    $log.debug('disconnecting from ' + model.deviceID);
+    return $cordovaBLE.disconnect(model.deviceID).then(function(result) {
+      $log.info('disconnected from ' + model.deviceID);
+      model.connected = false;
+      return result;
+    }).catch(function(error) {
+      $log.error('disconnecting from ' + deviceID + ' failed');
+      throw error;
+    });
+  };
 })
 
 ;
