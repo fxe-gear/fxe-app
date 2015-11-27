@@ -723,7 +723,7 @@ angular.module('ngCordova.plugins.beacon', [])
 /* globals ble: true */
 angular.module('ngCordova.plugins.ble', [])
 
-  .factory('$cordovaBLE', ['$q', '$timeout', function ($q, $timeout) {
+  .factory('$cordovaBLE', ['$q', '$timeout', '$log', function ($q, $timeout, $log) {
 
     return {
       scan: function (services, seconds) {
@@ -743,6 +743,20 @@ angular.module('ngCordova.plugins.ble', [])
             });
         }, seconds*1000);
 
+        return q.promise;
+      },
+
+      startScan: function (services, callback, errorCallback) {
+        return ble.startScan(services, callback, errorCallback);
+      },
+
+      stopScan: function () {
+        var q = $q.defer();
+        ble.stopScan(function () {
+          q.resolve();
+        }, function (error) {
+          q.reject(error);
+        });
         return q.promise;
       },
 
@@ -786,9 +800,9 @@ angular.module('ngCordova.plugins.ble', [])
         return q.promise;
       },
 
-      writeCommand: function (deviceID, serviceUUID, characteristicUUID, data) {
+      writeWithoutResponse: function (deviceID, serviceUUID, characteristicUUID, data) {
         var q = $q.defer();
-        ble.writeCommand(deviceID, serviceUUID, characteristicUUID, data, function (result) {
+        ble.writeWithoutResponse(deviceID, serviceUUID, characteristicUUID, data, function (result) {
           q.resolve(result);
         }, function (error) {
           q.reject(error);
@@ -796,14 +810,13 @@ angular.module('ngCordova.plugins.ble', [])
         return q.promise;
       },
 
-      startNotification: function (deviceID, serviceUUID, characteristicUUID) {
-        var q = $q.defer();
-        ble.startNotification(deviceID, serviceUUID, characteristicUUID, function (result) {
-          q.resolve(result);
-        }, function (error) {
-          q.reject(error);
-        });
-        return q.promise;
+      writeCommand: function (deviceID, serviceUUID, characteristicUUID, data) {
+        $log.warning('writeCommand is deprecated, use writeWithoutResponse');
+        return this.writeWithoutResponse(deviceID, serviceUUID, characteristicUUID, data);
+      },
+
+      startNotification: function (deviceID, serviceUUID, characteristicUUID, callback, errorCallback) {
+        return ble.startNotification(deviceID, serviceUUID, characteristicUUID, callback, errorCallback);
       },
 
       stopNotification: function (deviceID, serviceUUID, characteristicUUID) {
@@ -819,6 +832,16 @@ angular.module('ngCordova.plugins.ble', [])
       isConnected: function (deviceID) {
         var q = $q.defer();
         ble.isConnected(deviceID, function (result) {
+          q.resolve(result);
+        }, function (error) {
+          q.reject(error);
+        });
+        return q.promise;
+      },
+
+      enable: function () {
+        var q = $q.defer();
+        ble.enable(function (result) {
           q.resolve(result);
         }, function (error) {
           q.reject(error);
