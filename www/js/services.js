@@ -72,22 +72,22 @@ angular.module('experience.services', [])
   };
 
   this.loginGoogle = function() {
-    return $q(function(resolve, reject) {
-      window.plugins.googleplus.login({offline: true}, function(response) {
-        model.provider = 'google';
-        model.accessToken = response.oauthToken;
-        model.expiresIn = 0;
+    var q = $q.defer();
+    window.plugins.googleplus.login({offline: true}, function(response) {
+      model.provider = 'google';
+      model.accessToken = response.oauthToken;
+      model.expiresIn = 0;
 
-        model.email = response.email;
-        model.name = response.displayName;
+      model.email = response.email;
+      model.name = response.displayName;
 
-        if (response.gender) model.gender = response.gender; // Android only
-        if (response.birthday) model.birthday = response.birthday; // Android only
+      if (response.gender) model.gender = response.gender; // Android only
+      if (response.birthday) model.birthday = response.birthday; // Android only
 
-        $log.info('logged in using Google');
-        resolve(response);
-      }, reject);
-    });
+      $log.info('logged in using Google');
+      q.resolve(response);
+    }, q.reject);
+    return q.promise;
   };
 
   // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
@@ -138,7 +138,6 @@ angular.module('experience.services', [])
 // ------------------------------------------------------------------------------------------------
 
 .constant('experienceServiceUUID', '6b00')
-.constant('ledCharacteristicsUUID', '6b02')
 .constant('controlCharacteristicsUUID', '6bff')
 
 // scoring characteristics
@@ -146,12 +145,16 @@ angular.module('experience.services', [])
 .constant('rhythmCharacteristicsUUID', '6b05')
 .constant('frequencyCharacteristicsUUID', '6b06')
 
+.constant('ledServiceUUID', '6c00')
+.constant('ledCharacteristicsUUID', '6c01')
+
 .service('experienceService', function($rootScope, $cordovaBLE, $q, $log, experienceServiceUUID,
-  ledCharacteristicsUUID, controlCharacteristicsUUID, amplitudeCharacteristicsUUID,
+  ledServiceUUID, ledCharacteristicsUUID, controlCharacteristicsUUID, amplitudeCharacteristicsUUID,
   rhythmCharacteristicsUUID, frequencyCharacteristicsUUID) {
 
   var model = {
     deviceID: '',
+    scanning: false,
     connected: false,
     paired: false,
     score: {
@@ -164,43 +167,56 @@ angular.module('experience.services', [])
   this.paired = model.paired;
 
   this.enable = function() {
-    return $q(function(resolve, reject) {
+    var q = $q.defer();
 
-      if (typeof ble === 'undefined') {
-        // check for ble plugin
-        $log.error('ble module not avalible');
-        reject();
-      }
-
-      ble.isEnabled(resolve, function() {
+    if (typeof ble === 'undefined') {
+      // check for ble plugin
+      $log.error('ble module not avalible');
+      q.reject();
+    } else {
+      $cordovaBLE.isEnabled()
+      .then(function() {  // already enabled
+        q.resolve();
+      })
+      .catch(function(error) { // not enabled
         if (typeof ble.enable === 'undefined') {
           // iOS doesn't have ble.enable
           $log.warning('cannot enable bluetooth, probably on iOS');
-          reject();
+          q.reject();
         } else {
           // Android
           $log.info('enabling bluetooth');
-          ble.enable(resolve, reject);
+          $cordovaBLE.enable().then(q.resolve, q.reject);
         }
       });
-    });
+    }
+
+    return q.promise;
   };
 
   this.scan = function() {
-    return $q(function(resolve, reject) {
-      $log.info('starting ble scan');
-      ble.startScan([experienceServiceUUID], function(device) {
-        $log.info('stopping ble scan, found ' + device.id);
-        ble.stopScan();
-        resolve(device);
-      }, reject);
-    });
+    var q = $q.defer();
+    $log.info('starting ble scan');
+    model.scanning = true;
+    $cordovaBLE.startScan([experienceServiceUUID], function(device) {
+      $log.info('stopping ble scan, found ' + device.id);
+      $cordovaBLE.stopScan().then(function() {
+        q.resolve(device);
+      });
+    }, q.reject);
+    return q.promise;
   };
 
   this.stopScan = function() {
-    return $q(function(resolve, reject) {
-      $log.info('stopping ble scan');
-      ble.stopScan(resolve, reject);
+    if (!model.scanning) return;
+    $log.info('stopping ble scan');
+    return $cordovaBLE.stopScan().then(function(result) {
+      $log.info('scanning stopped');
+      model.scanning = false;
+      return result;
+    }).catch(function(error) {
+      $log.error('scanning stop failed');
+      throw error;
     });
   };
 
@@ -244,67 +260,63 @@ angular.module('experience.services', [])
     data[0] = parseInt(color.substring(1, 3), 16); // red
     data[1] = parseInt(color.substring(3, 5), 16); // green
     data[2] = parseInt(color.substring(5, 7), 16); // blue
-    return $cordovaBLE.write(model.deviceID, experienceServiceUUID, ledCharacteristicsUUID, data.buffer).catch(function(error) {
+    return $cordovaBLE.write(model.deviceID, ledServiceUUID, ledCharacteristicsUUID, data.buffer).catch(function(error) {
       $log.error(error);
       throw error;
     });
   };
 
   this.startMeasurement = function(notificationCallback) {
-    return $q(function(resolve, reject) {
-      $log.debug('starting measurement');
+    $log.debug('starting measurement');
+    var data = new Float32Array([0]);
 
-      var errorHandler = function(error) {
-        $log.error(error);
-        reject(error);
-      };
+    // delete previous scores
+    return $cordovaBLE.write(model.deviceID, experienceServiceUUID, amplitudeCharacteristicsUUID, data.buffer)
+    .then($cordovaBLE.write(model.deviceID, experienceServiceUUID, rhythmCharacteristicsUUID, data.buffer))
+    .then($cordovaBLE.write(model.deviceID, experienceServiceUUID, frequencyCharacteristicsUUID, data.buffer))
 
-      // delete previous scores
-      var data = new Uint8Array([0]);
-      $cordovaBLE.write(model.deviceID, experienceServiceUUID, amplitudeCharacteristicsUUID, data.buffer)
-      .then($cordovaBLE.write(model.deviceID, experienceServiceUUID, rhythmCharacteristicsUUID, data.buffer))
-      .then($cordovaBLE.write(model.deviceID, experienceServiceUUID, frequencyCharacteristicsUUID, data.buffer));
+    // register callbacks
+    .then(function() {
+      $cordovaBLE.startNotification(model.deviceID, experienceServiceUUID, amplitudeCharacteristicsUUID, function(data) {
+        model.score.amplitude = new Float32Array(data)[0];
+        notificationCallback();
+      });
 
-      // register callbacks
-      ble.startNotification(model.deviceID, experienceServiceUUID, amplitudeCharacteristicsUUID, function(data) {
-        model.score.amplitude = new Float32Buffer(data)[0];
-      }, errorHandler);
+      $cordovaBLE.startNotification(model.deviceID, experienceServiceUUID, rhythmCharacteristicsUUID, function(data) {
+        model.score.rhythm = new Float32Array(data)[0];
+        notificationCallback();
+      });
 
-      ble.startNotification(model.deviceID, experienceServiceUUID, rhythmCharacteristicsUUID, function(data) {
-        model.score.rhythm = new Float32Buffer(data)[0];
-      }, errorHandler);
+      $cordovaBLE.startNotification(model.deviceID, experienceServiceUUID, frequencyCharacteristicsUUID, function(data) {
+        model.score.frequency = new Float32Array(data)[0];
+        notificationCallback();
+      });
+    })
 
-      ble.startNotification(model.deviceID, experienceServiceUUID, frequencyCharacteristicsUUID, function(data) {
-        model.score.frequency = new Float32Buffer(data)[0];
-      }, errorHandler);
+    // start measurement
+    .then($cordovaBLE.write(model.deviceID, experienceServiceUUID, controlCharacteristicsUUID, new Uint8Array([0x1]).buffer))
 
-      // start measurement
-      $cordovaBLE.write(model.deviceID, experienceServiceUUID, controlCharacteristicsUUID, new Uint8Array([1]).buffer).catch(errorHandler);
-      resolve();
+    .catch(function(error) {
+      $log.error(error);
+      throw error;
     });
-
   };
 
   this.stopMeasurement = function() {
-    return $q(function(resolve, reject) {
-      $log.debug('stopping measurement');
+    $log.debug('stopping measurement');
 
-      var errorHandler = function(error) {
-        $log.error(error);
-        reject(error);
-      };
+    // stop measurement
+    return $cordovaBLE.write(model.deviceID, experienceServiceUUID, controlCharacteristicsUUID, new Uint8Array([0xff]).buffer)
 
-      // stop measurement
-      $cordovaBLE.write(model.deviceID, experienceServiceUUID, controlCharacteristicsUUID, new Uint8Array([0]).buffer).catch(errorHandler);
+    // unregister callbacks
+    .then($cordovaBLE.stopNotification(model.deviceID, experienceServiceUUID, amplitudeCharacteristicsUUID))
+    .then($cordovaBLE.stopNotification(model.deviceID, experienceServiceUUID, rhythmCharacteristicsUUID))
+    .then($cordovaBLE.stopNotification(model.deviceID, experienceServiceUUID, frequencyCharacteristicsUUID))
 
-      // unregister callbacks
-      ble.stopNotification(model.deviceID, experienceServiceUUID, amplitudeCharacteristicsUUID, null, errorHandler);
-      ble.stopNotification(model.deviceID, experienceServiceUUID, rhythmCharacteristicsUUID, null, errorHandler);
-      ble.stopNotification(model.deviceID, experienceServiceUUID, frequencyCharacteristicsUUID, null, errorHandler);
-
-      resolve();
+    .catch(function(error) {
+      $log.error(error);
+      throw error;
     });
-
   };
 
 })
