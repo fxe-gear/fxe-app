@@ -92,10 +92,6 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     if (toState.controller == 'ScanningController') enter();
     else exit();
   });
-
-  // app pause/resume
-  $scope.$on('resume', enter);
-  $scope.$on('pause', exit);
 };
 
 ScanningController.$inject = ['$scope', '$state', '$ionicPopup', 'experienceService'];
@@ -117,7 +113,9 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
   };
 
   var fail = function() {
-    return experienceService.disconnect().then($ionicHistory.goBack);
+    return experienceService.disconnect().then(function() {
+      $ionicHistory.goBack();
+    });
   };
 
   $scope.yes = function() {
@@ -153,18 +151,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     // TODO
   };
 
-  $scope.$on('$stateChangeSuccess', function(e, toState) {
-    if (toState.controller == 'PairingController') setRandomColor(); // enter
-    else if (toState.controller == 'ScanningController')  experienceService.disconnect();
-  });
-
-  // interupt pairing when app is paused
-  $scope.$on('pause', experienceService.disconnect);
-
-  // go back when app is resumed (initiates new scanning)
-  $scope.$on('resume', function() {
-    $ionicHistory.goBack();
-  });
+  setRandomColor();
 };
 
 PairingController.$inject = ['$scope', '$state', '$ionicHistory', '$ionicPopup', 'experienceService', 'util'];
@@ -176,20 +163,24 @@ var JumpingController = function($ionicPlatform, $scope, $state, experienceServi
   $scope.score = 0;
   $scope.time = 0;
 
+  // TODO don't touch 3rd level: experienceService.model.score
+
   var init = function() {
     experienceService.startMeasurement(function() {
       console.log(experienceService.model.score);
+      $scope.score = experienceService.model.score.amplitude;
+      $scope.score += experienceService.model.score.rhythm;
+      $scope.score += experienceService.model.score.frequency;
+      $scope.score = $scope.score.toFixed(2);
+      $scope.$apply();
     });
   };
 
   $scope.stop = function() {
     experienceService.stopMeasurement();
-    console.log('stopped');
   };
 
-  $ionicPlatform.ready(function() {
-    init();
-  });
+  init();
 };
 
 JumpingController.$inject = ['$ionicPlatform', '$scope', '$state', 'experienceService'];

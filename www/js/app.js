@@ -6,7 +6,7 @@ angular.module('experience', [
   'experience.services',
 ])
 
-.run(function($ionicPlatform, $rootScope, $state) {
+.run(function($ionicPlatform, $rootScope, $state, experienceService) {
   $ionicPlatform.ready(function() {
 
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -21,6 +21,12 @@ angular.module('experience', [
     }
   });
 
+  $rootScope.$on('pause', function(e) {
+    experienceService.stopScan();
+    experienceService.disconnect();
+    $state.go('welcome');
+  });
+
   document.addEventListener('resume', function(event) {
     $rootScope.$broadcast('resume');
   });
@@ -29,9 +35,14 @@ angular.module('experience', [
     $rootScope.$broadcast('pause');
   });
 
-  // when live reload is triggered
+  // related to live reload
   window.onbeforeunload = function(e) {
-    $state.go('welcome');
+    $rootScope.$broadcast('pause');
+  };
+
+  // related to live reload
+  window.onload = function(e) {
+    $rootScope.$broadcast('resume');
   };
 
 });
