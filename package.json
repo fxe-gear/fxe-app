@@ -20,13 +20,6 @@
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
     "com.ionic.keyboard",
-    {
-      "variables": {
-        "REVERSED_CLIENT_ID": "com.googleusercontent.apps.457117701129-1l9i4gdlnjgaglqugue3ksvg1ptvoc3o"
-      },
-      "locator": "https://github.com/phw/cordova-plugin-googleplus",
-      "id": "cordova-plugin-facebook4"
-    },
     "cordova-plugin-ble-central"
   ],
   "cordovaPlatforms": [
