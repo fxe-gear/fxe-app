@@ -8,6 +8,18 @@ angular.module('experience.routes', [])
     controller: 'WelcomeController',
   });
 
+  $stateProvider.state('create-account', {
+    url: '/create-account',
+    templateUrl: 'templates/create-account.html',
+    controller: 'CreateAccountController',
+  });
+
+  $stateProvider.state('login', {
+    url: '/login',
+    templateUrl: 'templates/login.html',
+    controller: 'LoginController',
+  });
+
   $stateProvider.state('scanning', {
     url: '/scanning',
     templateUrl: 'templates/scanning.html',

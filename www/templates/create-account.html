@@ -1,0 +1,55 @@
+<ion-view title="Create account">
+    <ion-content padding="true" scroll="true">
+
+        <form novalidate name="accountForm" class="list">
+            <ion-list>
+                <label class="item item-input required">
+                    <span class="input-label">Email:</span>
+                    <input type="email" required ng-model="data.email" name="email">
+                </label>
+                <label class="item item-input required">
+                    <span class="input-label">Password:</span>
+                    <input type="password" required ng-model="data.password" name="password">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Name:</span>
+                    <input type="text" ng-model="data.name" name="name">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Weight:</span>
+                    <input type="number" ng-model="data.weight" name="weight">
+                </label>
+                <label class="item item-input">
+                    <span class="input-label">Birthday:</span>
+                    <input type="date" ng-model="data.birthday" name="birthday">
+                </label>
+                <div class="item item-input">
+                    <span class="input-label">Gender:</span>
+                    <div class="button-bar">
+                      <a class="button button-small button-positive" ng-class="{'button-outline': data.gender != 'male'}" ng-click="data.gender = 'male'">Male</a>
+                      <a class="button button-small button-positive" ng-class="{'button-outline': data.gender != 'female'}" ng-click="data.gender = 'female'">Female</a>
+                    </div>
+                </div>
+                <div class="item item-input">
+                    <span class="input-label">Units:</span>
+                    <div class="button-bar">
+                      <a class="button button-small button-positive" ng-class="{'button-outline': data.units != 'metric'}" ng-click="data.units = 'metric'">Metric</a>
+                      <a class="button button-small button-positive" ng-class="{'button-outline': data.units != 'imperial'}" ng-click="data.units = 'imperial'">Imperial</a>
+                    </div>
+                </div>
+            </ion-list>
+
+            <div class="padding">
+              <p ng-show="accountForm.email.$error.required && accountForm.email.$touched">* Email is required</p>
+              <p ng-show="accountForm.email.$error.email && accountForm.email.$touched">* Email must be valid email address</p>
+              <p ng-show="accountForm.password.$error.required && accountForm.password.$touched">* Password is required</p>
+              <p ng-show="accountForm.password.$error.minlength && accountForm.password.$touched">* Password must be longer than 6 characters</p>
+              <!-- TODO add more validation rules -->
+            </div>
+
+            <button class="button button-balanced button-block" ng-disabled="accountForm.$invalid" ng-click="update(data)">Create account</button>
+            <a ui-sref="login" class="button button-positive button-clear button-block ">I already have an account</a>
+        </form>
+
+    </ion-content>
+</ion-view>

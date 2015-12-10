@@ -39,6 +39,27 @@ module.controller('WelcomeController', WelcomeController);
 
 // ------------------------------------------------------------------------------------------------
 
+var CreateAccountController = function($scope, $state, $ionicPopup, $log, userService) {
+  $scope.update = function(data) {
+    angular.copy(data, userService.model);
+    $state.go('scanning');
+  };
+};
+
+CreateAccountController.$inject = ['$scope', '$state', '$ionicPopup', '$log', 'userService'];
+module.controller('CreateAccountController', CreateAccountController);
+
+// ------------------------------------------------------------------------------------------------
+
+var LoginController = function($scope, $state, $ionicPopup, $log, userService) {
+  $scope.user = userService.model;
+};
+
+LoginController.$inject = ['$scope', '$state', '$ionicPopup', '$log', 'userService'];
+module.controller('LoginController', LoginController);
+
+// ------------------------------------------------------------------------------------------------
+
 var ScanningController = function($scope, $state, $ionicPopup, experienceService) {
   var enter = function() {
     enableBluetooth()
@@ -113,7 +134,9 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
   };
 
   var fail = function() {
-    return experienceService.disconnect().then(function() {
+    return experienceService.setColor()
+    .then(experienceService.disconnect)
+    .then(function() {
       $ionicHistory.goBack();
     });
   };
@@ -167,7 +190,6 @@ var JumpingController = function($ionicPlatform, $scope, $state, experienceServi
 
   var init = function() {
     experienceService.startMeasurement(function() {
-      console.log(experienceService.model.score);
       $scope.score = experienceService.model.score.amplitude;
       $scope.score += experienceService.model.score.rhythm;
       $scope.score += experienceService.model.score.frequency;

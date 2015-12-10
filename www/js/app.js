@@ -24,7 +24,7 @@ angular.module('experience', [
   $rootScope.$on('pause', function(e) {
     experienceService.stopScan();
     experienceService.disconnect();
-    $state.go('welcome');
+    // $state.go('welcome');
   });
 
   document.addEventListener('resume', function(event) {
@@ -38,11 +38,13 @@ angular.module('experience', [
   // related to live reload
   window.onbeforeunload = function(e) {
     $rootScope.$broadcast('pause');
+    return; // must explicitly return
   };
 
   // related to live reload
   window.onload = function(e) {
     $rootScope.$broadcast('resume');
+    $state.go('welcome');
   };
 
 });

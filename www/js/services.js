@@ -55,8 +55,8 @@ angular.module('experience.services', [])
   this.restoreState = function() {
     $log.info('restoring state of userService');
     if (window.localStorage.userService) {
-      prevState = angular.fromJson(window.localStorage.userService);
-      for (var attrname in prevState) model[attrname] = prevState[attrname]; // mustn't replace whole model object
+      prevModel = angular.fromJson(window.localStorage.userService);
+      angular.copy(prevModel, model);
       $rootScope.$apply();
     }
   };
