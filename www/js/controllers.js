@@ -1,6 +1,6 @@
 var module = angular.module('experience.controllers', []);
 
-var WelcomeController = function($scope, $state, $ionicPopup, $log, userService) {
+var WelcomeController = function($scope, $state, $ionicPopup, userService) {
   $scope.user = userService.model;
 
   $scope.loginFacebook = function() {
@@ -34,43 +34,59 @@ var WelcomeController = function($scope, $state, $ionicPopup, $log, userService)
   };
 };
 
-WelcomeController.$inject = ['$scope', '$state', '$ionicPopup', '$log', 'userService'];
+WelcomeController.$inject = ['$scope', '$state', '$ionicPopup', 'userService'];
 module.controller('WelcomeController', WelcomeController);
 
 // ------------------------------------------------------------------------------------------------
 
-var CreateAccountController = function($scope, $state, $ionicPopup, $log, userService) {
+var CreateAccountController = function($scope, $state, $ionicPopup, userService) {
   $scope.update = function(data) {
     angular.copy(data, userService.model);
     $state.go('scanning');
   };
 };
 
-CreateAccountController.$inject = ['$scope', '$state', '$ionicPopup', '$log', 'userService'];
+CreateAccountController.$inject = ['$scope', '$state', '$ionicPopup', 'userService'];
 module.controller('CreateAccountController', CreateAccountController);
 
 // ------------------------------------------------------------------------------------------------
 
-var LoginController = function($scope, $state, $ionicPopup, $log, userService) {
+var LoginController = function($scope, $state, $ionicPopup, userService) {
   $scope.user = userService.model;
 };
 
-LoginController.$inject = ['$scope', '$state', '$ionicPopup', '$log', 'userService'];
+LoginController.$inject = ['$scope', '$state', '$ionicPopup', 'userService'];
 module.controller('LoginController', LoginController);
 
 // ------------------------------------------------------------------------------------------------
 
 var ScanningController = function($scope, $state, $ionicPopup, experienceService) {
+
+  $scope.status = '';
+  $scope.working = false;
+
+  $scope.clearIgnored = function() {
+    experienceService.clearIgnored();
+    experienceService.stopScan().then(enter);
+  };
+
   var enter = function() {
+    $scope.ignoredDevices = 0;
     enableBluetooth()
+    .then(disconnect)
     .then(scan)
     .then(connect)
     .then(function() {
       // prevent changing state when the process has aleready been canceled
-      if ($state.current.controller != 'ScanningController') return;
+      // if ($state.current.controller != 'ScanningController') return;
       $state.go('pairing');
+    }, null, function(device) {
+      // ignored device found
+      $scope.ignoredDevices++;
     });
   };
+
+  $scope.tryAgain = enter;
 
   var enableBluetooth = function() {
     $scope.working = true;
@@ -82,12 +98,22 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     });
   };
 
+  var disconnect = function() {
+    $scope.working = true;
+    $scope.status = 'Disconnecting previously connected devices...';
+    return experienceService.disconnect().catch(function(error) {
+      $scope.working = false;
+      $scope.status = 'Disconnecting failed';
+      throw error;
+    });
+  };
+
   var scan = function() {
     $scope.working = true;
     $scope.status = 'Scanning...';
     return experienceService.scan().catch(function(error) {
       $scope.working = false;
-      $scope.status = 'Scanning failed, please try again.';
+      $scope.status = 'Scanning failed';
       throw error;
     });
   };
@@ -97,14 +123,14 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     $scope.status = 'Connecting...';
     return experienceService.connect(device.id).catch(function(error) {
       $scope.working = false;
-      $scope.status = 'Connecting failed, please try again.';
+      $scope.status = 'Connecting failed';
       throw error;
     });
   };
 
   var exit = function() {
     $scope.working = false;
-    $scope.status = '';
+    $scope.status = 'Scanning stopped';
     return experienceService.stopScan();
   };
 
@@ -113,6 +139,9 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     if (toState.controller == 'ScanningController') enter();
     else exit();
   });
+
+  // $scope.$on('pause', exit);
+  // $scope.$on('resume', enter);
 };
 
 ScanningController.$inject = ['$scope', '$state', '$ionicPopup', 'experienceService'];
@@ -133,20 +162,12 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     return experienceService.setColor($scope.color);
   };
 
-  var fail = function() {
-    return experienceService.setColor()
-    .then(experienceService.disconnect)
-    .then(function() {
-      $ionicHistory.goBack();
-    });
-  };
-
   $scope.yes = function() {
     $scope.step++;
     if ($scope.step == $scope.stepCount) {
       // on the end of pairing process
       experienceService.paired = true;
-      experienceService.setColor(); // clear color
+      experienceService.clearColor();
       $ionicHistory.nextViewOptions({historyRoot: true});
       return $state.go('main.start');
     }
@@ -157,7 +178,10 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
         template: 'Cannot communicate with Experience, please try it again.',
         okType: 'button-assertive',
       })
-      .then(fail);
+      .then(experienceService.disconnect)
+      .then(function() {
+        $ionicHistory.goBack();
+      });
     });
   };
 
@@ -167,14 +191,25 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
       template: 'Sorry, we have unintentionally connected to another Experience. Please try it again.',
       okType: 'button-energized',
     })
-    .then(fail);
+    .then(experienceService.clearColor)
+    .then(experienceService.disconnect)
+    .then(experienceService.ignore)
+    .then(function() {
+      $ionicHistory.goBack();
+    }).catch(function(error) {
+      $ionicHistory.goBack();
+      throw error;
+    });
   };
 
   $scope.cannotRecognize = function() {
     // TODO
   };
 
-  setRandomColor();
+  // controller enter/exit
+  $scope.$on('$stateChangeSuccess', function(e, toState) {
+    if (toState.controller == 'PairingController') setRandomColor();
+  });
 };
 
 PairingController.$inject = ['$scope', '$state', '$ionicHistory', '$ionicPopup', 'experienceService', 'util'];

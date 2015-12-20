@@ -17,3 +17,15 @@
   color: red;
   margin-left: .2em;
 }
+
+.ignoredDevices {
+  margin-top: 5em;
+
+  &.ng-enter {
+    animation: fadeIn 1s;
+  }
+
+  &.ng-leave {
+    animation: fadeOut .5s;
+  }
+}

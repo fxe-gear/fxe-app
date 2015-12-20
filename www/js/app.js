@@ -22,8 +22,8 @@ angular.module('experience', [
   });
 
   $rootScope.$on('pause', function(e) {
-    experienceService.stopScan();
-    experienceService.disconnect();
+    // experienceService.stopScan();
+    // experienceService.disconnect();
     // $state.go('welcome');
   });
 

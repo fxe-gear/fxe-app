@@ -4,6 +4,13 @@
       <center>
         <h1>{{ status }}</h1>
         <ion-spinner ng-if="working"></ion-spinner>
+        <button ng-if="!working" ng-click="tryAgain()" class="button button-positive button-block">Try again</button>
+
+        <div ng-if="ignoredDevices" class="ignoredDevices">
+          <p>{{ ignoredDevices }} previously ignored <ng-pluralize count="ignoredDevices" when="{1: 'Experience', 'other': 'Experiences'}"></ng-pluralize> found.</p>
+          <button ng-click="clearIgnored()" class="button button-small button-outline">Start over</button>
+        </div>
+
       </center>
 
   </ion-content>
