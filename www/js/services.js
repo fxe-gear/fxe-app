@@ -170,12 +170,13 @@ angular.module('experience.services', [])
   var model = {
     deviceID: '',
     paired: false,
-    score: {
-      amplitude: 0,
-      rhythm: 0,
-      frequency: 0,
-    },
     ignoredIDs: [],
+  };
+
+  var score = {
+    amplitude: 0,
+    rhythm: 0,
+    frequency: 0,
   };
 
   var saveState = function() {
@@ -327,28 +328,29 @@ angular.module('experience.services', [])
   };
 
   var startMeasurement = function(notificationCallback) {
+    if (!connected) return $q.reject();
     $log.debug('starting measurement');
-    var data = new Float32Array([0]);
+    var zeroScore = new Float32Array([0]);
 
     // delete previous scores
-    return $cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, data.buffer)
-    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, data.buffer))
-    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, data.buffer))
+    return $cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
+    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
+    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
 
     // register callbacks
     .then(function() {
       $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, function(data) {
-        model.score.amplitude = new Float32Array(data)[0];
+        score.amplitude = new Float32Array(data)[0];
         notificationCallback();
       });
 
       $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, function(data) {
-        model.score.rhythm = new Float32Array(data)[0];
+        score.rhythm = new Float32Array(data)[0];
         notificationCallback();
       });
 
       $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, function(data) {
-        model.score.frequency = new Float32Array(data)[0];
+        score.frequency = new Float32Array(data)[0];
         notificationCallback();
       });
     })
@@ -365,6 +367,7 @@ angular.module('experience.services', [])
   };
 
   var stopMeasurement = function() {
+    if (!connected) return $q.reject();
     $log.debug('stopping measurement');
 
     // stop measurement
@@ -386,8 +389,8 @@ angular.module('experience.services', [])
   };
 
   // service public API
-  this.model = model; // TODO dev only
-  this.score = model.score;
+  // this.model = model; // TODO dev only
+  this.score = score;
   this.paired = model.paired;
   this.enable = enable;
   this.scan = scan;

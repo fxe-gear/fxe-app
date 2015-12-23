@@ -37,6 +37,7 @@ angular.module('experience', [
 
   // related to live reload
   window.onbeforeunload = function(e) {
+    experienceService.disconnect();
     $rootScope.$broadcast('pause');
     return; // must explicitly return
   };

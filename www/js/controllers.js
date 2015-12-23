@@ -164,12 +164,13 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
 
   $scope.yes = function() {
     $scope.step++;
-    if ($scope.step == $scope.stepCount) {
+    if ($scope.step >= $scope.stepCount) {
       // on the end of pairing process
       experienceService.paired = true;
-      experienceService.clearColor();
-      $ionicHistory.nextViewOptions({historyRoot: true});
-      return $state.go('main.start');
+      return experienceService.clearColor().then(function() {
+        $ionicHistory.nextViewOptions({historyRoot: true});
+        $state.go('main.start');
+      });
     }
 
     setRandomColor().catch(function(error) {
@@ -221,13 +222,11 @@ var JumpingController = function($ionicPlatform, $scope, $state, experienceServi
   $scope.score = 0;
   $scope.time = 0;
 
-  // TODO don't touch 3rd level: experienceService.model.score
-
   var init = function() {
     experienceService.startMeasurement(function() {
-      $scope.score = experienceService.model.score.amplitude;
-      $scope.score += experienceService.model.score.rhythm;
-      $scope.score += experienceService.model.score.frequency;
+      $scope.score = experienceService.score.amplitude;
+      $scope.score += experienceService.score.rhythm;
+      $scope.score += experienceService.score.frequency;
       $scope.score = $scope.score.toFixed(2);
       $scope.$apply();
     });
