@@ -1,8 +1,13 @@
-angular.module('experience.services', [])
+'use strict';
+
+angular.module('experience.services', [
+  'ngCordovaMocks',
+  'ngStorage',
+])
 
 .filter('secondsToDateTime', function() {
-  return function(seconds) {
-    return new Date(1970, 0, 1).setSeconds(seconds);
+  return function(ms) {
+    return new Date(1970, 0, 1).setSeconds(0, ms);
   };
 })
 
@@ -31,6 +36,8 @@ angular.module('experience.services', [])
 
 .service('userService', function($rootScope, $http, $log, $cordovaFacebook, $q) {
 
+  var stateRestored = false;
+
   var model = {
     provider: '',
     accessToken: '',
@@ -52,12 +59,13 @@ angular.module('experience.services', [])
 
   var restoreState = function() {
     if (window.localStorage.userService) {
-      prevModel = angular.fromJson(window.localStorage.userService);
+      var prevModel = angular.fromJson(window.localStorage.userService);
       angular.copy(prevModel, model);
       $rootScope.$apply();
     }
 
     $log.info('userService state restored');
+    stateRestored = true;
   };
 
   $rootScope.$on('pause', saveState);
@@ -133,8 +141,13 @@ angular.module('experience.services', [])
     });
   };
 
+  var isLoggedIn = function() {
+    return model.provider != '';
+  };
+
   // service public API
   this.model = model;
+  this.isLoggedIn = isLoggedIn;
   this.loginFacebook = loginFacebook;
   this.loginGoogle = loginGoogle;
   this.loadFromFacebook = loadFromFacebook;
@@ -164,6 +177,7 @@ angular.module('experience.services', [])
 .service('experienceService', function($rootScope, $cordovaBLE, $q, $log, peripheralServices) {
   var ps = peripheralServices;
 
+  var stateRestored = false;
   var connected = false;
   var scanning = false;
 
@@ -171,12 +185,13 @@ angular.module('experience.services', [])
     deviceID: '',
     paired: false,
     ignoredIDs: [],
-  };
-
-  var score = {
-    amplitude: 0,
-    rhythm: 0,
-    frequency: 0,
+    score: {
+      amplitude: 0,
+      rhythm: 0,
+      frequency: 0,
+    },
+    startTime: null,
+    stopTime: null,
   };
 
   var saveState = function() {
@@ -185,12 +200,14 @@ angular.module('experience.services', [])
   };
 
   var restoreState = function() {
-    $log.info('experienceService state restored');
     if (window.localStorage.experienceService) {
-      prevModel = angular.fromJson(window.localStorage.experienceService);
+      var prevModel = angular.fromJson(window.localStorage.experienceService);
       angular.copy(prevModel, model);
       $rootScope.$apply();
     }
+
+    $log.info('experienceService state restored');
+    stateRestored = true;
   };
 
   $rootScope.$on('pause', saveState);
@@ -199,33 +216,24 @@ angular.module('experience.services', [])
   var enable = function() {
     var q = $q.defer();
 
-    if (typeof ble === 'undefined') {
-      // check for ble plugin
-      $log.error('ble module not avalible');
-      q.reject();
-    } else {
-      $cordovaBLE.isEnabled()
-      .then(function() {  // already enabled
-        q.resolve();
-      })
-      .catch(function(error) { // not enabled
-        if (typeof ble.enable === 'undefined') {
-          // iOS doesn't have ble.enable
-          $log.warning('cannot enable bluetooth, probably on iOS');
-          q.reject();
-        } else {
-          // Android
-          $log.debug('enabling bluetooth');
-          $cordovaBLE.enable().then(function() {
-            $log.info('bluetooth enabled');
-            q.resolve();
-          }).catch(function(error) {
-            $log.warning('bluetooth not enabled');
-            q.reject(error);
-          });
-        }
-      });
-    }
+    $cordovaBLE.isEnabled().then(function() {  // already enabled
+      q.resolve();
+    }).catch(function(error) { // not enabled
+      if (typeof ble.enable === 'undefined') {
+        // iOS doesn't have ble.enable
+        q.reject('cannot enable bluetooth, probably on iOS');
+      } else {
+        // Android
+        $log.debug('enabling bluetooth');
+        $cordovaBLE.enable().then(function() {
+          $log.info('bluetooth enabled');
+          q.resolve();
+        }).catch(function(error) {
+          $log.warning('bluetooth not enabled');
+          q.reject(error);
+        });
+      }
+    });
 
     return q.promise;
   };
@@ -275,7 +283,8 @@ angular.module('experience.services', [])
   };
 
   var reconnect = function() {
-    if (!model.paired) throw 'unable to reconnect, no device is paired';
+    if (!model.paired) return $q.reject('unable to reconnect, no device is paired');
+    if (connected) return $q.resolve();
     return connect(model.deviceID);
   };
 
@@ -327,8 +336,8 @@ angular.module('experience.services', [])
     return setColor('#000000');
   };
 
-  var startMeasurement = function(notificationCallback) {
-    if (!connected) return $q.reject();
+  var startMeasurement = function() {
+    if (!connected) return $q.reject('experience not connected');
     $log.debug('starting measurement');
     var zeroScore = new Float32Array([0]);
 
@@ -340,24 +349,23 @@ angular.module('experience.services', [])
     // register callbacks
     .then(function() {
       $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, function(data) {
-        score.amplitude = new Float32Array(data)[0];
-        notificationCallback();
+        model.score.amplitude = new Float32Array(data)[0];
       });
 
       $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, function(data) {
-        score.rhythm = new Float32Array(data)[0];
-        notificationCallback();
+        model.score.rhythm = new Float32Array(data)[0];
       });
 
       $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, function(data) {
-        score.frequency = new Float32Array(data)[0];
-        notificationCallback();
+        model.score.frequency = new Float32Array(data)[0];
       });
     })
 
     // start measurement
     .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
     .then(function() {
+      model.startTime = Date.now();
+      model.stopTime = null;
       $log.info('measurement started');
     })
     .catch(function(error) {
@@ -367,7 +375,7 @@ angular.module('experience.services', [])
   };
 
   var stopMeasurement = function() {
-    if (!connected) return $q.reject();
+    if (!connected) return $q.reject('experience not connected');
     $log.debug('stopping measurement');
 
     // stop measurement
@@ -379,6 +387,7 @@ angular.module('experience.services', [])
     .then($cordovaBLE.stopNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
 
     .then(function() {
+      model.stopTime = Date.now();
       $log.info('measurement stopped');
     })
 
@@ -388,10 +397,29 @@ angular.module('experience.services', [])
     });
   };
 
+  var getElapsedTime = function() {
+    // return elapsed time from start of measurement (in milliseconds)
+    return model.startTime != null ? (model.stopTime != null ? model.stopTime : Date.now()) - model.startTime : 0;
+  };
+
+  var pair = function() {
+    $log.info('device ' + model.deviceID + ' paired');
+    model.paired = true;
+  };
+
+  var isPaired = function() {
+    return model.paired;
+  };
+
+  var isConnected = function() {
+    return connected;
+  };
+
+  var getScore = function() {
+    return model.score;
+  };
+
   // service public API
-  // this.model = model; // TODO dev only
-  this.score = score;
-  this.paired = model.paired;
   this.enable = enable;
   this.scan = scan;
   this.stopScan = stopScan;
@@ -404,6 +432,11 @@ angular.module('experience.services', [])
   this.clearColor = clearColor;
   this.startMeasurement = startMeasurement;
   this.stopMeasurement = stopMeasurement;
+  this.getElapsedTime = getElapsedTime;
+  this.pair = pair;
+  this.isPaired = isPaired;
+  this.isConnected = isConnected;
+  this.getScore = getScore;
 
 })
 

@@ -3,9 +3,9 @@
 
     <center>
       <small>Your score:</small>
-      <h1>{{ score }}</h1>
+      <h1>{{ getScore() }}</h1>
       <small>Time:</small>
-      <h1>{{ time | secondsToDateTime | date:'HH:mm:ss' }}</h1>
+      <h1>{{ getElapsedTime() | secondsToDateTime | date:'HH:mm:ss' }}</h1>
     </center>
 
     <br>

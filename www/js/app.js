@@ -1,6 +1,7 @@
+'use strict';
+
 angular.module('experience', [
   'ionic',
-  'ngCordova',
   'experience.controllers',
   'experience.routes',
   'experience.services',
@@ -45,7 +46,7 @@ angular.module('experience', [
   // related to live reload
   window.onload = function(e) {
     $rootScope.$broadcast('resume');
-    $state.go('welcome');
+    // $state.go('welcome');
   };
 
 });

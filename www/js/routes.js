@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('experience.routes', [])
 
 .config(function($stateProvider, $urlRouterProvider) {
@@ -43,6 +45,7 @@ angular.module('experience.routes', [])
     views: {
       tab1: {
         templateUrl: 'templates/main/start.html',
+        controller: 'StartController',
       },
     },
   })
@@ -59,8 +62,19 @@ angular.module('experience.routes', [])
 
   ;
 
-  // TODO different application flow
+  $urlRouterProvider.otherwise(function($injector, $location) {
+    var userService = $injector.get('userService');
+    var experienceService = $injector.get('experienceService');
 
-  $urlRouterProvider.otherwise('/welcome');
+    // TODO wrong resolution order -> isPaired == false (always)
+    console.log(experienceService.isPaired());
+
+    if (experienceService.isPaired())
+      return '/main/start';
+    if (!experienceService.isPaired() && userService.isLoggedIn())
+      return '/scanning';
+    else
+      return '/welcome';
+  });
 
 });

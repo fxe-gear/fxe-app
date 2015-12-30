@@ -1,3 +1,5 @@
+'use strict';
+
 var module = angular.module('experience.controllers', []);
 
 var WelcomeController = function($scope, $state, $ionicPopup, userService) {
@@ -34,7 +36,6 @@ var WelcomeController = function($scope, $state, $ionicPopup, userService) {
   };
 };
 
-WelcomeController.$inject = ['$scope', '$state', '$ionicPopup', 'userService'];
 module.controller('WelcomeController', WelcomeController);
 
 // ------------------------------------------------------------------------------------------------
@@ -46,7 +47,6 @@ var CreateAccountController = function($scope, $state, $ionicPopup, userService)
   };
 };
 
-CreateAccountController.$inject = ['$scope', '$state', '$ionicPopup', 'userService'];
 module.controller('CreateAccountController', CreateAccountController);
 
 // ------------------------------------------------------------------------------------------------
@@ -55,7 +55,6 @@ var LoginController = function($scope, $state, $ionicPopup, userService) {
   $scope.user = userService.model;
 };
 
-LoginController.$inject = ['$scope', '$state', '$ionicPopup', 'userService'];
 module.controller('LoginController', LoginController);
 
 // ------------------------------------------------------------------------------------------------
@@ -144,7 +143,6 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
   // $scope.$on('resume', enter);
 };
 
-ScanningController.$inject = ['$scope', '$state', '$ionicPopup', 'experienceService'];
 module.controller('ScanningController', ScanningController);
 
 // ------------------------------------------------------------------------------------------------
@@ -166,7 +164,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     $scope.step++;
     if ($scope.step >= $scope.stepCount) {
       // on the end of pairing process
-      experienceService.paired = true;
+      experienceService.pair();
       return experienceService.clearColor().then(function() {
         $ionicHistory.nextViewOptions({historyRoot: true});
         $state.go('main.start');
@@ -213,31 +211,55 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
   });
 };
 
-PairingController.$inject = ['$scope', '$state', '$ionicHistory', '$ionicPopup', 'experienceService', 'util'];
 module.controller('PairingController', PairingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var JumpingController = function($ionicPlatform, $scope, $state, experienceService) {
-  $scope.score = 0;
-  $scope.time = 0;
+var StartController = function($scope, $state, $timeout, experienceService) {
 
-  var init = function() {
-    experienceService.startMeasurement(function() {
-      $scope.score = experienceService.score.amplitude;
-      $scope.score += experienceService.score.rhythm;
-      $scope.score += experienceService.score.frequency;
-      $scope.score = $scope.score.toFixed(2);
-      $scope.$apply();
+  $scope.connected = experienceService.isConnected();
+
+  $scope.reconnect = function() {
+    experienceService.reconnect().then(function() {
+      $scope.connected = experienceService.isConnected();
+    }).catch(function(error) {
+      // if connecting failed, try again in 3 sec
+      $timeout($scope.reconnect, 3000);
+      throw error;
     });
   };
 
-  $scope.stop = function() {
-    experienceService.stopMeasurement();
+  $scope.start = function() {
+    experienceService.startMeasurement().then(function() {
+      $state.go('main.jumping');
+    });
   };
 
-  init();
+  $scope.reconnect();
 };
 
-JumpingController.$inject = ['$ionicPlatform', '$scope', '$state', 'experienceService'];
+module.controller('StartController', StartController);
+
+// ------------------------------------------------------------------------------------------------
+
+var JumpingController = function($scope, $state, $interval, experienceService) {
+  var timer = $interval($scope.apply, 1000);
+
+  $scope.getElapsedTime = experienceService.getElapsedTime;
+
+  $scope.getScore = function() {
+    var s = experienceService.getScore();
+    return (s.amplitude + s.rhythm + s.frequency).toFixed(2);
+  };
+
+  $scope.stop = function() {
+    experienceService.stopMeasurement().then(function() {
+      $interval.cancel(timer);
+    }).then(function() {
+      // TODO go to result
+      $state.go('main.me.last');
+    });
+  };
+};
+
 module.controller('JumpingController', JumpingController);
