@@ -66,10 +66,7 @@ angular.module('experience.routes', [])
     var userService = $injector.get('userService');
     var experienceService = $injector.get('experienceService');
 
-    // TODO wrong resolution order -> isPaired == false (always)
-    console.log(experienceService.isPaired());
-
-    if (experienceService.isPaired())
+    if (experienceService.isPaired() && userService.isLoggedIn())
       return '/main/start';
     if (!experienceService.isPaired() && userService.isLoggedIn())
       return '/scanning';

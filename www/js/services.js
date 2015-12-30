@@ -34,42 +34,24 @@ angular.module('experience.services', [
 
 // ------------------------------------------------------------------------------------------------
 
-.service('userService', function($rootScope, $http, $log, $cordovaFacebook, $q) {
+.service('userService', function($rootScope, $localStorage, $http, $log, $cordovaFacebook, $q) {
 
-  var stateRestored = false;
+  $localStorage.$default({
+    userService: {
+      provider: '',
+      accessToken: '',
+      expiresIn: '',
 
-  var model = {
-    provider: '',
-    accessToken: '',
-    expiresIn: '',
-
-    email: '',
-    password: '',
-    name: '',
-    weight: 0,
-    birthday: '',
-    gender: '',
-    units: '',
-  };
-
-  var saveState = function() {
-    window.localStorage.userService = angular.toJson(model);
-    $log.info('userService state saved');
-  };
-
-  var restoreState = function() {
-    if (window.localStorage.userService) {
-      var prevModel = angular.fromJson(window.localStorage.userService);
-      angular.copy(prevModel, model);
-      $rootScope.$apply();
-    }
-
-    $log.info('userService state restored');
-    stateRestored = true;
-  };
-
-  $rootScope.$on('pause', saveState);
-  $rootScope.$on('resume', restoreState);
+      email: '',
+      password: '',
+      name: '',
+      weight: 0,
+      birthday: '',
+      gender: '',
+      units: '',
+    },
+  });
+  var model = $localStorage.userService;
 
   var loginFacebook = function() {
     return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
@@ -174,44 +156,27 @@ angular.module('experience.services', [
   },
 })
 
-.service('experienceService', function($rootScope, $cordovaBLE, $q, $log, peripheralServices) {
+.service('experienceService', function($rootScope, $localStorage, $cordovaBLE, $q, $log, peripheralServices) {
   var ps = peripheralServices;
 
-  var stateRestored = false;
   var connected = false;
   var scanning = false;
 
-  var model = {
-    deviceID: '',
-    paired: false,
-    ignoredIDs: [],
-    score: {
-      amplitude: 0,
-      rhythm: 0,
-      frequency: 0,
+  $localStorage.$default({
+    experienceService: {
+      deviceID: '',
+      paired: false,
+      ignoredIDs: [],
+      score: {
+        amplitude: 0,
+        rhythm: 0,
+        frequency: 0,
+      },
+      startTime: null,
+      stopTime: null,
     },
-    startTime: null,
-    stopTime: null,
-  };
-
-  var saveState = function() {
-    window.localStorage.experienceService = angular.toJson(model);
-    $log.info('experienceService state saved');
-  };
-
-  var restoreState = function() {
-    if (window.localStorage.experienceService) {
-      var prevModel = angular.fromJson(window.localStorage.experienceService);
-      angular.copy(prevModel, model);
-      $rootScope.$apply();
-    }
-
-    $log.info('experienceService state restored');
-    stateRestored = true;
-  };
-
-  $rootScope.$on('pause', saveState);
-  $rootScope.$on('resume', restoreState);
+  });
+  var model = $localStorage.experienceService;
 
   var enable = function() {
     var q = $q.defer();

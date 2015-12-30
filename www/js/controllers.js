@@ -8,7 +8,6 @@ var WelcomeController = function($scope, $state, $ionicPopup, userService) {
   $scope.loginFacebook = function() {
     userService.loginFacebook()
     .then(userService.loadFromFacebook)
-    .then(userService.saveState)
     .then(function() {
       $state.go('scanning');
     }).catch(function(error) {
@@ -23,7 +22,6 @@ var WelcomeController = function($scope, $state, $ionicPopup, userService) {
   $scope.loginGoogle = function() {
     userService.loginGoogle()
     .then(userService.loadFromGoogle)
-    .then(userService.saveState)
     .then(function() {
       $state.go('scanning');
     }).catch(function(error) {
@@ -42,6 +40,7 @@ module.controller('WelcomeController', WelcomeController);
 
 var CreateAccountController = function($scope, $state, $ionicPopup, userService) {
   $scope.update = function(data) {
+    // TODO do NOT copy whole model (overrides other model data)
     angular.copy(data, userService.model);
     $state.go('scanning');
   };
@@ -254,8 +253,6 @@ var JumpingController = function($scope, $state, $interval, experienceService) {
 
   $scope.stop = function() {
     experienceService.stopMeasurement().then(function() {
-      $interval.cancel(timer);
-    }).then(function() {
       // TODO go to result
       $state.go('main.me.last');
     });
