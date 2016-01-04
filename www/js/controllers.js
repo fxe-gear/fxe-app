@@ -1,6 +1,8 @@
 'use strict';
 
-var module = angular.module('experience.controllers', []);
+var module = angular.module('experience.controllers', [
+  'chart.js',
+]);
 
 var WelcomeController = function($scope, $state, $ionicPopup, userService) {
   $scope.user = userService.model;
@@ -260,3 +262,18 @@ var JumpingController = function($scope, $state, $interval, experienceService) {
 };
 
 module.controller('JumpingController', JumpingController);
+
+// ------------------------------------------------------------------------------------------------
+
+var LessonController = function($scope) {
+  $scope.labels = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'];
+
+  $scope.data = [[28, 48, 40, 19, 86, 27, 90]];
+
+  $scope.onClick = function(points, evt) {
+    console.log(points, evt);
+  };
+
+};
+
+module.controller('LessonController', LessonController);

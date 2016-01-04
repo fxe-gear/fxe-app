@@ -37,13 +37,13 @@ angular.module('experience.routes', [])
   .state('main', {
     url: '/main',
     abstract: true,
-    templateUrl: 'templates/main/tabs.html',
+    templateUrl: 'templates/main/main.html',
   })
 
   .state('main.start', {
     url: '/start',
     views: {
-      tab1: {
+      jump: {
         templateUrl: 'templates/main/start.html',
         controller: 'StartController',
       },
@@ -53,9 +53,29 @@ angular.module('experience.routes', [])
   .state('main.jumping', {
     url: '/jumping',
     views: {
-      tab1: {
+      jump: {
         templateUrl: 'templates/main/jumping.html',
         controller: 'JumpingController',
+      },
+    },
+  })
+
+  .state('main.me', {
+    url: '/me',
+    abstract: true,
+    views: {
+      me: {
+        templateUrl: 'templates/main/me/me.html',
+      },
+    },
+  })
+
+  .state('main.me.last', {
+    url: '/last',
+    views: {
+      lesson: {
+        templateUrl: 'templates/main/me/last.html',
+        controller: 'LessonController',
       },
     },
   })

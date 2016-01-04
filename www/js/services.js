@@ -5,7 +5,7 @@ angular.module('experience.services', [
   'ngStorage',
 ])
 
-.filter('secondsToDateTime', function() {
+.filter('msToTimeSpan', function() {
   return function(ms) {
     return new Date(1970, 0, 1).setSeconds(0, ms);
   };

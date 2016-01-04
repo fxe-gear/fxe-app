@@ -1,0 +1,25 @@
+<ion-view hide-nav-bar="true" title="Last lesson">
+  <ion-content padding="true">
+
+
+    <center>
+      <small>Your score:</small>
+      <!-- <h1>{{ getScore() }}</h1> -->
+      <h1>201</h1>
+      <small>Time:</small>
+      <!-- <h1>{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</h1> -->
+      <h1>{{ 123085 | msToTimeSpan | date:'HH:mm:ss' }}</h1>
+    </center>
+
+    <br>
+
+    <canvas class="chart chart-line" chart-data="data" chart-labels="labels" chart-click="onClick"></canvas>
+
+    <div class="button-bar">
+      <button class="button button-positive button-block icon ion-social-facebook"></button>
+      <button class="button button-assertive button-block icon ion-social-googleplus"></button>
+      <button class="button button-calm button-block icon ion-social-twitter"></button>
+    </div>
+
+  </ion-content>
+</ion-view>
