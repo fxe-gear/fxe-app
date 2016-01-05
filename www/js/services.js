@@ -140,35 +140,49 @@ angular.module('experience.services', [
 // ------------------------------------------------------------------------------------------------
 
 // thin wrapper on the top of SQL storage providing JS API to persistent data
-.service('storeService', function($cordovaSQLite, $q, $log) {
+.service('storeService', function($cordovaSQLite, $localStorage, $q, $log) {
 
-  // $cordovaSQLite.deleteDB({name: 'store.sqlite'}); // run after schema change
-  var db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.1.0'});
+  $localStorage.$default({deviceID: null});
+  $localStorage.$default({pairedID: null});
+  $localStorage.$default({ignoredIDs: []});
 
-  // SQL schema
-  $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME)');
-  $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
+  var db;
+
+  var getDB = function() {
+    // $cordovaSQLite.deleteDB({name: 'store.sqlite'}); // run after schema change
+    if (!db) {
+      db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.1.0'});
+      createSchema(db);
+    }
+
+    return db;
+  };
+
+  var createSchema = function(db) {
+    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME)');
+    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
+  };
 
   var addLesson = function(startTime) {
     var query = 'INSERT INTO lesson (start_time) VALUES (?)';
-    return $cordovaSQLite.execute(db, query, [startTime]);
+    return $cordovaSQLite.execute(getDB(), query, [startTime]);
   };
 
   var addScore = function(startTime, time, score, type) {
     var query = 'INSERT INTO score (start_time, time, score, type) VALUES (?, ?, ?, ?)';
-    return $cordovaSQLite.execute(db, query, [startTime, time, score, type]);
+    return $cordovaSQLite.execute(getDB(), query, [startTime, time, score, type]);
   };
 
   var setLessonStopTime = function(startTime, endTime) {
     var query = 'UPDATE lesson SET end_time = ? WHERE start_time = ?';
-    return $cordovaSQLite.execute(db, query, [endTime, startTime]);
+    return $cordovaSQLite.execute(getDB(), query, [endTime, startTime]);
   };
 
   var getLessonDuration = function(startTime) {
     var q = $q.defer();
 
     var query = 'SELECT (end_time - start_time) AS duration FROM lesson WHERE start_time = ?';
-    $cordovaSQLite.execute(db, query, [startTime]).then(function(res) {
+    $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
       q.resolve((res.rows.length > 0) ? res.rows.item(0).duration : 0);
     }).catch(function(err) {
       $log.error('DB select failed');
@@ -182,7 +196,7 @@ angular.module('experience.services', [
     var q = $q.defer();
 
     var query = 'SELECT score FROM score WHERE start_time = ? ORDER BY time DESC LIMIT 1';
-    $cordovaSQLite.execute(db, query, [startTime]).then(function(res) {
+    $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
       q.resolve((res.rows.length > 0) ? res.rows.item(0).score : 0);
     }).catch(function(err) {
       $log.error('getting lesson cumulative score failed');
@@ -196,7 +210,7 @@ angular.module('experience.services', [
     var q = $q.defer();
 
     var query = 'SELECT start_time AS startTime FROM lesson ORDER BY start_time DESC LIMIT 1';
-    $cordovaSQLite.execute(db, query).then(function(res) {
+    $cordovaSQLite.execute(getDB(), query).then(function(res) {
       q.resolve((res.rows.length > 0) ? res.rows.item(0).startTime : 0);
     }).catch(function(err) {
       $log.error('getting last lesson start time failed');
@@ -206,13 +220,57 @@ angular.module('experience.services', [
     return q.promise;
   };
 
-  // service API
+  var setDeviceID = function(id) {
+    $localStorage.deviceID = id;
+  };
+
+  var getDeviceID = function() {
+    return $localStorage.deviceID;
+  };
+
+  var getPairedID = function() {
+    return $localStorage.pairedID;
+  };
+
+  var setPairedID = function(id) {
+    $localStorage.pairedID = id;
+  };
+
+  var isPaired = function() {
+    return $localStorage.pairedID;
+  };
+
+  var ignore = function(deviceID) {
+    if (!isIgnored(deviceID)) {
+      $localStorage.ignoredIDs.push(deviceID);
+    }
+  };
+
+  var isIgnored = function(deviceID) {
+    return $localStorage.ignoredIDs.indexOf(deviceID) != -1;
+  };
+
+  var clearIgnored = function() {
+    $localStorage.ignoredIDs = [];
+  };
+
+  // sqlite related service API
   this.addLesson = addLesson;
   this.addScore = addScore;
   this.setLessonStopTime = setLessonStopTime;
   this.getLessonDuration = getLessonDuration;
   this.getLessonCumulativeScore = getLessonCumulativeScore;
   this.getLastLessonStartTime = getLastLessonStartTime;
+
+  // local storage related service API
+  this.setDeviceID = setDeviceID;
+  this.getDeviceID = getDeviceID;
+  this.setPairedID = setPairedID;
+  this.getPairedID = getPairedID;
+  this.isPaired = isPaired;
+  this.ignore = ignore;
+  this.isIgnored = isIgnored;
+  this.clearIgnored = clearIgnored;
 
 })
 
@@ -236,7 +294,7 @@ angular.module('experience.services', [
   },
 })
 
-.service('experienceService', function($rootScope, $localStorage, $cordovaBLE, $q, $log, $injector, peripheralServices) {
+.service('experienceService', function($rootScope, $cordovaBLE, $q, $log, storeService, peripheralServices) {
   var ps = peripheralServices;
 
   var connected = false;
@@ -248,15 +306,6 @@ angular.module('experience.services', [
   };
   var startTime = null;
   var stopTime = null;
-
-  $localStorage.$default({
-    experienceService: {
-      deviceID: '',
-      paired: false,
-      ignoredIDs: [],
-    },
-  });
-  var model = $localStorage.experienceService;
 
   var enable = function() {
     var q = $q.defer();
@@ -289,21 +338,23 @@ angular.module('experience.services', [
     scanning = true;
 
     $cordovaBLE.startScan([ps.experience.uuid], function(device) {
-      device = device.id;
-      if (model.paired && model.deviceID == device) {
-        // paired
-        $log.info('found paired ' + device);
-        stopScan().then(function() { q.resolve(device); });
+      var deviceID = device.id;
+      if (storeService.isPaired()) { // paired
+        if (storeService.getPairedID() == deviceID) { // found paired device
+          $log.info('found paired ' + deviceID);
+          stopScan().then(function() { q.resolve(deviceID); });
+        } else { // found another (not paired) device
+          $log.info('found not paired ' + deviceID);
+        }
 
-      } else if (model.ignoredIDs.indexOf(device) == -1) {
-        // not ignored (new)
-        $log.info('found ' + device);
-        stopScan().then(function() { q.resolve(device); });
-
-      } else {
-        // ignored
-        $log.info('found ignored ' + device);
-        q.notify(device);
+      } else { // not paired yet
+        if (!storeService.isIgnored(deviceID)) { // found new (not ignored) device
+          $log.info('found ' + deviceID);
+          stopScan().then(function() { q.resolve(deviceID); });
+        } else { // found ignored
+          $log.info('found ignored ' + deviceID);
+          q.notify(deviceID);
+        }
       }
     }, q.reject);
 
@@ -329,8 +380,8 @@ angular.module('experience.services', [
     return $cordovaBLE.connect(deviceID).then(function(device) {
       $log.info('connected to ' + deviceID);
       connected = true;
-      model.deviceID = deviceID;
-      return device;
+      storeService.setDeviceID(deviceID);
+      return deviceID;
     }).catch(function(error) {
       $log.error('connecting to ' + deviceID + ' failed');
       throw error;
@@ -338,17 +389,17 @@ angular.module('experience.services', [
   };
 
   var reconnect = function() {
-    if (!model.paired) return $q.reject('unable to reconnect, no device is paired');
+    if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
     if (connected) return $q.resolve();
     return scan().then(connect);
   };
 
   var disconnect = function() {
     if (!connected) return $q.resolve();
-    $log.debug('disconnecting from ' + model.deviceID);
+    $log.debug('disconnecting from ' + storeService.getDeviceID());
 
-    return $cordovaBLE.disconnect(model.deviceID).then(function(result) {
-      $log.info('disconnected from ' + model.deviceID);
+    return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
+      $log.info('disconnected from ' + storeService.getDeviceID());
       connected = false;
       return result;
     }).catch(function(error) {
@@ -358,16 +409,13 @@ angular.module('experience.services', [
   };
 
   var ignore = function() {
-    if (!model.deviceID) return;
-    if (model.ignoredIDs.indexOf(model.deviceID) == -1) {
-      model.ignoredIDs.push(model.deviceID);
-    }
-
-    $log.info(model.deviceID + ' added to ignore list');
+    if (!storeService.getDeviceID()) return;
+    storeService.ignore(storeService.getDeviceID());
+    $log.info(storeService.getDeviceID() + ' added to ignore list');
   };
 
   var clearIgnored = function() {
-    model.ignoredIDs = [];
+    storeService.clearIgnored();
   };
 
   var setColor = function(color) {
@@ -379,7 +427,7 @@ angular.module('experience.services', [
     data[1] = parseInt(color.substring(3, 5), 16); // green
     data[2] = parseInt(color.substring(5, 7), 16); // blue
     // TODO use reliable write - sometimes throws error number 133
-    return $cordovaBLE.writeWithoutResponse(model.deviceID, ps.led.uuid, ps.led.characteristics.led.uuid, data.buffer).then(function() {
+    return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.led.uuid, ps.led.characteristics.led.uuid, data.buffer).then(function() {
       $log.info('color set to ' + color);
     }).catch(function(error) {
       $log.error('setting color failed');
@@ -395,7 +443,6 @@ angular.module('experience.services', [
     if (!connected) return $q.reject('experience not connected');
     $log.debug('starting measurement');
     var zeroScore = new Float32Array([0]);
-    var storeService = $injector.get('storeService');
 
     var scoreCallback = function(data) {
       // TODO separate different characteristic types
@@ -404,19 +451,19 @@ angular.module('experience.services', [
     };
 
     // delete previous scores
-    return $cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
-    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
-    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
+    return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
+    .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
+    .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
 
     // register callbacks
     .then(function() {
-      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, scoreCallback);
-      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, scoreCallback);
-      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, scoreCallback);
+      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, scoreCallback);
+      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, scoreCallback);
+      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, scoreCallback);
     })
 
     // start measurement
-    .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
+    .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
     .then(function() {
       startTime = Date.now();
       stopTime = null;
@@ -432,15 +479,14 @@ angular.module('experience.services', [
   var stopMeasurement = function() {
     if (!connected) return $q.reject('experience not connected');
     $log.debug('stopping measurement');
-    var storeService = $injector.get('storeService');
 
     // stop measurement
-    return $cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0xff]).buffer)
+    return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0xff]).buffer)
 
     // unregister callbacks
-    .then($cordovaBLE.stopNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid))
-    .then($cordovaBLE.stopNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid))
-    .then($cordovaBLE.stopNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
+    .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid))
+    .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid))
+    .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
 
     .then(function() {
       stopTime = Date.now();
@@ -460,12 +506,12 @@ angular.module('experience.services', [
   };
 
   var pair = function() {
-    $log.info('device ' + model.deviceID + ' paired');
-    model.paired = true;
+    $log.info('device ' + storeService.getDeviceID() + ' paired');
+    storeService.setPairedID(storeService.getDeviceID());
   };
 
   var isPaired = function() {
-    return model.paired;
+    return storeService.isPaired();
   };
 
   var isConnected = function() {

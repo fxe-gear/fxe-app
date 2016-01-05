@@ -84,11 +84,11 @@ angular.module('experience.routes', [])
 
   $urlRouterProvider.otherwise(function($injector, $location) {
     var userService = $injector.get('userService');
-    var experienceService = $injector.get('experienceService');
+    var storeService = $injector.get('storeService');
 
-    if (experienceService.isPaired() && userService.isLoggedIn())
+    if (storeService.isPaired() && userService.isLoggedIn())
       return '/main/start';
-    if (!experienceService.isPaired() && userService.isLoggedIn())
+    if (!storeService.isPaired() && userService.isLoggedIn())
       return '/scanning';
     else
       return '/welcome';

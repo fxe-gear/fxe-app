@@ -220,7 +220,6 @@ var StartController = function($scope, $state, $ionicPlatform, $timeout, experie
 
   $scope.reconnect = function() {
     experienceService.enable()
-    .then(experienceService.disconnect)
     .then(experienceService.reconnect)
     .then(function() {
       $scope.connected = experienceService.isConnected();
