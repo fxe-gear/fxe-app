@@ -1,15 +1,29 @@
 <ion-view hide-nav-bar="true" title="Jump!">
   <ion-content padding="true" scroll="false">
 
-    <center>
-      <small>Your score:</small>
-      <h1>{{ getScore() }}</h1>
-      <small>Time:</small>
-      <h1>{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</h1>
-    </center>
+    <!-- start measurement -->
+    <div ng-hide="running">
+      <a ng-click="start()" ng-disabled="!connected" class="button button-royal button-block button-large icon-left ion-ios-play">Start jumping!</a>
+      <a ng-click="join()" ng-disabled="!connected" class="button button-royal button-outline button-block icon-left ion-person-stalker">Join lesson</a>
+    </div>
 
-    <br>
-    <a ng-click="stop()" class="button button-royal button-block button-large icon-left ion-stop">Stop</a>
+    <!-- running measurement -->
+    <div ng-show="running">
+      <center>
+        <small>Your score:</small>
+        <h1>{{ getScore() }}</h1>
+        <small>Time:</small>
+        <h1>{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</h1>
+      </center>
+      <br><a ng-click="stop()" class="button button-royal button-block button-large icon-left ion-stop">Stop</a>
+    </div>
+
+    <div ng-if="!isConnected()">
+      <center>
+        <ion-spinner></ion-spinner>
+        <p>Reconnecting...</p>
+      </center>
+    </div>
 
   </ion-content>
 </ion-view>

@@ -134,21 +134,15 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     return experienceService.stopScan();
   };
 
-  // controller enter/exit
-  $scope.$on('$stateChangeSuccess', function(e, toState) {
-    if (toState.controller == 'ScanningController') enter();
-    else exit();
-  });
-
-  // $scope.$on('pause', exit);
-  // $scope.$on('resume', enter);
+  $scope.$on('$ionicView.enter', enter);
+  $scope.$on('$ionicView.exit', exit);
 };
 
 module.controller('ScanningController', ScanningController);
 
 // ------------------------------------------------------------------------------------------------
 
-var PairingController = function($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, util) {
+var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, experienceService, util) {
   var colors = {red: '#ff0000', green: '#00ff00', blue: '#0000ff', yellow: '#ffff00', white: '#ffffff', cyan: '#00ffff'};
   var colorNamesShuffled = util.shuffle(Object.keys(colors));
 
@@ -204,9 +198,8 @@ var PairingController = function($scope, $state, $ionicPlatform, $ionicHistory, 
     // TODO
   };
 
-  // controller enter/exit
-  $scope.$on('$stateChangeSuccess', function(e, toState) {
-    if (toState.controller == 'PairingController') setRandomColor();
+  $scope.$on('$ionicView.beforeEnter', function() {
+    setRandomColor();
   });
 };
 
@@ -214,11 +207,15 @@ module.controller('PairingController', PairingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var StartController = function($scope, $state, $ionicPlatform, $timeout, experienceService) {
+var JumpingController = function($scope, $state, $interval, $timeout, experienceService) {
+  var timer = null;
 
-  $scope.connected = experienceService.isConnected();
+  $scope.running = false;
 
-  $scope.reconnect = function() {
+  $scope.isConnected = experienceService.isConnected;
+  $scope.getElapsedTime = experienceService.getElapsedTime;
+
+  var reconnect = function() {
     experienceService.enable()
     .then(experienceService.reconnect)
     .then(function() {
@@ -230,35 +227,28 @@ var StartController = function($scope, $state, $ionicPlatform, $timeout, experie
     });
   };
 
-  $scope.start = function() {
-    experienceService.startMeasurement().then(function() {
-      $state.go('main.jumping');
-    });
-  };
-
-  $ionicPlatform.ready(function() {
-    $scope.reconnect();
-  });
-};
-
-module.controller('StartController', StartController);
-
-// ------------------------------------------------------------------------------------------------
-
-var JumpingController = function($scope, $state, $interval, experienceService) {
-  var timer = $interval($scope.apply, 1000);
-
-  $scope.getElapsedTime = experienceService.getElapsedTime;
-
   $scope.getScore = function() {
     return experienceService.getCumulativeScore().toFixed(2);
   };
 
+  $scope.start = function() {
+    experienceService.startMeasurement().then(function() {
+      $scope.running = true;
+      timer = $interval($scope.apply, 1000);
+    });
+  };
+
   $scope.stop = function() {
     experienceService.stopMeasurement().then(function() {
+      $scope.running = false;
+      $interval.cancel(timer);
       $state.go('main.me.last');
     });
   };
+
+  $scope.$on('$ionicView.enter', function() {
+    reconnect();
+  });
 };
 
 module.controller('JumpingController', JumpingController);
@@ -289,10 +279,8 @@ var LessonController = function($scope, storeService) {
     });
   };
 
-  // controller enter/exit
-  getLastLessonData();
-  $scope.$on('$stateChangeSuccess', function(e, toState) {
-    if (toState.controller == 'LessonController') getLastLessonData();
+  $scope.$on('$ionicView.beforeEnter', function() {
+    getLastLessonData();
   });
 };
 

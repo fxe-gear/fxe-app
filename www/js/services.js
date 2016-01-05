@@ -500,6 +500,19 @@ angular.module('experience.services', [
     });
   };
 
+  var sendCommand = function(cmd) {
+    if (!connected) return $q.reject('experience not connected');
+    $log.debug('sending command ' + cmd);
+    var data = new Uint8Array([cmd]).buffer;
+    return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, data)
+    .then(function() {
+      $log.info('command ' + cmd + ' sent');
+    }).catch(function(error) {
+      $log.error('sending command failed');
+      throw error;
+    });
+  };
+
   var getElapsedTime = function() {
     // return elapsed time from start of measurement (in milliseconds)
     return startTime != null ? (stopTime != null ? stopTime : Date.now()) - startTime : 0;
@@ -508,10 +521,6 @@ angular.module('experience.services', [
   var pair = function() {
     $log.info('device ' + storeService.getDeviceID() + ' paired');
     storeService.setPairedID(storeService.getDeviceID());
-  };
-
-  var isPaired = function() {
-    return storeService.isPaired();
   };
 
   var isConnected = function() {
@@ -540,9 +549,9 @@ angular.module('experience.services', [
   this.clearColor = clearColor;
   this.startMeasurement = startMeasurement;
   this.stopMeasurement = stopMeasurement;
+  this.sendCommand = sendCommand;
   this.getElapsedTime = getElapsedTime;
   this.pair = pair;
-  this.isPaired = isPaired;
   this.isConnected = isConnected;
   this.getScore = getScore;
   this.getCumulativeScore = getCumulativeScore;
