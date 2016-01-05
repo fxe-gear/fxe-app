@@ -121,7 +121,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
   var connect = function(device) {
     $scope.working = true;
     $scope.status = 'Connecting...';
-    return experienceService.connect(device.id).catch(function(error) {
+    return experienceService.connect(device).catch(function(error) {
       $scope.working = false;
       $scope.status = 'Connecting failed';
       throw error;
@@ -148,7 +148,7 @@ module.controller('ScanningController', ScanningController);
 
 // ------------------------------------------------------------------------------------------------
 
-var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, experienceService, util) {
+var PairingController = function($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, util) {
   var colors = {red: '#ff0000', green: '#00ff00', blue: '#0000ff', yellow: '#ffff00', white: '#ffffff', cyan: '#00ffff'};
   var colorNamesShuffled = util.shuffle(Object.keys(colors));
 
@@ -162,16 +162,14 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
   };
 
   $scope.yes = function() {
-    $scope.step++;
-    if ($scope.step >= $scope.stepCount) {
+    if ($scope.step + 1 >= $scope.stepCount) {
       // on the end of pairing process
       experienceService.pair();
-      return experienceService.clearColor().then(function() {
-        $ionicHistory.nextViewOptions({historyRoot: true});
-        $state.go('main.start');
-      });
+      $ionicHistory.nextViewOptions({historyRoot: true});
+      return $state.go('main.start');
     }
 
+    $scope.step++;
     setRandomColor().catch(function(error) {
       $ionicPopup.alert({
         title: 'Pairing process failed.',
@@ -180,7 +178,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
       })
       .then(experienceService.disconnect)
       .then(function() {
-        $ionicHistory.goBack();
+        return $state.go('scanning');
       });
     });
   };
@@ -192,12 +190,12 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
       okType: 'button-energized',
     })
     .then(experienceService.clearColor)
-    .then(experienceService.disconnect)
     .then(experienceService.ignore)
+    .then(experienceService.disconnect)
     .then(function() {
-      $ionicHistory.goBack();
+      return $state.go('scanning');
     }).catch(function(error) {
-      $ionicHistory.goBack();
+      $state.go('scanning');
       throw error;
     });
   };
@@ -216,12 +214,15 @@ module.controller('PairingController', PairingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var StartController = function($scope, $state, $timeout, experienceService) {
+var StartController = function($scope, $state, $ionicPlatform, $timeout, experienceService) {
 
   $scope.connected = experienceService.isConnected();
 
   $scope.reconnect = function() {
-    experienceService.reconnect().then(function() {
+    experienceService.enable()
+    .then(experienceService.disconnect)
+    .then(experienceService.reconnect)
+    .then(function() {
       $scope.connected = experienceService.isConnected();
     }).catch(function(error) {
       // if connecting failed, try again in 3 sec
@@ -236,7 +237,9 @@ var StartController = function($scope, $state, $timeout, experienceService) {
     });
   };
 
-  $scope.reconnect();
+  $ionicPlatform.ready(function() {
+    $scope.reconnect();
+  });
 };
 
 module.controller('StartController', StartController);
@@ -249,13 +252,11 @@ var JumpingController = function($scope, $state, $interval, experienceService) {
   $scope.getElapsedTime = experienceService.getElapsedTime;
 
   $scope.getScore = function() {
-    var s = experienceService.getScore();
-    return (s.amplitude + s.rhythm + s.frequency).toFixed(2);
+    return experienceService.getCumulativeScore().toFixed(2);
   };
 
   $scope.stop = function() {
     experienceService.stopMeasurement().then(function() {
-      // TODO go to result
       $state.go('main.me.last');
     });
   };
@@ -265,15 +266,35 @@ module.controller('JumpingController', JumpingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var LessonController = function($scope) {
+var LessonController = function($scope, storeService) {
   $scope.labels = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'];
-
   $scope.data = [[28, 48, 40, 19, 86, 27, 90]];
 
-  $scope.onClick = function(points, evt) {
-    console.log(points, evt);
+  $scope.score = 0;
+  $scope.duration = 0;
+
+  var getLastLessonData = function() {
+    storeService.getLastLessonStartTime().then(function(startTime) {
+      if (!startTime) {
+        console.log('no last lesson found');
+        return;
+      }
+
+      storeService.getLessonCumulativeScore(startTime).then(function(score) {
+        $scope.score = score.toFixed(2);
+      });
+
+      storeService.getLessonDuration(startTime).then(function(duration) {
+        $scope.duration = duration;
+      });
+    });
   };
 
+  // controller enter/exit
+  getLastLessonData();
+  $scope.$on('$stateChangeSuccess', function(e, toState) {
+    if (toState.controller == 'LessonController') getLastLessonData();
+  });
 };
 
 module.controller('LessonController', LessonController);

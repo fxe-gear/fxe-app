@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('experience.services', [
-  'ngCordovaMocks',
+  'ngCordova',
+  // 'ngCordovaMocks',
   'ngStorage',
 ])
 
@@ -138,6 +139,85 @@ angular.module('experience.services', [
 
 // ------------------------------------------------------------------------------------------------
 
+// thin wrapper on the top of SQL storage providing JS API to persistent data
+.service('storeService', function($cordovaSQLite, $q, $log) {
+
+  // $cordovaSQLite.deleteDB({name: 'store.sqlite'}); // run after schema change
+  var db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.1.0'});
+
+  // SQL schema
+  $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME)');
+  $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
+
+  var addLesson = function(startTime) {
+    var query = 'INSERT INTO lesson (start_time) VALUES (?)';
+    return $cordovaSQLite.execute(db, query, [startTime]);
+  };
+
+  var addScore = function(startTime, time, score, type) {
+    var query = 'INSERT INTO score (start_time, time, score, type) VALUES (?, ?, ?, ?)';
+    return $cordovaSQLite.execute(db, query, [startTime, time, score, type]);
+  };
+
+  var setLessonStopTime = function(startTime, endTime) {
+    var query = 'UPDATE lesson SET end_time = ? WHERE start_time = ?';
+    return $cordovaSQLite.execute(db, query, [endTime, startTime]);
+  };
+
+  var getLessonDuration = function(startTime) {
+    var q = $q.defer();
+
+    var query = 'SELECT (end_time - start_time) AS duration FROM lesson WHERE start_time = ?';
+    $cordovaSQLite.execute(db, query, [startTime]).then(function(res) {
+      q.resolve((res.rows.length > 0) ? res.rows.item(0).duration : 0);
+    }).catch(function(err) {
+      $log.error('DB select failed');
+      q.reject(err);
+    });
+
+    return q.promise;
+  };
+
+  var getLessonCumulativeScore = function(startTime) {
+    var q = $q.defer();
+
+    var query = 'SELECT score FROM score WHERE start_time = ? ORDER BY time DESC LIMIT 1';
+    $cordovaSQLite.execute(db, query, [startTime]).then(function(res) {
+      q.resolve((res.rows.length > 0) ? res.rows.item(0).score : 0);
+    }).catch(function(err) {
+      $log.error('getting lesson cumulative score failed');
+      q.reject(err);
+    });
+
+    return q.promise;
+  };
+
+  var getLastLessonStartTime = function() {
+    var q = $q.defer();
+
+    var query = 'SELECT start_time AS startTime FROM lesson ORDER BY start_time DESC LIMIT 1';
+    $cordovaSQLite.execute(db, query).then(function(res) {
+      q.resolve((res.rows.length > 0) ? res.rows.item(0).startTime : 0);
+    }).catch(function(err) {
+      $log.error('getting last lesson start time failed');
+      q.reject(err);
+    });
+
+    return q.promise;
+  };
+
+  // service API
+  this.addLesson = addLesson;
+  this.addScore = addScore;
+  this.setLessonStopTime = setLessonStopTime;
+  this.getLessonDuration = getLessonDuration;
+  this.getLessonCumulativeScore = getLessonCumulativeScore;
+  this.getLastLessonStartTime = getLastLessonStartTime;
+
+})
+
+// ------------------------------------------------------------------------------------------------
+
 .constant('peripheralServices', {
   experience: {
     uuid: '6b00',
@@ -156,24 +236,24 @@ angular.module('experience.services', [
   },
 })
 
-.service('experienceService', function($rootScope, $localStorage, $cordovaBLE, $q, $log, peripheralServices) {
+.service('experienceService', function($rootScope, $localStorage, $cordovaBLE, $q, $log, $injector, peripheralServices) {
   var ps = peripheralServices;
 
   var connected = false;
   var scanning = false;
+  var score = {
+    amplitude: 0,
+    rhythm: 0,
+    frequency: 0,
+  };
+  var startTime = null;
+  var stopTime = null;
 
   $localStorage.$default({
     experienceService: {
       deviceID: '',
       paired: false,
       ignoredIDs: [],
-      score: {
-        amplitude: 0,
-        rhythm: 0,
-        frequency: 0,
-      },
-      startTime: null,
-      stopTime: null,
     },
   });
   var model = $localStorage.experienceService;
@@ -205,18 +285,28 @@ angular.module('experience.services', [
 
   var scan = function() {
     var q = $q.defer();
+    $log.debug('starting ble scan');
     scanning = true;
+
     $cordovaBLE.startScan([ps.experience.uuid], function(device) {
-      if (model.ignoredIDs.indexOf(device.id) == -1) {
-        $log.info('found ' + device.id);
-        stopScan().then(function() {
-          q.resolve(device);
-        });
+      device = device.id;
+      if (model.paired && model.deviceID == device) {
+        // paired
+        $log.info('found paired ' + device);
+        stopScan().then(function() { q.resolve(device); });
+
+      } else if (model.ignoredIDs.indexOf(device) == -1) {
+        // not ignored (new)
+        $log.info('found ' + device);
+        stopScan().then(function() { q.resolve(device); });
+
       } else {
-        $log.info('found ignored ' + device.id);
+        // ignored
+        $log.info('found ignored ' + device);
         q.notify(device);
       }
     }, q.reject);
+
     $log.info('scanning started');
     return q.promise;
   };
@@ -250,7 +340,7 @@ angular.module('experience.services', [
   var reconnect = function() {
     if (!model.paired) return $q.reject('unable to reconnect, no device is paired');
     if (connected) return $q.resolve();
-    return connect(model.deviceID);
+    return scan().then(connect);
   };
 
   var disconnect = function() {
@@ -305,6 +395,13 @@ angular.module('experience.services', [
     if (!connected) return $q.reject('experience not connected');
     $log.debug('starting measurement');
     var zeroScore = new Float32Array([0]);
+    var storeService = $injector.get('storeService');
+
+    var scoreCallback = function(data) {
+      // TODO separate different characteristic types
+      score.amplitude = new Float32Array(data)[0];
+      storeService.addScore(startTime, Date.now(), getCumulativeScore(), null);
+    };
 
     // delete previous scores
     return $cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
@@ -313,24 +410,17 @@ angular.module('experience.services', [
 
     // register callbacks
     .then(function() {
-      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, function(data) {
-        model.score.amplitude = new Float32Array(data)[0];
-      });
-
-      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, function(data) {
-        model.score.rhythm = new Float32Array(data)[0];
-      });
-
-      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, function(data) {
-        model.score.frequency = new Float32Array(data)[0];
-      });
+      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, scoreCallback);
+      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, scoreCallback);
+      $cordovaBLE.startNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid, scoreCallback);
     })
 
     // start measurement
     .then($cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
     .then(function() {
-      model.startTime = Date.now();
-      model.stopTime = null;
+      startTime = Date.now();
+      stopTime = null;
+      storeService.addLesson(startTime);
       $log.info('measurement started');
     })
     .catch(function(error) {
@@ -342,6 +432,7 @@ angular.module('experience.services', [
   var stopMeasurement = function() {
     if (!connected) return $q.reject('experience not connected');
     $log.debug('stopping measurement');
+    var storeService = $injector.get('storeService');
 
     // stop measurement
     return $cordovaBLE.write(model.deviceID, ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0xff]).buffer)
@@ -352,7 +443,8 @@ angular.module('experience.services', [
     .then($cordovaBLE.stopNotification(model.deviceID, ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
 
     .then(function() {
-      model.stopTime = Date.now();
+      stopTime = Date.now();
+      storeService.setLessonStopTime(startTime, stopTime);
       $log.info('measurement stopped');
     })
 
@@ -364,7 +456,7 @@ angular.module('experience.services', [
 
   var getElapsedTime = function() {
     // return elapsed time from start of measurement (in milliseconds)
-    return model.startTime != null ? (model.stopTime != null ? model.stopTime : Date.now()) - model.startTime : 0;
+    return startTime != null ? (stopTime != null ? stopTime : Date.now()) - startTime : 0;
   };
 
   var pair = function() {
@@ -381,7 +473,12 @@ angular.module('experience.services', [
   };
 
   var getScore = function() {
-    return model.score;
+    return score;
+  };
+
+  var getCumulativeScore = function() {
+    var s = getScore();
+    return s.amplitude + s.rhythm + s.frequency;
   };
 
   // service public API
@@ -402,6 +499,7 @@ angular.module('experience.services', [
   this.isPaired = isPaired;
   this.isConnected = isConnected;
   this.getScore = getScore;
+  this.getCumulativeScore = getCumulativeScore;
 
 })
 

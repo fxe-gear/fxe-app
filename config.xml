@@ -3,7 +3,7 @@
   <name>Experience</name>
   <description/>
   <author email="ja@tbedrich.cz" href="http://tbedrich.cz/">Tomáš Bedřich</author>
-  <content src="http://10.104.220.2:8100" original-src="index.html"/>
+  <content src="index.html"/>
   <access origin="*"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>

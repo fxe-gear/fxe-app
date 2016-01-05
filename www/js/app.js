@@ -39,13 +39,13 @@ angular.module('experience', [
   // related to live reload
   window.onbeforeunload = function(e) {
     experienceService.disconnect();
-    $rootScope.$broadcast('pause');
+    $rootScope.$broadcast('liveunload');
     return; // must explicitly return
   };
 
   // related to live reload
   window.onload = function(e) {
-    $rootScope.$broadcast('resume');
+    $rootScope.$broadcast('livereload');
     // $state.go('welcome');
   };
 

@@ -4,16 +4,14 @@
 
     <center>
       <small>Your score:</small>
-      <!-- <h1>{{ getScore() }}</h1> -->
-      <h1>201</h1>
+      <h1>{{ score }}</h1>
       <small>Time:</small>
-      <!-- <h1>{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</h1> -->
-      <h1>{{ 123085 | msToTimeSpan | date:'HH:mm:ss' }}</h1>
+      <h1>{{ duration | msToTimeSpan | date:'HH:mm:ss' }}</h1>
     </center>
 
     <br>
 
-    <canvas class="chart chart-line" chart-data="data" chart-labels="labels" chart-click="onClick"></canvas>
+    <canvas class="chart chart-line" chart-data="data" chart-labels="labels"></canvas>
 
     <div class="button-bar">
       <button class="button button-positive button-block icon ion-social-facebook"></button>
