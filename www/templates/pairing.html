@@ -1,16 +1,17 @@
 <ion-view title="Pairing" hide-nav-bar="true">
-  <ion-content padding="true" scroll="false">
+  <ion-content padding="true" scroll="false" class="pairing">
 
-      <center>
-        <small>step {{ step + 1 }} of {{ stepCount }}</small>
-        <div class="led" style="background-color: {{ color }}; box-shadow: 0px 0px 8px 1px {{ color }};"></div>
-        <h1>Do you see <br> a <span class="color">{{ colorName }}</span> light?</h1>
-      </center>
+    <div class="color">
+      <div class="step">step {{ step + 1 }} of {{ stepCount }}</div>
+      <div class="led" style="background-color: {{ color }}; box-shadow: 0px 0px 8px 1px {{ color }};"></div>
+      <div class="question">Do you see <br> a <span class="color">{{ colorName }}</span> light?</div>
+    </div>
 
-      <a ng-click="yes()" class="button button-positive button-block">Yes</a>
-      <a ng-click="no()" class="button button-assertive button-outline button-block">No</a>
-      <a ng-click="cannotRecognize()" class="button button-positive button-clear button-block">I cannot recognize the color</a>
-
+    <div class="buttons">
+      <a ng-click="yes()" class="button button-balanced button-block">Yes</a>
+      <a ng-click="no()" class="button button-assertive button-block">No</a>
+      <!-- <a ng-click="cannotRecognize()" class="button button-light button-clear button-block">I cannot recognize the color</a> -->
+    </div>
 
   </ion-content>
 </ion-view>

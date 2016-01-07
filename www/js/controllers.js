@@ -62,8 +62,8 @@ module.controller('LoginController', LoginController);
 
 var ScanningController = function($scope, $state, $ionicPopup, experienceService) {
 
-  $scope.status = '';
-  $scope.working = false;
+  $scope.status = 'Starting...';
+  $scope.working = true;
 
   $scope.clearIgnored = function() {
     experienceService.clearIgnored();
@@ -130,7 +130,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
 
   var exit = function() {
     $scope.working = false;
-    $scope.status = 'Scanning stopped';
+    $scope.status = 'Ready';
     return experienceService.stopScan();
   };
 
@@ -160,7 +160,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
       // on the end of pairing process
       experienceService.pair();
       $ionicHistory.nextViewOptions({historyRoot: true});
-      return $state.go('main.start');
+      return $state.go('main.jumping');
     }
 
     $scope.step++;
@@ -199,6 +199,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
   };
 
   $scope.$on('$ionicView.beforeEnter', function() {
+    $scope.step = 0;
     setRandomColor();
   });
 };
@@ -207,7 +208,7 @@ module.controller('PairingController', PairingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var JumpingController = function($scope, $state, $interval, $timeout, experienceService) {
+var JumpingController = function($scope, $state, $ionicPlatform, $interval, $timeout, experienceService) {
   var timer = null;
 
   $scope.running = false;
@@ -246,7 +247,7 @@ var JumpingController = function($scope, $state, $interval, $timeout, experience
     });
   };
 
-  $scope.$on('$ionicView.enter', function() {
+  $ionicPlatform.ready(function() {
     reconnect();
   });
 };
@@ -279,9 +280,20 @@ var LessonController = function($scope, storeService) {
     });
   };
 
-  $scope.$on('$ionicView.beforeEnter', function() {
+  $scope.$on('$ionicView.enter', function() {
     getLastLessonData();
   });
 };
+
+// ------------------------------------------------------------------------------------------------
+
+var SettingsController = function($scope, $localStorage, $cordovaSQLite) {
+  $scope.clearAll = function() {
+    $localStorage.$reset();
+    $cordovaSQLite.deleteDB({name: 'store.sqlite'});
+  };
+};
+
+module.controller('SettingsController', SettingsController);
 
 module.controller('LessonController', LessonController);

@@ -427,7 +427,7 @@ angular.module('experience.services', [
     data[1] = parseInt(color.substring(3, 5), 16); // green
     data[2] = parseInt(color.substring(5, 7), 16); // blue
     // TODO use reliable write - sometimes throws error number 133
-    return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.led.uuid, ps.led.characteristics.led.uuid, data.buffer).then(function() {
+    return $cordovaBLE.write(storeService.getDeviceID(), ps.led.uuid, ps.led.characteristics.led.uuid, data.buffer).then(function() {
       $log.info('color set to ' + color);
     }).catch(function(error) {
       $log.error('setting color failed');
@@ -451,6 +451,7 @@ angular.module('experience.services', [
     };
 
     // delete previous scores
+    score.amplitude = 0;
     return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
     .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
     .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))

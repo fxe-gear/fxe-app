@@ -17,10 +17,11 @@ angular.module('experience', [
     }
 
     if (window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
+      StatusBar.styleLightContent();
     }
   });
+
+  $rootScope.platform = ionic.Platform.platform();
 
   $rootScope.$on('pause', function(e) {
     // experienceService.stopScan();

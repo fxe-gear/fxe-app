@@ -24,7 +24,8 @@
     {
       "locator": "https://github.com/litehelpers/Cordova-sqlite-storage.git",
       "id": "cordova-plugin-facebook4"
-    }
+    },
+    "cordova-plugin-statusbar"
   ],
   "cordovaPlatforms": [
     "android",

@@ -1,28 +1,24 @@
 <ion-view hide-nav-bar="true" title="Jump!">
-  <ion-content padding="true" scroll="false">
+  <ion-content padding="true" scroll="false" class="jumping">
 
     <!-- start measurement -->
-    <div ng-hide="running">
-      <a ng-click="start()" ng-disabled="!connected" class="button button-royal button-block button-large icon-left ion-ios-play">Start jumping!</a>
-      <a ng-click="join()" ng-disabled="!connected" class="button button-royal button-outline button-block icon-left ion-person-stalker">Join lesson</a>
+    <div ng-hide="running" class="start">
+      <a ng-click="start()" ng-disabled="!connected" class="button button-balanced button-block button-large icon-left ion-ios-play">Start jumping!</a>
+      <a ng-click="join()" ng-disabled="!connected" class="button button-balanced button-block button-large button-outline icon-left ion-person-stalker">Join lesson</a>
     </div>
 
     <!-- running measurement -->
-    <div ng-show="running">
-      <center>
-        <small>Your score:</small>
-        <h1>{{ getScore() }}</h1>
-        <small>Time:</small>
-        <h1>{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</h1>
-      </center>
-      <br><a ng-click="stop()" class="button button-royal button-block button-large icon-left ion-stop">Stop</a>
+    <div ng-show="running" class="info">
+      <div class="label">Your score:</div>
+      <div class="score">{{ getScore() }}</div>
+      <div class="label">Time:</div>
+      <div class="time">{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</div>
+      <a ng-click="stop()" class="button button-balanced button-block button-large icon-left ion-stop">Stop</a>
     </div>
 
-    <div ng-if="!isConnected()">
-      <center>
-        <ion-spinner></ion-spinner>
-        <p>Reconnecting...</p>
-      </center>
+    <div ng-if="!isConnected()" class="reconnecting">
+      <ion-spinner icon="{{ platform == 'android' ? 'android' : 'lines' }}" class="spinner-balanced"></ion-spinner>
+      <p>Reconnecting...</p>
     </div>
 
   </ion-content>

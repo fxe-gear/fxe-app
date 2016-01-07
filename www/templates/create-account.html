@@ -1,5 +1,5 @@
 <ion-view title="Create account">
-    <ion-content padding="true" scroll="true">
+    <ion-content padding="true" class="create">
 
         <form novalidate name="accountForm" class="list">
             <ion-list>
@@ -26,15 +26,15 @@
                 <div class="item item-input">
                     <span class="input-label">Gender:</span>
                     <div class="button-bar">
-                      <a class="button button-small button-positive" ng-class="{'button-outline': data.gender != 'male'}" ng-click="data.gender = 'male'">Male</a>
-                      <a class="button button-small button-positive" ng-class="{'button-outline': data.gender != 'female'}" ng-click="data.gender = 'female'">Female</a>
+                      <a class="button button-small button-dark" ng-class="{'button-outline': data.gender != 'male'}" ng-click="data.gender = 'male'">Male</a>
+                      <a class="button button-small button-dark" ng-class="{'button-outline': data.gender != 'female'}" ng-click="data.gender = 'female'">Female</a>
                     </div>
                 </div>
                 <div class="item item-input">
                     <span class="input-label">Units:</span>
                     <div class="button-bar">
-                      <a class="button button-small button-positive" ng-class="{'button-outline': data.units != 'metric'}" ng-click="data.units = 'metric'">Metric</a>
-                      <a class="button button-small button-positive" ng-class="{'button-outline': data.units != 'imperial'}" ng-click="data.units = 'imperial'">Imperial</a>
+                      <a class="button button-small button-dark" ng-class="{'button-outline': data.units != 'metric'}" ng-click="data.units = 'metric'">Metric</a>
+                      <a class="button button-small button-dark" ng-class="{'button-outline': data.units != 'imperial'}" ng-click="data.units = 'imperial'">Imperial</a>
                     </div>
                 </div>
             </ion-list>
@@ -48,7 +48,7 @@
             </div>
 
             <button class="button button-balanced button-block" ng-disabled="accountForm.$invalid" ng-click="update(data)">Create account</button>
-            <a ui-sref="login" class="button button-positive button-clear button-block ">I already have an account</a>
+            <a ui-sref="login" class="button button-light button-clear button-block ">I already have an account</a>
         </form>
 
     </ion-content>
