@@ -10,7 +10,7 @@
     <!-- running measurement -->
     <div ng-show="running" class="info">
       <div class="label">Your score:</div>
-      <div class="score">{{ getScore() }}</div>
+      <div class="score pulser-{{ Math.random().toString().substr(2) }}">{{ getScore() }}</div>
       <div class="label">Time:</div>
       <div class="time">{{ getElapsedTime() | msToTimeSpan | date:'HH:mm:ss' }}</div>
       <a ng-click="stop()" class="button button-balanced button-block button-large icon-left ion-stop">Stop</a>
