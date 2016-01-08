@@ -1,5 +1,4 @@
-// The path for our ionicons font files, relative to the built CSS in www/css
-$ionicons-font-path: "../lib/ionic/fonts" !default;
+$ionicons-font-path: "../lib" !default;
 
 $base-background-color:           #000 !default;
 $base-color:                      #fff !default;
@@ -32,6 +31,10 @@ $tabs-off-opacity:                0.3 !default;
   font-size: .8rem;
 }
 
+.bar {
+  animation: fadeIn 1s;
+}
+
 .platform-ios .pane {
   // because of statusbar
   padding-top: 1rem;
@@ -44,10 +47,11 @@ $tabs-off-opacity:                0.3 !default;
   border-bottom: 1px solid $dark;
 }
 
-.list .button-bar {
+.list .item-input .button-bar {
   flex: 1 0 100px;
   margin-right: 44px;
 }
 
+
 // Include all of Ionic
-@import "www/lib/ionic/scss/ionic";
+@import "../lib/ionic/scss/ionic";

@@ -1,5 +1,7 @@
+@import "../lib/ionic/scss/_variables";
+
 .pane {
-  background: url('../img/background.jpg') no-repeat center center fixed;
+  background: $base-background-color url('../img/background.jpg') no-repeat center center fixed;
   background-size: cover;
 
   .h1, .h2, .h3, .h4, .h5, .h6,
@@ -17,9 +19,8 @@
   max-width: 400px;
   margin: -$height/2 auto 0;
 
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 1em;
+  .buttons {
+    animation: fadeIn 2s;
   }
 }
 
