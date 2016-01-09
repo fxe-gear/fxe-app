@@ -1,7 +1,24 @@
 <ion-view hide-nav-bar="true" title="Settings">
   <ion-content padding="true" class="settings">
 
-    <a ng-click="clearAll()" class="button button-assertive button-block button-large">Clear all &amp; reset application</a>
+    <div class="card">
+      <div class="item item-divider">
+        Websocket extreme publishing
+      </div>
+      <label class="item item-input">
+        <span class="input-label">IP</span>
+        <input type="text" ng-model="websocket.ip">
+      </label>
+      <label class="item item-input">
+        <span class="input-label">Port</span>
+        <input type="number" ng-model="websocket.port">
+      </label>
+      <a ng-click="toggleSubscribeExtremes()" class="item {{ extremesSubscribed ? 'assertive' : 'balanced' }}">{{ extremesSubscribed ? 'Stop' : 'Start' }} publishing</a>
+    </div>
+
+    <hr>
+
+    <a ng-click="clearAll()" class="button button-assertive button-block">Clear all &amp; reset application</a>
     <p><strong>Warning</strong>, no confirmation!</p>
 
   </ion-content>

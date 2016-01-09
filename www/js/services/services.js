@@ -3,6 +3,7 @@
 angular.module('experience.services', [
   'ngCordova',
   'ngWebSocket',
+  // 'ngCordovaMocks',
   'ngStorage',
 ])
 
@@ -531,6 +532,9 @@ angular.module('experience.services', [
     $log.debug('subscribing extremes and streaming to ' + address);
 
     websocket = $websocket(address);
+    var message = [12, 23, 2332, -4223].join('\t');
+    $log.debug('sending WS message: ' + message);
+    websocket.send(message);
 
     $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid, function(data) {
       var t = new DataView(data, 0, 4).getUint32();

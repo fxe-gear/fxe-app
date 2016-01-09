@@ -2,10 +2,7 @@
   "name": "experience",
   "app_id": "d4c682c6",
   "gulpStartupTasks": [
-    "bower-files",
-    "scripts",
-    "styles",
-    "index",
+    "default",
     "watch"
   ],
   "watchPatterns": [

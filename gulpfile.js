@@ -5,7 +5,7 @@ var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var mainBowerFiles = require('main-bower-files');
 var inject = require('gulp-inject');
-var order = require('gulp-order');
+var series = require('stream-series');
 var filter = require('gulp-filter');
 
 var paths = {
@@ -13,59 +13,62 @@ var paths = {
   scripts: ['./app/**/*.js', './app/*.js'],
 };
 
-gulp.task('bower-files', function(done) {
-  gulp.src(mainBowerFiles())
-  .pipe(gulp.dest('./www/lib'))
-  .on('end', done);
-});
-
 gulp.task('styles', function(done) {
   gulp.src(paths.styles)
-  .pipe(sass())
-  .pipe(minifyCss({
-    keepSpecialComments: 0,
-  }))
-  .pipe(concat('style.min.css'))
-  .pipe(gulp.dest('./www/css/'));
+      .pipe(sass())
+      .pipe(minifyCss({
+        keepSpecialComments: 0,
+      }))
+      .pipe(concat('style.min.css'))
+      .pipe(gulp.dest('./www/css/'));
 });
 
 gulp.task('scripts', function(done) {
+
+  // copy bower scripts
+  gulp.src(mainBowerFiles())
+      .pipe(filter([
+        '*',
+        '!source-map.js',
+      ]))
+      .pipe(gulp.dest('./www/lib'));
+
+  // copy app scripts
   gulp.src(paths.scripts)
-  .pipe(concat('app.js'))
-  .pipe(gulp.dest('./www/js'))
-  .on('end', done);
+    // .pipe(concat('app.js'))
+    .pipe(gulp.dest('./www/js'));
+
+  // inject into index.html
+  var libStream = gulp.src([
+    './www/lib/angular.js',
+    './www/lib/Chart.js',
+    './www/lib/angular*.js',
+    './www/lib/ionic.js',
+    './www/lib/ionic*.js',
+    './www/lib/ng*.js',
+    './www/lib/stacktrace.min.js',
+    './www/lib/stack*.js',
+    './www/lib/*.js',
+    './www/lib/**/*.css',
+  ], {read: false});
+  var appStream = gulp.src([
+    './www/js/services/*.js',
+    './www/js/controllers/*.js',
+    './www/js/**/*.js',
+    './www/css/**/*.css',
+  ], {read: false});
+  gulp.src('./www/index.html')
+      .pipe(inject(series(libStream, appStream), {relative: true}))
+      .pipe(gulp.dest('./www'))
+      .on('end', done);
 });
 
-gulp.task('index', function(done) {
-  gulp.src('./www/index.html')
-  .pipe(inject(
-    gulp.src([
-      './www/lib/**/*.js',
-      './www/lib/**/*.css',
-    ], {read: false})
-    .pipe(order([
-      'angular.js',
-      'Chart.js',
-      'angular*.js',
-      'ionic.js',
-      'ionic*.js',
-      'ng*.js',
-      'stacktrace.min.js',
-      'stack*.js',
-    ]))
-    .pipe(filter([
-      '*',
-      '!*source-map.js',
-    ])),
-    {relative: true}
-  ))
-  .pipe(gulp.dest('./www'))
-  .on('end', done);
+gulp.task('inject', function(done) {
 });
 
 gulp.task('watch', function() {
   gulp.watch(paths.styles, ['styles']);
-  gulp.watch(paths.scripts, ['bower-files', 'scripts']);
+  gulp.watch(paths.scripts, ['scripts']);
 });
 
-gulp.task('default', ['bower-files', 'scripts', 'styles', 'index']);
+gulp.task('default', ['scripts', 'styles']);
