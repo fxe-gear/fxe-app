@@ -1,20 +1,26 @@
 <ion-view hide-nav-bar="true" title="Last lesson">
   <ion-content padding="true" class="lesson">
 
-  <div class="info">
-    <div class="label">Your score:</div>
-    <div class="score">{{ score }}</div>
-    <div class="label">Time:</div>
-    <div class="time">{{ duration | msToTimeSpan | date:'HH:mm:ss' }}</div>
+    <div ng-show="duration == 0" class="info">
+      <p class="label">No last lesson, go jumping!</p>
+    </div>
+    <div ng-show="duration != 0">
+
+      <div class="info">
+        <div class="label">Your score:</div>
+        <div class="score">{{ score }}</div>
+        <div class="label">Time:</div>
+        <div class="time">{{ duration | msToTimeSpan | date:'HH:mm:ss' }}</div>
+      </div>
+
+      <canvas class="chart chart-line" chart-data="data" chart-labels="labels"></canvas>
+
+      <!-- <div class="button-bar">
+      <button class="button button-positive button-block icon ion-social-facebook"></button>
+      <button class="button button-assertive button-block icon ion-social-googleplus"></button>
+      <button class="button button-calm button-block icon ion-social-twitter"></button>
+    </div> -->
   </div>
 
-  <canvas class="chart chart-line" chart-data="data" chart-labels="labels"></canvas>
-
-  <!-- <div class="button-bar">
-    <button class="button button-positive button-block icon ion-social-facebook"></button>
-    <button class="button button-assertive button-block icon ion-social-googleplus"></button>
-    <button class="button button-calm button-block icon ion-social-twitter"></button>
-  </div> -->
-
-  </ion-content>
+</ion-content>
 </ion-view>

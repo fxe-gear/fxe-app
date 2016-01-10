@@ -220,6 +220,25 @@ angular.module('experience.services', [
     return q.promise;
   };
 
+  var getLessonDiffData = function(startTime, interval) {
+    var q = $q.defer();
+
+    // select lesson data grouped to N-seconds intervals
+    var query = 'SELECT SUM(score) AS score, (time - start_time) AS relativeTime, ((time - start_time) / ?) AS diffGroup '
+              + 'FROM score WHERE start_time = ? GROUP BY diffGroup ORDER BY relativeTime ASC';
+    $cordovaSQLite.execute(getDB(), query, [interval * 1000, startTime]).then(function(res) {
+      var ret = [];
+      for (var i = 0; i < res.rows.length; i++) ret.push(res.rows.item(i).score);
+      q.resolve(ret);
+    }).catch(function(err) {
+      $log.error('getting lesson diff data failed');
+      console.log(err);
+      q.reject(err);
+    });
+
+    return q.promise;
+  };
+
   var setDeviceID = function(id) {
     $localStorage.deviceID = id;
   };
@@ -261,6 +280,7 @@ angular.module('experience.services', [
   this.getLessonDuration = getLessonDuration;
   this.getLessonCumulativeScore = getLessonCumulativeScore;
   this.getLastLessonStartTime = getLastLessonStartTime;
+  this.getLessonDiffData = getLessonDiffData;
 
   // local storage related service API
   this.setDeviceID = setDeviceID;

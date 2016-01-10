@@ -159,9 +159,10 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     if ($scope.step + 1 >= $scope.stepCount) {
       // on the end of pairing process
       experienceService.pair();
-      experienceService.setColor(colors.blue);
-      $ionicHistory.nextViewOptions({historyRoot: true});
-      return $state.go('main.jumping');
+      return experienceService.clearColor().then(function() {
+        $ionicHistory.nextViewOptions({historyRoot: true});
+        $state.go('main.jumping');
+      });
     }
 
     $scope.step++;
@@ -265,12 +266,14 @@ module.controller('JumpingController', JumpingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var LessonController = function($scope, storeService) {
-  $scope.labels = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'];
-  $scope.data = [[28, 48, 40, 19, 86, 27, 90]];
+// interval used in diff graph (in seconds)
+module.constant('diffGraphInterval', 90);
 
-  $scope.score = 0;
-  $scope.duration = 0;
+var LessonController = function($scope, storeService, diffGraphInterval, msToTimeSpanFilter, dateFilter) {
+
+  var msToLabel = function(val) {
+    return dateFilter(msToTimeSpanFilter(val), 'HH:mm:ss');
+  };
 
   var getLastLessonData = function() {
     storeService.getLastLessonStartTime().then(function(startTime) {
@@ -279,6 +282,23 @@ var LessonController = function($scope, storeService) {
         return;
       }
 
+      storeService.getLessonDiffData(startTime, diffGraphInterval).then(function(data) {
+        $scope.labels = [];
+        $scope.data = [[]];
+
+        // fill labels
+        for (var i = 0; i <= data.length; i++) {
+          $scope.labels.push(msToLabel(i * diffGraphInterval * 1e3)); // in milliseconds
+        }
+
+        // fill score
+        $scope.data[0].push(0);
+        for (var i = 0; i < data.length; i++) {
+          $scope.data[0].push(data[i]);
+        }
+
+      });
+
       storeService.getLessonCumulativeScore(startTime).then(function(score) {
         $scope.score = score.toFixed(2);
       });
@@ -286,8 +306,12 @@ var LessonController = function($scope, storeService) {
       storeService.getLessonDuration(startTime).then(function(duration) {
         $scope.duration = duration;
       });
+
     });
   };
+
+  $scope.score = 0;
+  $scope.duration = 0;
 
   $scope.$on('$ionicView.enter', function() {
     getLastLessonData();

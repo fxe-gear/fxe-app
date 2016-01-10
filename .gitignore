@@ -5,5 +5,8 @@ node_modules/
 platforms/
 plugins/
 /lib/
+/www/lib/
+/www/js/
+/www/css/
 
 .vagrant
