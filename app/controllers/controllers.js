@@ -134,7 +134,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
     return experienceService.stopScan();
   };
 
-  $scope.$on('$ionicView.enter', enter);
+  $scope.$on('$ionicView.beforeEnter', enter);
   $scope.$on('$ionicView.exit', exit);
 };
 
@@ -221,8 +221,9 @@ var JumpingController = function($scope, $state, $ionicPlatform, $interval, $tim
   var reconnect = function() {
     experienceService.enable()
     .then(experienceService.reconnect)
-    .then(function() {
-      $scope.connected = experienceService.isConnected();
+    .then(experienceService.ensureConnected)
+    .then(function(res) {
+      $scope.connected = true;
     }).catch(function(error) {
       // if connecting failed, try again in 3 sec
       $timeout(reconnect, 3000);
@@ -247,9 +248,10 @@ var JumpingController = function($scope, $state, $ionicPlatform, $interval, $tim
 
   $scope.stop = function() {
     experienceService.stopMeasurement().then(function() {
-      $scope.running = false;
       $interval.cancel(timer);
-      $state.go('main.me.last');
+      $state.go('main.lesson').then(function() {
+        $scope.running = false;
+      });
     }).catch(function(error) {
       // if connecting failed, try again in 3 sec
       $timeout(reconnect, 3000);
@@ -269,56 +271,46 @@ module.controller('JumpingController', JumpingController);
 // interval used in diff graph (in seconds)
 module.constant('diffGraphInterval', 90);
 
-var LessonController = function($scope, storeService, diffGraphInterval, msToTimeSpanFilter, dateFilter) {
+var LessonController = function($scope, storeService, diffGraphInterval, msToTimeSpanFilter, dateFilter, lesson) {
+
+  $scope.lesson = lesson;
 
   var msToLabel = function(val) {
     return dateFilter(msToTimeSpanFilter(val), 'HH:mm:ss');
   };
 
-  var getLastLessonData = function() {
-    storeService.getLastLessonStartTime().then(function(startTime) {
-      if (!startTime) {
-        console.log('no last lesson found');
-        return;
+  var prepareChartData = function() {
+    storeService.getLessonDiffData(lesson.startTime, diffGraphInterval).then(function(data) {
+
+      // fill labels
+      $scope.chartLabels = [];
+      for (var i = 0; i <= data.length; i++) {
+        $scope.chartLabels.push(msToLabel(i * diffGraphInterval * 1e3)); // in milliseconds
       }
 
-      storeService.getLessonDiffData(startTime, diffGraphInterval).then(function(data) {
-        $scope.labels = [];
-        $scope.data = [[]];
-
-        // fill labels
-        for (var i = 0; i <= data.length; i++) {
-          $scope.labels.push(msToLabel(i * diffGraphInterval * 1e3)); // in milliseconds
-        }
-
-        // fill score
-        $scope.data[0].push(0);
-        for (var i = 0; i < data.length; i++) {
-          $scope.data[0].push(data[i]);
-        }
-
-      });
-
-      storeService.getLessonCumulativeScore(startTime).then(function(score) {
-        $scope.score = score.toFixed(2);
-      });
-
-      storeService.getLessonDuration(startTime).then(function(duration) {
-        $scope.duration = duration;
-      });
+      // fill score
+      $scope.chartData = [[0]];
+      for (var i = 0; i < data.length; i++) {
+        $scope.chartData[0].push(data[i]);
+      }
 
     });
   };
 
-  $scope.score = 0;
-  $scope.duration = 0;
-
-  $scope.$on('$ionicView.enter', function() {
-    getLastLessonData();
+  $scope.$on('$ionicView.beforeEnter', function() {
+    prepareChartData();
   });
 };
 
 module.controller('LessonController', LessonController);
+
+// ------------------------------------------------------------------------------------------------
+
+var HistoryController = function($scope, lessons) {
+  $scope.lessons = lessons;
+};
+
+module.controller('HistoryController', HistoryController);
 
 // ------------------------------------------------------------------------------------------------
 

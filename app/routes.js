@@ -50,22 +50,32 @@ angular.module('experience.routes', [])
     },
   });
 
-  $stateProvider.state('main.me', {
-    url: '/me',
-    abstract: true,
+  $stateProvider.state('main.lesson', {
+    url: '/lesson?startTime',
     views: {
       me: {
-        templateUrl: 'templates/main/me/me.html',
+        templateUrl: 'templates/main/me/lesson.html',
+        controller: 'LessonController',
+        resolve: {
+          lesson: function($stateParams, storeService) {
+            return $stateParams.startTime ? storeService.getLesson($stateParams.startTime) : storeService.getLastLesson();
+          },
+        },
       },
     },
   });
 
-  $stateProvider.state('main.me.last', {
-    url: '/last',
+  $stateProvider.state('main.history', {
+    url: '/history',
     views: {
-      lesson: {
-        templateUrl: 'templates/main/me/last.html',
-        controller: 'LessonController',
+      me: {
+        templateUrl: 'templates/main/me/history.html',
+        controller: 'HistoryController',
+        resolve: {
+          lessons: function($stateParams, storeService) {
+            return storeService.getAllLessons();
+          },
+        },
       },
     },
   });
@@ -84,7 +94,7 @@ angular.module('experience.routes', [])
     var userService = $injector.get('userService');
     var storeService = $injector.get('storeService');
 
-    if (storeService.isPaired() && userService.isLoggedIn())
+    if (storeService.isPaired())
       return '/main/jumping';
     if (!storeService.isPaired() && userService.isLoggedIn())
       return '/scanning';

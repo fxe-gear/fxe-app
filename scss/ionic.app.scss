@@ -1,5 +1,6 @@
-$ionicons-font-path: "../lib" !default;
+$ionicons-font-path:              "../lib" !default;
 
+// override Ionic variables
 $base-background-color:           #000 !default;
 $base-color:                      #fff !default;
 
@@ -13,6 +14,14 @@ $assertive:                       #d84a05 !default;
 $royal:                           #3c1642 !default;
 $dark:                            #444 !default;
 
+$button-light-bg:                 rgba($light, .6) !default;  // lots of backgrounds are derived from this
+$button-light-text:               rgba($dark, 1) !default;
+$button-light-border:             rgba($dark, .4) !default;
+$button-light-active-bg:          rgba($light, .8) !default;
+$button-light-active-border:      rgba($light, .5) !default;
+
+$tabs-off-opacity:                .3 !default;
+
 $bar-transparency:                .2 !default;
 
 $font-family-sans-serif:          "Roboto", "Helvetica Neue", "Segoe UI", sans-serif !default;
@@ -20,38 +29,5 @@ $font-family-sans-serif:          "Roboto", "Helvetica Neue", "Segoe UI", sans-s
 $spinner-width:                   50px !default;
 $spinner-height:                  50px !default;
 
-// other component overrides
-
-$tabs-off-opacity:                0.3 !default;
-.tabs-balanced .tabs {
-  background-color: rgba($balanced, .2) !important;
-}
-.platform-android .tab-title {
-  padding-left: 1em;
-  font-size: .8rem;
-}
-
-.bar {
-  animation: fadeIn 1s;
-}
-
-.platform-ios .pane {
-  // because of statusbar
-  padding-top: 1rem;
-}
-
-.popup, .popup-title, .popup-sub-title, .popup-body {
-  color: #000;
-}
-.popup-head {
-  border-bottom: 1px solid $dark;
-}
-
-.list .item-input .button-bar {
-  flex: 1 0 150px;
-  margin-right: 44px;
-}
-
-
-// Include all of Ionic
+// rest of Ionic
 @import "../lib/ionic/scss/ionic";

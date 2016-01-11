@@ -7,14 +7,16 @@ var mainBowerFiles = require('main-bower-files');
 var inject = require('gulp-inject');
 var series = require('stream-series');
 var filter = require('gulp-filter');
+var plumber = require('gulp-plumber');
 
 var paths = {
   styles: ['./scss/**/*.scss', './scss/**/*.css'],
   scripts: ['./app/**/*.js', './app/*.js'],
 };
 
-gulp.task('styles', function(done) {
+gulp.task('styles', function() {
   gulp.src(paths.styles)
+      .pipe(plumber())
       .pipe(sass())
       .pipe(minifyCss({
         keepSpecialComments: 0,
@@ -23,7 +25,7 @@ gulp.task('styles', function(done) {
       .pipe(gulp.dest('./www/css/'));
 });
 
-gulp.task('scripts', function(done) {
+gulp.task('scripts', function() {
 
   // copy bower scripts
   gulp.src(mainBowerFiles())
@@ -59,11 +61,7 @@ gulp.task('scripts', function(done) {
   ], {read: false});
   gulp.src('./www/index.html')
       .pipe(inject(series(libStream, appStream), {relative: true}))
-      .pipe(gulp.dest('./www'))
-      .on('end', done);
-});
-
-gulp.task('inject', function(done) {
+      .pipe(gulp.dest('./www'));
 });
 
 gulp.task('watch', function() {

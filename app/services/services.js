@@ -149,13 +149,16 @@ angular.module('experience.services', [
   var db;
 
   var getDB = function() {
-    // $cordovaSQLite.deleteDB({name: 'store.sqlite'}); // run after schema change
     if (!db) {
       db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.1.0'});
       createSchema(db);
     }
 
     return db;
+  };
+
+  var prepareDB = function() {
+    getDB();
   };
 
   var createSchema = function(db) {
@@ -195,7 +198,7 @@ angular.module('experience.services', [
   var getLessonCumulativeScore = function(startTime) {
     var q = $q.defer();
 
-    var query = 'SELECT score FROM score WHERE start_time = ? ORDER BY time DESC LIMIT 1';
+    var query = 'SELECT SUM(score) AS score FROM score WHERE start_time = ? GROUP BY start_time';
     $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
       q.resolve((res.rows.length > 0) ? res.rows.item(0).score : 0);
     }).catch(function(err) {
@@ -206,18 +209,62 @@ angular.module('experience.services', [
     return q.promise;
   };
 
-  var getLastLessonStartTime = function() {
+  var getLesson = function(startTime) {
     var q = $q.defer();
 
-    var query = 'SELECT start_time AS startTime FROM lesson ORDER BY start_time DESC LIMIT 1';
-    $cordovaSQLite.execute(getDB(), query).then(function(res) {
-      q.resolve((res.rows.length > 0) ? res.rows.item(0).startTime : 0);
-    }).catch(function(err) {
-      $log.error('getting last lesson start time failed');
+    var query = `SELECT
+      start_time AS startTime,
+      end_time AS endTime,
+      (end_time - start_time) AS duration,
+      (SELECT SUM(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time) AS score
+      FROM lesson`;
+    var callback;
+    var inject = [];
+
+    if (startTime == 0) { // last lesson
+      query += ' ORDER BY start_time DESC LIMIT 1';
+      callback = function(res) {
+        if (res.rows.length > 0) {
+          q.resolve(res.rows.item(0));
+        } else {
+          q.reject('no last lesson found');
+        }
+      };
+
+    } else if (startTime == -1) { // all lessons
+      query += ' ORDER BY start_time DESC';
+      callback = function(res) {
+        var ret = [];
+        for (var i = 0; i < res.rows.length; i++) ret.push(res.rows.item(i));
+        q.resolve(ret);
+      };
+
+    } else { // one lesson
+      query += ' WHERE start_time = ? LIMIT 1';
+      inject.push(startTime);
+      callback = function(res) {
+        if (res.rows.length > 0) {
+          q.resolve(res.rows.item(0));
+        } else {
+          q.reject('no lesson with start time ' + startTime + ' found');
+        }
+      };
+    }
+
+    $cordovaSQLite.execute(getDB(), query, inject).then(callback).catch(function(err) {
+      $log.error('getting lesson failed');
       q.reject(err);
     });
 
     return q.promise;
+  };
+
+  var getLastLesson = function() {
+    return getLesson(0);
+  };
+
+  var getAllLessons = function() {
+    return getLesson(-1);
   };
 
   var getLessonDiffData = function(startTime, interval) {
@@ -274,12 +321,15 @@ angular.module('experience.services', [
   };
 
   // sqlite related service API
+  this.prepareDB = prepareDB;
   this.addLesson = addLesson;
   this.addScore = addScore;
   this.setLessonStopTime = setLessonStopTime;
   this.getLessonDuration = getLessonDuration;
   this.getLessonCumulativeScore = getLessonCumulativeScore;
-  this.getLastLessonStartTime = getLastLessonStartTime;
+  this.getLesson = getLesson;
+  this.getLastLesson = getLastLesson;
+  this.getAllLessons = getAllLessons;
   this.getLessonDiffData = getLessonDiffData;
 
   // local storage related service API
@@ -318,13 +368,13 @@ angular.module('experience.services', [
 .service('experienceService', function($rootScope, $cordovaBLE, $websocket, $q, $log, storeService, peripheralServices) {
   var ps = peripheralServices;
 
-  var connected = false;
   var scanning = false;
   var score = {
     amplitude: 0,
     rhythm: 0,
     frequency: 0,
   };
+  var lastScore = 0;
   var startTime = null;
   var stopTime = null;
   var websocket = null;
@@ -410,7 +460,6 @@ angular.module('experience.services', [
     $log.debug('connecting to ' + deviceID);
     return $cordovaBLE.connect(deviceID).then(function(device) {
       $log.info('connected to ' + deviceID);
-      connected = true;
       storeService.setDeviceID(deviceID);
       return deviceID;
     }).catch(function(error) {
@@ -421,17 +470,16 @@ angular.module('experience.services', [
 
   var reconnect = function() {
     if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
-    if (connected) return $q.resolve();
+    if (isConnected()) return $q.resolve();
     return scan().then(connect).then(clearColor);
   };
 
   var disconnect = function() {
-    if (!connected) return $q.resolve();
+    if (!isConnected()) return $q.resolve();
     $log.debug('disconnecting from ' + storeService.getDeviceID());
 
     return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
       $log.info('disconnected from ' + storeService.getDeviceID());
-      connected = false;
       return result;
     }).catch(function(error) {
       $log.error('disconnecting from ' + deviceID + ' failed');
@@ -450,7 +498,7 @@ angular.module('experience.services', [
   };
 
   var setColor = function(color) {
-    if (!connected) return $q.resolve();
+    if (!isConnected()) return $q.resolve();
     $log.debug('setting color to ' + color);
 
     var data = new Uint8Array(3);
@@ -471,14 +519,15 @@ angular.module('experience.services', [
   };
 
   var startMeasurement = function() {
-    if (!connected) return $q.reject('experience not connected');
+    if (!isConnected()) return $q.reject('experience not connected');
     $log.debug('starting measurement');
     var zeroScore = new Float32Array([0]);
 
     var scoreCallback = function(data) {
       // TODO separate different characteristic types
       score.amplitude = new Float32Array(data)[0];
-      storeService.addScore(startTime, Date.now(), getCumulativeScore(), null);
+      storeService.addScore(startTime, Date.now(), score.amplitude - lastScore, null);
+      lastScore = score.amplitude;
     };
 
     // delete previous scores
@@ -509,7 +558,7 @@ angular.module('experience.services', [
   };
 
   var stopMeasurement = function() {
-    if (!connected) return $q.reject('experience not connected');
+    if (!isConnected()) return $q.reject('experience not connected');
     $log.debug('stopping measurement');
 
     // stop measurement
@@ -533,7 +582,7 @@ angular.module('experience.services', [
   };
 
   var sendCommand = function(cmd) {
-    if (!connected) return $q.reject('experience not connected');
+    if (!isConnected()) return $q.reject('experience not connected');
     $log.debug('sending command ' + cmd);
     var data = new Uint8Array([cmd]).buffer;
     return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, data)
@@ -546,7 +595,7 @@ angular.module('experience.services', [
   };
 
   var subscribeExtremes = function(websocketIP, websocketPort) {
-    if (!connected) throw 'experience not connected';
+    if (!isConnected()) throw 'experience not connected';
     var address = 'ws://' + [websocketIP, websocketPort].join(':');
     $log.debug('subscribing extremes and streaming to ' + address);
 
@@ -566,7 +615,7 @@ angular.module('experience.services', [
   };
 
   var unsubscribeExtremes = function() {
-    if (!connected) throw 'experience not connected';
+    if (!isConnected()) throw 'experience not connected';
     $log.debug('unsubscribing extremes');
     $cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid);
     websocket.close();
@@ -583,8 +632,16 @@ angular.module('experience.services', [
     storeService.setPairedID(storeService.getDeviceID());
   };
 
+  var ensureConnected = function() {
+    return $cordovaBLE.isConnected(storeService.getDeviceID());
+  };
+
   var isConnected = function() {
-    return connected;
+    ensureConnected().then(function() {
+      return true;
+    }).catch(function() {
+      return false;
+    });
   };
 
   var getScore = function() {
@@ -614,6 +671,7 @@ angular.module('experience.services', [
   this.unsubscribeExtremes = unsubscribeExtremes;
   this.getElapsedTime = getElapsedTime;
   this.pair = pair;
+  this.ensureConnected = ensureConnected;
   this.isConnected = isConnected;
   this.getScore = getScore;
   this.getCumulativeScore = getCumulativeScore;

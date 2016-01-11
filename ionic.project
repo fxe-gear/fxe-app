@@ -8,6 +8,7 @@
   "watchPatterns": [
     "app/**/*",
     "www/**/*",
+    "scss/**/*",
     "!www/lib/**/*"
   ]
 }

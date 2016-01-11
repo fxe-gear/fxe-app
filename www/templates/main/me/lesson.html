@@ -1,0 +1,28 @@
+<ion-view title="Lesson">
+  <ion-content padding="true" class="lesson">
+
+    <div class="info">
+      <div class="label">Your score:</div>
+      <div class="score">{{ ::lesson.score.toFixed(0) }}</div>
+      <div class="label">Time:</div>
+      <div class="time">{{ ::lesson.duration | msToTimeSpan | date:'HH:mm:ss' }}</div>
+    </div>
+
+    <canvas class="chart chart-line" chart-data="chartData" chart-labels="chartLabels" chart-options="
+      {
+        tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(0) %>',
+        scaleOverride: true,
+        scaleSteps: 6,
+        scaleStepWidth: 5,
+        scaleStartValue: 0,
+      }
+    "></canvas>
+
+    <!-- <div class="button-bar"> -->
+    <!-- <button class="button button-positive button-block icon ion-social-facebook"></button> -->
+    <!-- <button class="button button-assertive button-block icon ion-social-googleplus"></button> -->
+    <!-- <button class="button button-calm button-block icon ion-social-twitter"></button> -->
+    <!-- </div> -->
+
+  </ion-content>
+</ion-view>

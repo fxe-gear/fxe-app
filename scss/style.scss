@@ -1,13 +1,67 @@
 @import "../lib/ionic/scss/_variables";
 
-.pane {
-  background: $base-background-color url('../img/background.jpg') no-repeat center center fixed;
-  background-size: cover;
+body {
+  background-color: $base-background-color;
+}
 
-  .h1, .h2, .h3, .h4, .h5, .h6,
-  h1, h2, h3, h4, h5, h6 {
-    text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+// ionic components overrides ----------------------------------------------------------------------
+
+.pane {
+  background: $base-background-color url('../img/background.jpg') no-repeat center fixed;
+  background-size: cover;
+}
+
+// tabs
+.tabs-balanced>.tabs {
+  background-color: rgba($balanced, .2) !important;
+
+  // add borders on iOS
+  .platform-ios & {
+    padding-top: 0;
+    border-top: 1px solid rgba($balanced, .4) !important;
+    .tab-item {
+      padding-top: 2px;
+    }
+    .tab-item-active {
+      padding-top: 0px;
+      border-top: 2px solid $balanced !important;
+    }
   }
+}
+.platform-android .tab-title {
+  padding-left: 1em;
+  font-size: .8rem;
+}
+
+// nav bar
+.platform-ios .bar {
+  border-bottom: 1px solid rgba($balanced, .4) !important;
+}
+
+// because of statusbar
+.platform-ios .scroll-content:not(.has-header) {
+  padding-top: 1rem;
+}
+
+// popup
+.popup, .popup-title, .popup-sub-title, .popup-body {
+  color: #000;
+}
+.popup-head {
+  border-bottom: 1px solid $dark;
+}
+
+// button-bar inside list
+.list .item-input .button-bar {
+  flex-basis: 65%;
+  padding-right: $padding-large-horizontal;
+}
+
+
+// custom views ------------------------------------------------------------------------------------
+
+.shadow {
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
 }
 
 .welcome {
@@ -21,6 +75,12 @@
 
   .buttons {
     animation: fadeIn 2s;
+  }
+}
+
+.create {
+  .validation {
+    margin-top: 1rem;
   }
 }
 
@@ -92,6 +152,12 @@
     &[class*="-add"] {
         transform: scale(1.1);
     }
+  }
+}
+
+.history {
+  .no-lessons {
+    text-align: center;
   }
 }
 

@@ -1,7 +1,7 @@
 <ion-view title="Create account">
     <ion-content padding="true" class="has-header create">
 
-        <form novalidate name="accountForm" class="list">
+        <form novalidate name="f" class="list">
             <ion-list>
                 <label class="item item-input required">
                     <span class="input-label">Email:</span>
@@ -39,15 +39,15 @@
                 </div>
             </ion-list>
 
-            <div class="padding">
-              <p ng-show="accountForm.email.$error.required && accountForm.email.$touched">* Email is required</p>
-              <p ng-show="accountForm.email.$error.email && accountForm.email.$touched">* Email must be valid email address</p>
-              <p ng-show="accountForm.password.$error.required && accountForm.password.$touched">* Password is required</p>
-              <p ng-show="accountForm.password.$error.minlength && accountForm.password.$touched">* Password must be longer than 6 characters</p>
+            <div class="validation" ng-if="f.$invalid">
+              <p ng-show="f.email.$touched && f.email.$error.required">* Email is required</p>
+              <p ng-show="f.email.$touched && f.email.$error.email">* Email must be valid email address</p>
+              <p ng-show="f.password.$touched && f.password.$error.required">* Password is required</p>
+              <p ng-show="f.password.$touched && f.password.$error.minlength">* Password must be longer than 6 characters</p>
               <!-- TODO add more validation rules -->
             </div>
 
-            <button class="button button-balanced button-block" ng-disabled="accountForm.$invalid" ng-click="update(data)">Create account</button>
+            <button class="button button-balanced button-block" ng-disabled="f.$invalid" ng-click="update(data)">Create account</button>
             <a ui-sref="login" class="button button-light button-clear button-block ">I already have an account</a>
         </form>
 

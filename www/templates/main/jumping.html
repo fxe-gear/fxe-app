@@ -1,4 +1,4 @@
-<ion-view hide-nav-bar="true" title="Jump!">
+<ion-view title="Jump!">
   <ion-content padding="true" scroll="false" class="jumping">
 
     <!-- start measurement -->
@@ -16,8 +16,8 @@
       <a ng-click="stop()" class="button button-balanced button-block button-large icon-left ion-stop">Stop</a>
     </div>
 
-    <div ng-if="!isConnected()" class="reconnecting">
-      <ion-spinner icon="{{ platform == 'android' ? 'android' : 'lines' }}" class="spinner-balanced"></ion-spinner>
+    <div ng-hide="isConnected()" class="reconnecting">
+      <ion-spinner icon="lines" class="spinner-balanced"></ion-spinner>
       <p>Reconnecting...</p>
     </div>
 

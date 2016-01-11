@@ -1,0 +1,14 @@
+<ion-view title="My lessons">
+  <ion-content class="history">
+
+    <div class="list">
+      <a class="item dark" ui-sref="main.lesson({startTime: lesson.startTime})" ng-repeat="lesson in lessons">
+        <h2 class="dark">Lesson {{ lesson.startTime | date:'short' }}</h2>
+        <strong>{{ lesson.score.toFixed(0) }} points</strong>, {{ lesson.duration | msToTimeSpan | date:'HH:mm:ss' }}
+      </a>
+    </div>
+
+    <p class="no-lessons" ng-hide="lessons.length">No lesson found, go jumping!</p>
+
+  </ion-content>
+</ion-view>
