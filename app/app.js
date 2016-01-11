@@ -2,10 +2,23 @@
 
 angular.module('experience', [
   'ionic',
-  'experience.controllers',
-  'experience.routes',
-  'experience.services',
   'talis.services.logging',
+
+  'experience.services.util',
+  'experience.services.store',
+  'experience.services.experience',
+
+  'experience.controllers.account',
+  'experience.controllers.history',
+  'experience.controllers.jumping',
+  'experience.controllers.lesson',
+  'experience.controllers.login',
+  'experience.controllers.pairing',
+  'experience.controllers.scanning',
+  'experience.controllers.settings',
+  'experience.controllers.welcome',
+
+  'experience.routes',
 ])
 
 .run(function($ionicConfig, $ionicPlatform, $rootScope, storeService, experienceService) {
