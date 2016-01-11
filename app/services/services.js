@@ -150,7 +150,12 @@ angular.module('experience.services', [
 
   var getDB = function() {
     if (!db) {
-      db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.1.0'});
+      if (window.sqlitePlugin) { // native sqlite DB
+        db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.2.0'});
+      } else { // fallback to websql
+        db = window.openDatabase('store', '0.2.0', null, 2 * 1024 * 1024);
+      }
+
       createSchema(db);
     }
 
@@ -181,32 +186,12 @@ angular.module('experience.services', [
     return $cordovaSQLite.execute(getDB(), query, [endTime, startTime]);
   };
 
-  var getLessonDuration = function(startTime) {
-    var q = $q.defer();
-
-    var query = 'SELECT (end_time - start_time) AS duration FROM lesson WHERE start_time = ?';
-    $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
-      q.resolve((res.rows.length > 0) ? res.rows.item(0).duration : 0);
-    }).catch(function(err) {
-      $log.error('DB select failed');
-      q.reject(err);
-    });
-
-    return q.promise;
+  var getLastLesson = function() {
+    return getLesson(0);
   };
 
-  var getLessonCumulativeScore = function(startTime) {
-    var q = $q.defer();
-
-    var query = 'SELECT SUM(score) AS score FROM score WHERE start_time = ? GROUP BY start_time';
-    $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
-      q.resolve((res.rows.length > 0) ? res.rows.item(0).score : 0);
-    }).catch(function(err) {
-      $log.error('getting lesson cumulative score failed');
-      q.reject(err);
-    });
-
-    return q.promise;
+  var getAllLessons = function() {
+    return getLesson(-1);
   };
 
   var getLesson = function(startTime) {
@@ -216,7 +201,7 @@ angular.module('experience.services', [
       start_time AS startTime,
       end_time AS endTime,
       (end_time - start_time) AS duration,
-      (SELECT SUM(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time) AS score
+      COALESCE((SELECT SUM(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time), 0) AS score
       FROM lesson`;
     var callback;
     var inject = [];
@@ -257,14 +242,6 @@ angular.module('experience.services', [
     });
 
     return q.promise;
-  };
-
-  var getLastLesson = function() {
-    return getLesson(0);
-  };
-
-  var getAllLessons = function() {
-    return getLesson(-1);
   };
 
   var getLessonDiffData = function(startTime, interval) {
@@ -325,11 +302,9 @@ angular.module('experience.services', [
   this.addLesson = addLesson;
   this.addScore = addScore;
   this.setLessonStopTime = setLessonStopTime;
-  this.getLessonDuration = getLessonDuration;
-  this.getLessonCumulativeScore = getLessonCumulativeScore;
-  this.getLesson = getLesson;
   this.getLastLesson = getLastLesson;
   this.getAllLessons = getAllLessons;
+  this.getLesson = getLesson;
   this.getLessonDiffData = getLessonDiffData;
 
   // local storage related service API
@@ -382,33 +357,32 @@ angular.module('experience.services', [
   var enable = function() {
     var q = $q.defer();
 
-    // TODO horrible hack
-    function checkBle() {
-      if (typeof ble === 'undefined') {
-        window.setTimeout(checkBle, 100);
-      } else {
-        $cordovaBLE.isEnabled().then(function() {  // already enabled
-          q.resolve();
-        }).catch(function(error) { // not enabled
-          if (typeof ble.enable === 'undefined') {
-            // iOS doesn't have ble.enable
-            q.reject('cannot enable bluetooth, probably on iOS');
-          } else {
-            // Android
-            $log.debug('enabling bluetooth');
-            $cordovaBLE.enable().then(function() {
-              $log.info('bluetooth enabled');
-              q.resolve();
-            }).catch(function(error) {
-              $log.warning('bluetooth not enabled');
-              q.reject(error);
-            });
-          }
-        });
-      }
+    try {
+      ble.isEnabled;
+    } catch (e) {
+      $log.error('no ble, no fun');
+      q.reject(e);
+      return q.promise;
     }
 
-    checkBle();
+    $cordovaBLE.isEnabled().then(function() {  // already enabled
+      q.resolve();
+    }).catch(function(error) { // not enabled
+      if (typeof ble.enable === 'undefined') {
+        // iOS doesn't have ble.enable
+        q.reject('cannot enable bluetooth, probably on iOS');
+      } else {
+        // Android
+        $log.debug('enabling bluetooth');
+        $cordovaBLE.enable().then(function() {
+          $log.info('bluetooth enabled');
+          q.resolve();
+        }).catch(function(error) {
+          $log.warn('bluetooth not enabled');
+          q.reject(error);
+        });
+      }
+    });
 
     return q.promise;
   };
@@ -470,47 +444,55 @@ angular.module('experience.services', [
 
   var reconnect = function() {
     if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
-    if (isConnected()) return $q.resolve();
-    return scan().then(connect).then(clearColor);
+    return isConnected().then(function(connected) {
+      if (connected) return;
+      else return scan().then(connect).then(clearColor);
+    });
   };
 
   var disconnect = function() {
-    if (!isConnected()) return $q.resolve();
-    $log.debug('disconnecting from ' + storeService.getDeviceID());
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('disconnecting from ' + storeService.getDeviceID());
 
-    return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
-      $log.info('disconnected from ' + storeService.getDeviceID());
-      return result;
-    }).catch(function(error) {
-      $log.error('disconnecting from ' + deviceID + ' failed');
-      throw error;
+      return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
+        $log.info('disconnected from ' + storeService.getDeviceID());
+        return result;
+      }).catch(function(error) {
+        $log.error('disconnecting from ' + deviceID + ' failed');
+        throw error;
+      });
     });
   };
 
   var ignore = function() {
-    if (!storeService.getDeviceID()) return;
+    if (!storeService.getDeviceID()) return $q.reject('unable to ignore, no device is paired');
     storeService.ignore(storeService.getDeviceID());
     $log.info(storeService.getDeviceID() + ' added to ignore list');
+    return $q.resolve();
   };
 
   var clearIgnored = function() {
     storeService.clearIgnored();
+    return $q.resolve();
   };
 
   var setColor = function(color) {
-    if (!isConnected()) return $q.resolve();
-    $log.debug('setting color to ' + color);
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('setting color to ' + color);
 
-    var data = new Uint8Array(3);
-    data[0] = parseInt(color.substring(1, 3), 16); // red
-    data[1] = parseInt(color.substring(3, 5), 16); // green
-    data[2] = parseInt(color.substring(5, 7), 16); // blue
-    // TODO use reliable write - sometimes throws error number 133
-    return $cordovaBLE.write(storeService.getDeviceID(), ps.led.uuid, ps.led.characteristics.led.uuid, data.buffer).then(function() {
-      $log.info('color set to ' + color);
-    }).catch(function(error) {
-      $log.error('setting color failed');
-      throw error;
+      var data = new Uint8Array(3);
+      data[0] = parseInt(color.substring(1, 3), 16); // red
+      data[1] = parseInt(color.substring(3, 5), 16); // green
+      data[2] = parseInt(color.substring(5, 7), 16); // blue
+      // TODO use reliable write - sometimes throws error number 133
+      return $cordovaBLE.write(storeService.getDeviceID(), ps.led.uuid, ps.led.characteristics.led.uuid, data.buffer).then(function() {
+        $log.info('color set to ' + color);
+      }).catch(function(error) {
+        $log.error('setting color failed');
+        throw error;
+      });
     });
   };
 
@@ -519,129 +501,157 @@ angular.module('experience.services', [
   };
 
   var startMeasurement = function() {
-    if (!isConnected()) return $q.reject('experience not connected');
-    $log.debug('starting measurement');
-    var zeroScore = new Float32Array([0]);
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('starting measurement');
 
-    var scoreCallback = function(data) {
-      // TODO separate different characteristic types
-      score.amplitude = new Float32Array(data)[0];
-      storeService.addScore(startTime, Date.now(), score.amplitude - lastScore, null);
-      lastScore = score.amplitude;
-    };
+      var zeroScore = new Float32Array([0]);
 
-    // delete previous scores
-    score.amplitude = 0;
-    return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
-    .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
-    .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
+      var scoreCallback = function(data) {
+        // TODO separate different characteristic types
+        score.amplitude = new Float32Array(data)[0];
+        storeService.addScore(startTime, Date.now(), score.amplitude - lastScore, null);
+        lastScore = score.amplitude;
+      };
 
-    // register callbacks
-    .then(function() {
-      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, scoreCallback);
-      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, scoreCallback);
-      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, scoreCallback);
-    })
+      // delete previous scores
+      score.amplitude = 0;
+      return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
+      .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
+      .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
 
-    // start measurement
-    .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
-    .then(function() {
-      startTime = Date.now();
-      stopTime = null;
-      storeService.addLesson(startTime);
-      $log.info('measurement started');
-    })
-    .catch(function(error) {
-      $log.error('starting measurement failed');
-      throw error;
+      // register callbacks
+      .then(function() {
+        $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, scoreCallback);
+        $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, scoreCallback);
+        $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, scoreCallback);
+      })
+
+      // start measurement
+      .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
+      .then(function() {
+        startTime = Date.now();
+        stopTime = null;
+        storeService.addLesson(startTime);
+        $log.info('measurement started');
+      })
+      .catch(function(error) {
+        $log.error('starting measurement failed');
+        throw error;
+      });
     });
   };
 
   var stopMeasurement = function() {
-    if (!isConnected()) return $q.reject('experience not connected');
-    $log.debug('stopping measurement');
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('stopping measurement');
 
-    // stop measurement
-    return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0xff]).buffer)
+      // stop measurement
+      return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0xff]).buffer)
 
-    // unregister callbacks
-    .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid))
-    .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid))
-    .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
+      // unregister callbacks
+      .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid))
+      .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid))
+      .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
 
-    .then(function() {
-      stopTime = Date.now();
-      storeService.setLessonStopTime(startTime, stopTime);
-      $log.info('measurement stopped');
-    })
+      .then(function() {
+        stopTime = Date.now();
+        storeService.setLessonStopTime(startTime, stopTime);
+        $log.info('measurement stopped');
+      })
 
-    .catch(function(error) {
-      $log.error('stopping measurement failed');
-      throw error;
+      .catch(function(error) {
+        $log.error('stopping measurement failed');
+        throw error;
+      });
     });
   };
 
   var sendCommand = function(cmd) {
-    if (!isConnected()) return $q.reject('experience not connected');
-    $log.debug('sending command ' + cmd);
-    var data = new Uint8Array([cmd]).buffer;
-    return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, data)
-    .then(function() {
-      $log.info('command ' + cmd + ' sent');
-    }).catch(function(error) {
-      $log.error('sending command failed');
-      throw error;
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('sending command ' + cmd);
+
+      var data = new Uint8Array([cmd]).buffer;
+      return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, data)
+      .then(function() {
+        $log.info('command ' + cmd + ' sent');
+      }).catch(function(error) {
+        $log.error('sending command failed');
+        throw error;
+      });
     });
   };
 
   var subscribeExtremes = function(websocketIP, websocketPort) {
-    if (!isConnected()) throw 'experience not connected';
-    var address = 'ws://' + [websocketIP, websocketPort].join(':');
-    $log.debug('subscribing extremes and streaming to ' + address);
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
 
-    websocket = $websocket(address);
+      var address = 'ws://' + [websocketIP, websocketPort].join(':');
+      $log.debug('subscribing extremes and streaming to ' + address);
 
-    $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid, function(data) {
-      var t = new DataView(data, 0, 4).getUint32();
-      var x = new DataView(data, 4, 5).getInt16();
-      var y = new DataView(data, 5, 6).getInt16();
-      var z = new DataView(data, 6, 7).getInt16();
-      var message = [t, x, y, z].join('\t');
-      $log.debug('sending WS message: ' + message);
-      websocket.send(message);
+      websocket = $websocket(address);
+
+      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid, function(data) {
+        var t = new DataView(data, 0, 4).getUint32();
+        var x = new DataView(data, 4, 5).getInt16();
+        var y = new DataView(data, 5, 6).getInt16();
+        var z = new DataView(data, 6, 7).getInt16();
+        var message = [t, x, y, z].join('\t');
+        $log.debug('sending WS message: ' + message);
+        websocket.send(message);
+      });
+
+      $log.info('extremes subscribed');
     });
-
-    $log.info('extremes subscribed');
   };
 
   var unsubscribeExtremes = function() {
-    if (!isConnected()) throw 'experience not connected';
-    $log.debug('unsubscribing extremes');
-    $cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid);
-    websocket.close();
-    $log.info('extremes unsubscribed');
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('unsubscribing extremes');
+
+      $cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid);
+      websocket.close();
+      $log.info('extremes unsubscribed');
+    });
+  };
+
+  var pair = function() {
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+
+      $log.info('device ' + storeService.getDeviceID() + ' paired');
+      storeService.setPairedID(storeService.getDeviceID());
+    });
+  };
+
+  var isConnected = function() {
+    var q = $q.defer();
+    var deviceID = storeService.getDeviceID();
+
+    // no deviceID = not connected
+    if (!deviceID) {
+      q.resolve(false);
+      return q.promise;
+    }
+
+    $log.debug('checking connection status for ' + deviceID);
+    $cordovaBLE.isConnected(deviceID).then(function() {
+      $log.debug(deviceID + ' is connected');
+      q.resolve(true);
+    }).catch(function() {
+      $log.debug(deviceID + ' is not connected');
+      q.resolve(false);
+    });
+
+    return q.promise;
   };
 
   var getElapsedTime = function() {
     // return elapsed time from start of measurement (in milliseconds)
     return startTime != null ? (stopTime != null ? stopTime : Date.now()) - startTime : 0;
-  };
-
-  var pair = function() {
-    $log.info('device ' + storeService.getDeviceID() + ' paired');
-    storeService.setPairedID(storeService.getDeviceID());
-  };
-
-  var ensureConnected = function() {
-    return $cordovaBLE.isConnected(storeService.getDeviceID());
-  };
-
-  var isConnected = function() {
-    ensureConnected().then(function() {
-      return true;
-    }).catch(function() {
-      return false;
-    });
   };
 
   var getScore = function() {
@@ -671,7 +681,6 @@ angular.module('experience.services', [
   this.unsubscribeExtremes = unsubscribeExtremes;
   this.getElapsedTime = getElapsedTime;
   this.pair = pair;
-  this.ensureConnected = ensureConnected;
   this.isConnected = isConnected;
   this.getScore = getScore;
   this.getCumulativeScore = getCumulativeScore;

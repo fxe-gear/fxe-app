@@ -101,7 +101,9 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
   var disconnect = function() {
     $scope.working = true;
     $scope.status = 'Disconnecting previously connected devices...';
-    return experienceService.disconnect().catch(function(error) {
+    return experienceService.isConnected().then(function(connected) {
+      if (connected) experienceService.disconnect();
+    }).catch(function(error) {
       $scope.working = false;
       $scope.status = 'Disconnecting failed';
       throw error;
@@ -135,7 +137,7 @@ var ScanningController = function($scope, $state, $ionicPopup, experienceService
   };
 
   $scope.$on('$ionicView.beforeEnter', enter);
-  $scope.$on('$ionicView.exit', exit);
+  $scope.$on('$ionicView.afterExit', exit);
 };
 
 module.controller('ScanningController', ScanningController);
@@ -171,9 +173,7 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
         title: 'Pairing process failed.',
         template: 'Cannot communicate with Experience, please try it again.',
         okType: 'button-assertive',
-      })
-      .then(experienceService.disconnect)
-      .then(function() {
+      }).then(function() {
         return $state.go('scanning');
       });
     });
@@ -187,7 +187,6 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
     })
     .then(experienceService.clearColor)
     .then(experienceService.ignore)
-    .then(experienceService.disconnect)
     .then(function() {
       return $state.go('scanning');
     }).catch(function(error) {
@@ -210,23 +209,27 @@ module.controller('PairingController', PairingController);
 
 // ------------------------------------------------------------------------------------------------
 
-var JumpingController = function($scope, $state, $ionicPlatform, $interval, $timeout, experienceService) {
+module.constant('reconnectTimeout', 3000); // in milliseconds
+
+var JumpingController = function($scope, $state, $ionicPlatform, $ionicHistory, $interval, $timeout, experienceService, reconnectTimeout) {
   var timer = null;
 
   $scope.running = false;
+  $scope.connected = false;
 
-  $scope.isConnected = experienceService.isConnected;
   $scope.getElapsedTime = experienceService.getElapsedTime;
 
   var reconnect = function() {
     experienceService.enable()
     .then(experienceService.reconnect)
-    .then(experienceService.ensureConnected)
-    .then(function(res) {
-      $scope.connected = true;
+    .then(experienceService.isConnected).then(function(connected) {
+      $scope.connected = connected;
+      if (!connected) {
+        throw 'not connected, but reconnect resolved successfully, don\'t know why';
+      }
     }).catch(function(error) {
       // if connecting failed, try again in 3 sec
-      $timeout(reconnect, 3000);
+      $timeout(reconnect, reconnectTimeout);
       throw error;
     });
   };
@@ -241,7 +244,7 @@ var JumpingController = function($scope, $state, $ionicPlatform, $interval, $tim
       timer = $interval($scope.apply, 1000);
     }).catch(function(error) {
       // if connecting failed, try again in 3 sec
-      $timeout(reconnect, 3000);
+      $timeout(reconnect, reconnectTimeout);
       throw error;
     });
   };
@@ -249,12 +252,16 @@ var JumpingController = function($scope, $state, $ionicPlatform, $interval, $tim
   $scope.stop = function() {
     experienceService.stopMeasurement().then(function() {
       $interval.cancel(timer);
-      $state.go('main.lesson').then(function() {
+
+      // TODO go to nested state
+      // https://gist.github.com/Deminetix/f7e0d9b91b685df5fc0d
+      // http://codepen.io/TimothyKrell/pen/bnukj?editors=101
+      $state.go('main.history').then(function() {
         $scope.running = false;
       });
     }).catch(function(error) {
       // if connecting failed, try again in 3 sec
-      $timeout(reconnect, 3000);
+      $timeout(reconnect, reconnectTimeout);
       throw error;
     });
   };
@@ -336,10 +343,13 @@ var SettingsController = function($scope, $state, $localStorage, $cordovaSQLite,
   };
 
   $scope.clearAll = function() {
-    experienceService.disconnect();
     $localStorage.$reset();
     $cordovaSQLite.deleteDB({name: 'store.sqlite'});
-    $state.go('welcome');
+    experienceService.isConnected().then(function(connected) {
+      if (connected) experienceService.disconnect();
+    }).then(function() {
+      $state.go('welcome');
+    });
   };
 
 };

@@ -8,7 +8,7 @@ angular.module('experience', [
   'talis.services.logging',
 ])
 
-.run(function($ionicConfig, $ionicPlatform, $rootScope, storeService) {
+.run(function($ionicConfig, $ionicPlatform, $rootScope, storeService, experienceService) {
   $ionicConfig.scrolling.jsScrolling(false);
 
   $ionicPlatform.ready(function() {
@@ -41,6 +41,10 @@ angular.module('experience', [
 
   // related to live reload
   window.onbeforeunload = function(e) {
+    experienceService.isConnected().then(function(connected) {
+      if (connected) experienceService.disconnect();
+    });
+
     $rootScope.$broadcast('liveunload');
     return; // must explicitly return
   };

@@ -16,7 +16,7 @@
       <a ng-click="stop()" class="button button-balanced button-block button-large icon-left ion-stop">Stop</a>
     </div>
 
-    <div ng-hide="isConnected()" class="reconnecting">
+    <div ng-hide="connected" class="reconnecting">
       <ion-spinner icon="lines" class="spinner-balanced"></ion-spinner>
       <p>Reconnecting...</p>
     </div>

@@ -1,0 +1,33 @@
+// override Ionic variables
+
+$ionicons-font-path:              "../lib" !default;
+
+$base-background-color:           #000 !default;
+$base-color:                      #fff !default;
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #084887 !default;
+$calm:                            #65def1 !default;
+$balanced:                        #9ccf28 !default;
+$energized:                       #eca400 !default;
+$assertive:                       #d84a05 !default;
+$royal:                           #3c1642 !default;
+$dark:                            #444 !default;
+
+// $button-light-bg:                 rgba($light, .6) !default;  // lots of backgrounds are derived from this
+// $button-light-text:               rgba($dark, 1) !default;
+// $button-light-border:             rgba($dark, .4) !default;
+// $button-light-active-bg:          rgba($light, .8) !default;
+// $button-light-active-border:      rgba($light, .5) !default;
+
+$tabs-off-opacity:                .3 !default;
+
+$bar-transparency:                .4 !default;
+
+$font-family-sans-serif:          "Roboto", "Helvetica Neue", "Segoe UI", sans-serif !default;
+
+$spinner-width:                   50px !default;
+$spinner-height:                  50px !default;
+
+@import "../lib/ionic/scss/_variables";

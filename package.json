@@ -1,6 +1,6 @@
 {
   "name": "experience",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:tomasbedrich/experience-app.git"
@@ -31,12 +31,27 @@
     "com.ionic.keyboard",
     "cordova-plugin-ble-central",
     {
-      "locator": "https://github.com/litehelpers/Cordova-sqlite-storage.git",
-      "id": "cordova-plugin-facebook4"
+      "id": "cordova-sqlite-storage",
+      "locator": "https://github.com/litehelpers/Cordova-sqlite-storage.git"
     },
-    "cordova-plugin-statusbar"
+    {
+      "id": "cordova-plugin-facebook4",
+      "locator": "cordova-plugin-facebook4",
+      "variables": {
+        "APP_ID": "702447366556323",
+        "APP_NAME": "Experience"
+      }
+    },
+    {
+      "id": "cordova-plugin-googleplus",
+      "locator": "cordova-plugin-googleplus",
+      "variables": {
+        "REVERSED_CLIENT_ID": "com.googleusercontent.apps.457117701129-1l9i4gdlnjgaglqugue3ksvg1ptvoc3o"
+      }
+    }
   ],
   "cordovaPlatforms": [
-    "android"
+    "android",
+    "ios"
   ]
 }

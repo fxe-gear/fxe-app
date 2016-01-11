@@ -56,6 +56,7 @@ gulp.task('scripts', function() {
   var appStream = gulp.src([
     './www/js/services/*.js',
     './www/js/controllers/*.js',
+    './www/js/directives/*.js',
     './www/js/**/*.js',
     './www/css/**/*.css',
   ], {read: false});

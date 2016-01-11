@@ -1,19 +1,26 @@
-@import "../lib/ionic/scss/_variables";
-
-body {
-  background-color: $base-background-color;
-}
+@import "variables";
 
 // ionic components overrides ----------------------------------------------------------------------
 
 .pane {
   background: $base-background-color url('../img/background.jpg') no-repeat center fixed;
   background-size: cover;
+
+  // &:before {
+  //   content: " ";
+  //   display: block;
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   right: 0;
+  //   height: 44px;
+  //   background-color: red;
+  // }
 }
 
 // tabs
 .tabs-balanced>.tabs {
-  background-color: rgba($balanced, .2) !important;
+  background-color: rgba($balanced, $bar-transparency) !important;
 
   // add borders on iOS
   .platform-ios & {
