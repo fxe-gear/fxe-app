@@ -270,26 +270,37 @@ angular.module('experience.services.experience', [
   };
 
   var subscribeExtremes = function(websocketIP, websocketPort) {
-    return isConnected().then(function(connected) {
+    var q = $q.defer();
+
+    isConnected().then(function(connected) {
       if (!connected) throw 'experience not connected';
 
       var address = 'ws://' + [websocketIP, websocketPort].join(':');
       $log.debug('subscribing extremes and streaming to ' + address);
 
       websocket = $websocket(address);
+      websocket.onOpen(function() {
+        $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid, function(data) {
+          var dataView = new DataView(data);
+          var t = dataView.getUint32(0, true);
+          var x = dataView.getInt16(4, true);
+          var y = dataView.getInt16(6, true);
+          var z = dataView.getInt16(8, true);
+          var message = [t, x, y, z].join('\t');
+          $log.debug('sending WS message: ' + message);
+          websocket.send(message);
+        });
 
-      $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid, function(data) {
-        var t = new DataView(data, 0, 4).getUint32();
-        var x = new DataView(data, 4, 5).getInt16();
-        var y = new DataView(data, 5, 6).getInt16();
-        var z = new DataView(data, 6, 7).getInt16();
-        var message = [t, x, y, z].join('\t');
-        $log.debug('sending WS message: ' + message);
-        websocket.send(message);
+        $log.info('extremes subscribed');
+        q.resolve();
       });
 
-      $log.info('extremes subscribed');
+      websocket.onError(function(err) {
+        q.reject(err);
+      });
     });
+
+    return q.promise;
   };
 
   var unsubscribeExtremes = function() {
