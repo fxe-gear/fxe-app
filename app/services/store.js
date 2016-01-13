@@ -62,12 +62,12 @@ angular.module('experience.services.store', [
   var getLesson = function(startTime) {
     var q = $q.defer();
 
-    var query = `SELECT
-      start_time AS startTime,
-      end_time AS endTime,
-      (end_time - start_time) AS duration,
-      COALESCE((SELECT SUM(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time), 0) AS score
-      FROM lesson`;
+    var query = 'SELECT ' +
+      'start_time AS startTime, ' +
+      'end_time AS endTime, ' +
+      '(end_time - start_time) AS duration, ' +
+      'COALESCE((SELECT SUM(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time), 0) AS score ' +
+      'FROM lesson';
     var callback;
     var inject = [];
 
