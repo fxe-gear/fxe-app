@@ -10,17 +10,17 @@ angular.module('experience.services.experience', [
   experience: {
     uuid: '6b00',
     characteristics: {
-      extreme: {uuid: '6b01'},
-      control: {uuid: '6bff'},
-      amplitude: {uuid: '6b04'},
-      rhythm: {uuid: '6b05'},
-      frequency: {uuid: '6b06'},
+      extreme: { uuid: '6b01' },
+      control: { uuid: '6bff' },
+      amplitude: { uuid: '6b04' },
+      rhythm: { uuid: '6b05' },
+      frequency: { uuid: '6b06' },
     },
   },
   led: {
     uuid: '6c00',
     characteristics: {
-      led: {uuid: '6c01'},
+      led: { uuid: '6c01' },
     },
   },
 })
@@ -189,6 +189,7 @@ angular.module('experience.services.experience', [
     return isConnected().then(function(connected) {
       if (!connected) throw 'experience not connected';
       $log.debug('starting measurement');
+      lastScore = 0;
 
       var zeroScore = new Float32Array([0]);
 

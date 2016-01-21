@@ -22,7 +22,7 @@ var LessonController = function($scope, storeService, diffGraphInterval, msToTim
 
       // fill labels
       $scope.chartLabels = [];
-      for (var i = 0; i <= data.length; i++) {
+      for (var i = 0; i < data.length + 1; i++) { // add one label after data
         $scope.chartLabels.push(msToLabel(i * diffGraphInterval * 1e3)); // in milliseconds
       }
 

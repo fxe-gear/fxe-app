@@ -7,16 +7,26 @@ angular.module('experience.services.store', [
 
 .service('storeService', function($cordovaSQLite, $localStorage, $q, $log) {
 
-  $localStorage.$default({deviceID: null});
-  $localStorage.$default({pairedID: null});
-  $localStorage.$default({ignoredIDs: []});
+  $localStorage.$default({
+    deviceID: null,
+  });
+  $localStorage.$default({
+    pairedID: null,
+  });
+  $localStorage.$default({
+    ignoredIDs: [],
+  });
 
   var db;
 
   var getDB = function() {
     if (!db) {
       if (window.sqlitePlugin) { // native sqlite DB
-        db = $cordovaSQLite.openDB({name: 'store.sqlite', bgType: true, version: '0.2.0'});
+        db = $cordovaSQLite.openDB({
+          name: 'store.sqlite',
+          bgType: true,
+          version: '0.2.0',
+        });
       } else { // fallback to websql
         db = window.openDatabase('store', '0.2.0', null, 2 * 1024 * 1024);
       }
@@ -113,11 +123,23 @@ angular.module('experience.services.store', [
     var q = $q.defer();
 
     // select lesson data grouped to N-seconds intervals
-    var query = 'SELECT SUM(score) AS score, (time - start_time) AS relativeTime, ((time - start_time) / ?) AS diffGroup '
-              + 'FROM score WHERE start_time = ? GROUP BY diffGroup ORDER BY relativeTime ASC';
+    var query = 'SELECT SUM(score) AS score, (time - start_time) AS relativeTime, ((time - start_time) / ?) AS diffGroup ' + 'FROM score WHERE start_time = ? GROUP BY diffGroup ORDER BY relativeTime ASC';
     $cordovaSQLite.execute(getDB(), query, [interval * 1000, startTime]).then(function(res) {
+
       var ret = [];
-      for (var i = 0; i < res.rows.length; i++) ret.push(res.rows.item(i).score);
+      var prevDiffGroup = -1;
+
+      for (var i = 0; i < res.rows.length; i++) {
+        var row = res.rows.item(i);
+        for (var j = prevDiffGroup + 1; j < row.diffGroup; j++) {
+          // we have to add missing diffGroups with zeroes! (with no score)
+          ret.push(0);
+        }
+
+        ret.push(row.score);
+        prevDiffGroup = row.diffGroup;
+      }
+
       q.resolve(ret);
     }).catch(function(err) {
       $log.error('getting lesson diff data failed');
