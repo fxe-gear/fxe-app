@@ -143,7 +143,6 @@ angular.module('experience.services.store', [
       q.resolve(ret);
     }).catch(function(err) {
       $log.error('getting lesson diff data failed');
-      console.log(err);
       q.reject(err);
     });
 

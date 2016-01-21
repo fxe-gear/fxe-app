@@ -18,18 +18,24 @@ var SettingsController = function($scope, $state, $localStorage, $cordovaSQLite,
   $scope.websocket = $localStorage.websocket;
 
   $scope.toggleSubscribeExtremes = function() {
+    var action;
+
     if (!$scope.extremesSubscribed) {
-      experienceService.subscribeExtremes($scope.websocket.ip, $scope.websocket.port);
+      action = experienceService.subscribeExtremes($scope.websocket.ip, $scope.websocket.port);
     } else {
-      experienceService.unsubscribeExtremes();
+      action = experienceService.unsubscribeExtremes();
     }
 
-    $scope.extremesSubscribed = !$scope.extremesSubscribed;
+    action.then(function() {
+      $scope.extremesSubscribed = !$scope.extremesSubscribed;
+    });
   };
 
   $scope.clearAll = function() {
     $localStorage.$reset();
-    $cordovaSQLite.deleteDB({name: 'store.sqlite'});
+    $cordovaSQLite.deleteDB({
+      name: 'store.sqlite',
+    });
     experienceService.isConnected().then(function(connected) {
       if (connected) experienceService.disconnect();
     }).then(function() {

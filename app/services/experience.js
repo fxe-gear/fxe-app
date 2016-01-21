@@ -10,17 +10,29 @@ angular.module('experience.services.experience', [
   experience: {
     uuid: '6b00',
     characteristics: {
-      extreme: { uuid: '6b01' },
-      control: { uuid: '6bff' },
-      amplitude: { uuid: '6b04' },
-      rhythm: { uuid: '6b05' },
-      frequency: { uuid: '6b06' },
+      extreme: {
+        uuid: '6b01',
+      },
+      control: {
+        uuid: '6bff',
+      },
+      amplitude: {
+        uuid: '6b04',
+      },
+      rhythm: {
+        uuid: '6b05',
+      },
+      frequency: {
+        uuid: '6b06',
+      },
     },
   },
   led: {
     uuid: '6c00',
     characteristics: {
-      led: { uuid: '6c01' },
+      led: {
+        uuid: '6c01',
+      },
     },
   },
 })
@@ -50,7 +62,7 @@ angular.module('experience.services.experience', [
       return q.promise;
     }
 
-    $cordovaBLE.isEnabled().then(function() {  // already enabled
+    $cordovaBLE.isEnabled().then(function() { // already enabled
       q.resolve();
     }).catch(function(error) { // not enabled
       if (typeof ble.enable === 'undefined') {
@@ -82,7 +94,9 @@ angular.module('experience.services.experience', [
       if (storeService.isPaired()) { // paired
         if (storeService.getPairedID() == deviceID) { // found paired device
           $log.info('found paired ' + deviceID);
-          stopScan().then(function() { q.resolve(deviceID); });
+          stopScan().then(function() {
+            q.resolve(deviceID);
+          });
         } else { // found another (not paired) device
           $log.info('found not paired ' + deviceID);
         }
@@ -90,7 +104,9 @@ angular.module('experience.services.experience', [
       } else { // not paired yet
         if (!storeService.isIgnored(deviceID)) { // found new (not ignored) device
           $log.info('found ' + deviceID);
-          stopScan().then(function() { q.resolve(deviceID); });
+          stopScan().then(function() {
+            q.resolve(deviceID);
+          });
         } else { // found ignored
           $log.info('found ignored ' + deviceID);
           q.notify(deviceID);
@@ -203,8 +219,8 @@ angular.module('experience.services.experience', [
       // delete previous scores
       score.amplitude = 0;
       return $cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid, zeroScore.buffer)
-      .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
-      .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
+        .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid, zeroScore.buffer))
+        .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid, zeroScore.buffer))
 
       // register callbacks
       .then(function() {
@@ -215,16 +231,16 @@ angular.module('experience.services.experience', [
 
       // start measurement
       .then($cordovaBLE.write(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, new Uint8Array([0x1]).buffer))
-      .then(function() {
-        startTime = Date.now();
-        stopTime = null;
-        storeService.addLesson(startTime);
-        $log.info('measurement started');
-      })
-      .catch(function(error) {
-        $log.error('starting measurement failed');
-        throw error;
-      });
+        .then(function() {
+          startTime = Date.now();
+          stopTime = null;
+          storeService.addLesson(startTime);
+          $log.info('measurement started');
+        })
+        .catch(function(error) {
+          $log.error('starting measurement failed');
+          throw error;
+        });
     });
   };
 
@@ -238,8 +254,8 @@ angular.module('experience.services.experience', [
 
       // unregister callbacks
       .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.amplitude.uuid))
-      .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid))
-      .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
+        .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.rhythm.uuid))
+        .then($cordovaBLE.stopNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.frequency.uuid))
 
       .then(function() {
         stopTime = Date.now();
@@ -261,12 +277,12 @@ angular.module('experience.services.experience', [
 
       var data = new Uint8Array([cmd]).buffer;
       return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.control.uuid, data)
-      .then(function() {
-        $log.info('command ' + cmd + ' sent');
-      }).catch(function(error) {
-        $log.error('sending command failed');
-        throw error;
-      });
+        .then(function() {
+          $log.info('command ' + cmd + ' sent');
+        }).catch(function(error) {
+          $log.error('sending command failed');
+          throw error;
+        });
     });
   };
 
@@ -280,6 +296,7 @@ angular.module('experience.services.experience', [
       $log.debug('subscribing extremes and streaming to ' + address);
 
       websocket = $websocket(address);
+
       websocket.onOpen(function() {
         $cordovaBLE.startNotification(storeService.getDeviceID(), ps.experience.uuid, ps.experience.characteristics.extreme.uuid, function(data) {
           var dataView = new DataView(data);
@@ -296,9 +313,6 @@ angular.module('experience.services.experience', [
         q.resolve();
       });
 
-      websocket.onError(function(err) {
-        q.reject(err);
-      });
     });
 
     return q.promise;
