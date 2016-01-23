@@ -9,9 +9,22 @@ var module = angular.module('experience.controllers.lesson', [
 // interval used in diff graph (in seconds)
 module.constant('diffGraphInterval', 90);
 
-var LessonController = function($scope, storeService, diffGraphInterval, msToTimeSpanFilter, dateFilter, lesson) {
+var LessonController = function($scope, $cordovaSocialSharing, $ionicPopup, $cordovaToast, storeService, diffGraphInterval, msToTimeSpanFilter, dateFilter, lesson) {
 
-  $scope.lesson = lesson;
+  var share = function() {
+    // TODO Facebook for Android not working! http://ngcordova.com/docs/plugins/socialSharing/
+    // share image instead
+    var message = 'My jumping score in last lesson was ' + $scope.lesson.score.toFixed(0) + '!';
+    $cordovaSocialSharing.share(message).catch(function(error) {
+      // sharing result is nonsense boolean (see https://goo.gl/XYpqiQ) so we only catch errors
+      $ionicPopup.alert({
+        title: 'Sharing failed.',
+        template: 'Please try it again.',
+        okType: 'button-assertive',
+      });
+      throw error;
+    });
+  };
 
   var msToLabel = function(val) {
     return dateFilter(msToTimeSpanFilter(val), 'HH:mm:ss');
@@ -23,11 +36,13 @@ var LessonController = function($scope, storeService, diffGraphInterval, msToTim
       // fill labels
       $scope.chartLabels = [];
       for (var i = 0; i < data.length + 1; i++) { // add one label after data
-        $scope.chartLabels.push(msToLabel(i * diffGraphInterval * 1e3)); // in milliseconds
+        $scope.chartLabels.push(msToLabel(i *  diffGraphInterval * 1e3)); // in milliseconds
       }
 
       // fill score
-      $scope.chartData = [[0]];
+      $scope.chartData = [
+        [0],
+      ];
       for (var i = 0; i < data.length; i++) {
         $scope.chartData[0].push(data[i]);
       }
@@ -35,6 +50,8 @@ var LessonController = function($scope, storeService, diffGraphInterval, msToTim
     });
   };
 
+  $scope.share = share;
+  $scope.lesson = lesson;
   $scope.$on('$ionicView.beforeEnter', function() {
     prepareChartData();
   });
