@@ -16,6 +16,7 @@ angular.module('experience', [
   'experience.controllers.pairing',
   'experience.controllers.scanning',
   'experience.controllers.settings',
+  'experience.controllers.developer',
   'experience.controllers.welcome',
 
   'experience.routes',

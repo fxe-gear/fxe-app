@@ -1,11 +1,7 @@
 'use strict';
 
-var module = angular.module('experience.controllers.login', [
-  'experience.services.user',
-]);
+var module = angular.module('experience.controllers.login', []);
 
-var LoginController = function($scope, $state, $ionicPopup, userService) {
-  $scope.user = userService.model;
-};
+var LoginController = function() {};
 
 module.controller('LoginController', LoginController);

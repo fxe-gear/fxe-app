@@ -50,6 +50,22 @@ angular.module('experience.routes', [])
     },
   });
 
+  $stateProvider.state('main.history', {
+    url: '/history',
+    cache: false,
+    views: {
+      me: {
+        templateUrl: 'templates/main/me/history.html',
+        controller: 'HistoryController',
+        resolve: {
+          lessons: function($stateParams, storeService) {
+            return storeService.getAllLessons();
+          },
+        },
+      },
+    },
+  });
+
   $stateProvider.state('main.lesson', {
     url: '/lesson?startTime',
     views: {
@@ -65,38 +81,32 @@ angular.module('experience.routes', [])
     },
   });
 
-  $stateProvider.state('main.history', {
-    url: '/history',
-    views: {
-      me: {
-        templateUrl: 'templates/main/me/history.html',
-        controller: 'HistoryController',
-        resolve: {
-          lessons: function($stateParams, storeService) {
-            return storeService.getAllLessons();
-          },
-        },
-      },
-    },
-  });
-
   $stateProvider.state('main.settings', {
     url: '/settings',
     views: {
       settings: {
-        templateUrl: 'templates/main/settings.html',
+        templateUrl: 'templates/main/settings/settings.html',
         controller: 'SettingsController',
       },
     },
   });
 
+  $stateProvider.state('main.developer', {
+    url: '/settings/developer',
+    views: {
+      settings: {
+        templateUrl: 'templates/main/settings/developer.html',
+        controller: 'DeveloperController',
+      },
+    },
+  });
+
   $urlRouterProvider.otherwise(function($injector, $location) {
-    var userService = $injector.get('userService');
     var storeService = $injector.get('storeService');
 
     if (storeService.isPaired())
       return '/main/jumping';
-    if (!storeService.isPaired() && userService.isLoggedIn())
+    if (!storeService.isPaired() && storeService.isLoggedIn())
       return '/scanning';
     else
       return '/welcome';

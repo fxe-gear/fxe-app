@@ -5,7 +5,6 @@ var module = angular.module('experience.controllers.welcome', [
 ]);
 
 var WelcomeController = function($scope, $state, $ionicPopup, userService) {
-  $scope.user = userService.model;
 
   $scope.loginFacebook = function() {
     userService.loginFacebook()

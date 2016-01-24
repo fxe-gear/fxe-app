@@ -2,42 +2,28 @@
 
 angular.module('experience.services.user', [
   'ngCordova',
-  'ngStorage',
+  'experience.services.store',
 ])
 
-.service('userService', function($rootScope, $localStorage, $http, $log, $cordovaFacebook, $q) {
+.service('userService', function($rootScope, $http, $log, $cordovaFacebook, storeService, $q) {
 
-  // TODO use storeService
-  $localStorage.$default({
-    userService: {
-      provider: '',
-      accessToken: '',
-      expiresIn: '',
-
-      email: '',
-      password: '',
-      name: '',
-      weight: 0,
-      birthday: '',
-      gender: '',
-      units: '',
-    },
-  });
-  var model = $localStorage.userService;
+  var model = storeService.getUser();
 
   var loginFacebook = function() {
     return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
-    .then(function(response) {
-      model.provider = 'facebook';
-      model.accessToken = response.authResponse.accessToken;
-      model.expiresIn = response.authResponse.expiresIn;
-      $log.info('logged in using Facebook');
-    });
+      .then(function(response) {
+        model.provider = 'facebook';
+        model.accessToken = response.authResponse.accessToken;
+        model.expiresIn = response.authResponse.expiresIn;
+        $log.info('logged in using Facebook');
+      });
   };
 
   var loginGoogle = function() {
     var q = $q.defer();
-    window.plugins.googleplus.login({offline: true}, function(response) {
+    window.plugins.googleplus.login({
+      offline: true,
+    }, function(response) {
       model.provider = 'google';
       model.accessToken = response.oauthToken;
       model.expiresIn = 0;
@@ -95,13 +81,7 @@ angular.module('experience.services.user', [
     });
   };
 
-  var isLoggedIn = function() {
-    return model.provider != '';
-  };
-
   // service public API
-  this.model = model;
-  this.isLoggedIn = isLoggedIn;
   this.loginFacebook = loginFacebook;
   this.loginGoogle = loginGoogle;
   this.loadFromFacebook = loadFromFacebook;

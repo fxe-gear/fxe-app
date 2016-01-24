@@ -16,6 +16,21 @@ angular.module('experience.services.store', [
   $localStorage.$default({
     ignoredIDs: [],
   });
+  $localStorage.$default({
+    user: {
+      provider: '',
+      accessToken: '',
+      expiresIn: '',
+
+      email: '',
+      password: '',
+      name: '',
+      weight: 0,
+      birthday: '',
+      gender: '',
+      units: '',
+    },
+  });
 
   var db;
 
@@ -183,6 +198,14 @@ angular.module('experience.services.store', [
     $localStorage.ignoredIDs = [];
   };
 
+  var getUser = function() {
+    return $localStorage.user;
+  };
+
+  var isLoggedIn = function() {
+    return getUser().provider != '';
+  };
+
   // sqlite related service API
   this.prepareDB = prepareDB;
   this.addLesson = addLesson;
@@ -202,5 +225,7 @@ angular.module('experience.services.store', [
   this.ignore = ignore;
   this.isIgnored = isIgnored;
   this.clearIgnored = clearIgnored;
+  this.getUser = getUser;
+  this.isLoggedIn = isLoggedIn;
 
 });
