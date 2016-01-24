@@ -338,6 +338,12 @@ angular.module('experience.services.experience', [
     });
   };
 
+  var unpair = function() {
+    storeService.setPairedID(null);
+    $log.info('device ' + storeService.getDeviceID() + ' unpaired');
+    return $q.resolve();
+  };
+
   var isConnected = function() {
     var q = $q.defer();
     var deviceID = storeService.getDeviceID();
@@ -392,6 +398,7 @@ angular.module('experience.services.experience', [
   this.unsubscribeExtremes = unsubscribeExtremes;
   this.getElapsedTime = getElapsedTime;
   this.pair = pair;
+  this.unpair = unpair;
   this.isConnected = isConnected;
   this.getScore = getScore;
   this.getCumulativeScore = getCumulativeScore;
