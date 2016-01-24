@@ -19,6 +19,8 @@ angular.module('experience', [
   'experience.controllers.developer',
   'experience.controllers.welcome',
 
+  'experience.directives.account',
+
   'experience.routes',
 ])
 

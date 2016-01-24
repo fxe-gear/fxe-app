@@ -43,9 +43,7 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
     $cordovaSQLite.deleteDB({
       name: 'store.sqlite',
     });
-    experienceService.isConnected().then(function(connected) {
-      if (connected) experienceService.disconnect();
-    }).then(function() {
+    experienceService.disconnect().then(function() {
       $state.go('welcome');
     });
   };

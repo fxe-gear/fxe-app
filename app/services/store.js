@@ -18,17 +18,17 @@ angular.module('experience.services.store', [
   });
   $localStorage.$default({
     user: {
-      provider: '',
-      accessToken: '',
-      expiresIn: '',
+      provider: null,
+      accessToken: null,
+      expiresIn: null,
 
-      email: '',
-      password: '',
-      name: '',
-      weight: 0,
-      birthday: '',
-      gender: '',
-      units: '',
+      email: null,
+      password: null,
+      name: null,
+      weight: null,
+      age: null,
+      gender: null,
+      units: null,
     },
   });
 
@@ -203,7 +203,7 @@ angular.module('experience.services.store', [
   };
 
   var isLoggedIn = function() {
-    return getUser().provider != '';
+    return getUser().provider != null;
   };
 
   // sqlite related service API

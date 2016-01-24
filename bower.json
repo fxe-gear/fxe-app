@@ -12,7 +12,8 @@
     "angular": "~1.4.8",
     "stacktrace-js": "~1.0.1",
     "ngCordova": "git@github.com:tomasbedrich/ng-cordova.git#b7fc33404c97893c4186a4f6dec4394ce8059c8e",
-    "angular-websocket": "~1.0.14"
+    "angular-websocket": "~1.0.14",
+    "angular-messages": "~1.4.9"
   },
   "overrides": {
     "stacktrace-js": {

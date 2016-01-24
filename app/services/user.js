@@ -9,6 +9,10 @@ angular.module('experience.services.user', [
 
   var model = storeService.getUser();
 
+  var getAge = function(ISOdate) {
+    return ((Date.now() - Date.parse(ISOdate)) / (1000 * 60 * 60 * 24 * 365)).toFixed(0);
+  };
+
   var loginFacebook = function() {
     return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
       .then(function(response) {
@@ -32,7 +36,7 @@ angular.module('experience.services.user', [
       model.name = response.displayName;
 
       if (response.gender) model.gender = response.gender; // Android only
-      if (response.birthday) model.birthday = response.birthday; // Android only
+      if (response.birthday) model.age = getAge(response.birthday); // Android only
 
       $log.info('logged in using Google');
       q.resolve(response);
@@ -53,7 +57,7 @@ angular.module('experience.services.user', [
       model.email = response.data.email;
       model.name = response.data.name;
       model.gender = response.data.gender;
-      model.birthday = response.data.birthday;
+      model.age = getAge(response.data.birthday);
       model.units = response.data.locale == 'en' ? 'imperial' : 'metric';
       $log.info('user data loaded from Facebook');
     }).catch(function(error) {
