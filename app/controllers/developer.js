@@ -33,13 +33,18 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
   };
 
   $scope.unpair = function() {
-    experienceService.unpair().then(experienceService.disconnect).then(function() {
-      $state.go('scanning');
-    });
+    experienceService.unpair()
+      .then(experienceService.isConnected).then(function(connected) {
+        if (connected) return experienceService.disconnect();
+      }).then(function() {
+        $state.go('scanning');
+      });
   };
 
   $scope.clearAll = function() {
-    experienceService.disconnect().then(function() {
+    experienceService.isConnected().then(function(connected) {
+      if (connected) return experienceService.disconnect();
+    }).then(function() {
       $localStorage.$reset();
       $cordovaSQLite.deleteDB({
         name: 'store.sqlite',

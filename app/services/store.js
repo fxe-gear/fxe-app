@@ -5,7 +5,22 @@ angular.module('experience.services.store', [
   'ngStorage',
 ])
 
-.service('storeService', function($cordovaSQLite, $localStorage, $q, $log) {
+.constant('scoreTypes', {
+  amplitude: 1,
+  rhythm: 2,
+  frequency: 3,
+})
+
+.service('storeService', function($cordovaSQLite, $localStorage, $q, $log, scoreTypes) {
+
+  // prepare default (empty) lesson object
+  var emptyLesson = {
+    startTime: null,
+    score: {},
+  };
+  angular.forEach(scoreTypes, function(value, key) {
+    emptyLesson.score[key] = 0;
+  });
 
   $localStorage.$default({
     deviceID: null,
@@ -30,6 +45,9 @@ angular.module('experience.services.store', [
       gender: null,
       units: null,
     },
+  });
+  $localStorage.$default({
+    currentLesson: emptyLesson,
   });
 
   var db;
@@ -61,27 +79,42 @@ angular.module('experience.services.store', [
     $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
   };
 
-  var addLesson = function(startTime) {
+  var startLesson = function() {
+    var startTime = Date.now();
     var query = 'INSERT INTO lesson (start_time) VALUES (?)';
-    return $cordovaSQLite.execute(getDB(), query, [startTime]);
+    return $cordovaSQLite.execute(getDB(), query, [startTime]).then(function() {
+      $localStorage.currentLesson.startTime = startTime;
+    });
   };
 
-  var addScore = function(startTime, time, score, type) {
+  var addScore = function(score, type) {
+    var startTime = $localStorage.currentLesson.startTime;
+    var time = Date.now();
     var query = 'INSERT INTO score (start_time, time, score, type) VALUES (?, ?, ?, ?)';
-    return $cordovaSQLite.execute(getDB(), query, [startTime, time, score, type]);
+    return $cordovaSQLite.execute(getDB(), query, [startTime, time, score, type]).then(function() {
+      $localStorage.currentLesson.score[type] = score;
+    });
   };
 
-  var setLessonStopTime = function(startTime, endTime) {
+  var endLesson = function() {
+    var endTime = Date.now();
+    var startTime = $localStorage.currentLesson.startTime;
     var query = 'UPDATE lesson SET end_time = ? WHERE start_time = ?';
-    return $cordovaSQLite.execute(getDB(), query, [endTime, startTime]);
+    return $cordovaSQLite.execute(getDB(), query, [endTime, startTime]).then(function() {
+      angular.copy(emptyLesson, $localStorage.currentLesson);
+    });
+  };
+
+  var getCurrentLesson = function() {
+    return $localStorage.currentLesson;
   };
 
   var getLastLesson = function() {
-    return getLesson(0);
+    return getLesson(-1);
   };
 
   var getAllLessons = function() {
-    return getLesson(-1);
+    return getLesson(Infinity);
   };
 
   var getLesson = function(startTime) {
@@ -91,22 +124,22 @@ angular.module('experience.services.store', [
       'start_time AS startTime, ' +
       'end_time AS endTime, ' +
       '(end_time - start_time) AS duration, ' +
-      'COALESCE((SELECT SUM(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time), 0) AS score ' +
+      'COALESCE((SELECT MAX(score) FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time), 0) AS score ' +
       'FROM lesson';
     var callback;
     var inject = [];
 
-    if (startTime == 0) { // last lesson
+    if (startTime == -1) { // last lesson
       query += ' ORDER BY start_time DESC LIMIT 1';
       callback = function(res) {
         if (res.rows.length > 0) {
           q.resolve(res.rows.item(0));
         } else {
-          q.reject('no last lesson found');
+          q.reject('no current/last lesson found');
         }
       };
 
-    } else if (startTime == -1) { // all lessons
+    } else if (startTime == Infinity) { // all lessons
       query += ' ORDER BY start_time DESC';
       callback = function(res) {
         var ret = [];
@@ -138,21 +171,26 @@ angular.module('experience.services.store', [
     var q = $q.defer();
 
     // select lesson data grouped to N-seconds intervals
-    var query = 'SELECT SUM(score) AS score, (time - start_time) AS relativeTime, ((time - start_time) / ?) AS diffGroup ' + 'FROM score WHERE start_time = ? GROUP BY diffGroup ORDER BY relativeTime ASC';
+    var query = 'SELECT ' +
+      'MAX(score) AS score, ((time - start_time) / ?) AS diffGroup ' +
+      'FROM score WHERE start_time = ? GROUP BY diffGroup ORDER BY diffGroup ASC';
     $cordovaSQLite.execute(getDB(), query, [interval * 1000, startTime]).then(function(res) {
 
       var ret = [];
       var prevDiffGroup = -1;
+      var prevDiffGroupScore = 0;
 
       for (var i = 0; i < res.rows.length; i++) {
         var row = res.rows.item(i);
+
+        // we have to add missing diffGroups with zeroes! (with no score)
         for (var j = prevDiffGroup + 1; j < row.diffGroup; j++) {
-          // we have to add missing diffGroups with zeroes! (with no score)
           ret.push(0);
         }
 
-        ret.push(row.score);
+        ret.push(row.score - prevDiffGroupScore);
         prevDiffGroup = row.diffGroup;
+        prevDiffGroupScore = row.score;
       }
 
       q.resolve(ret);
@@ -208,9 +246,10 @@ angular.module('experience.services.store', [
 
   // sqlite related service API
   this.prepareDB = prepareDB;
-  this.addLesson = addLesson;
+  this.startLesson = startLesson;
   this.addScore = addScore;
-  this.setLessonStopTime = setLessonStopTime;
+  this.endLesson = endLesson;
+  this.getCurrentLesson = getCurrentLesson;
   this.getLastLesson = getLastLesson;
   this.getAllLessons = getAllLessons;
   this.getLesson = getLesson;

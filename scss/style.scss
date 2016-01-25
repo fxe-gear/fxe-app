@@ -181,9 +181,9 @@ form {
     margin-bottom: .5em;
   }
   .score {
-    transition: transform .2s ease-out;
-    &[class*="-add"] {
-        transform: scale(1.1);
+    transition: transform .1s ease-out;
+    &.fresh {
+        transform: scale(1.4);
     }
   }
 }

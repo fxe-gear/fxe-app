@@ -3,9 +3,9 @@
 
     <div class="info">
       <div class="label">Your score:</div>
-      <div class="score">{{ ::lesson.score.toFixed(0) }}</div>
+      <div class="score">{{ ::lesson.score | number:0 }}</div>
       <div class="label">Time:</div>
-      <div class="time">{{ ::lesson.duration | msToTimeSpan | date:'HH:mm:ss' }}</div>
+      <div class="time">{{ ::lesson.duration | msToTimeSpan }}</div>
     </div>
 
     <canvas class="chart chart-line" chart-data="chartData" chart-labels="chartLabels" chart-options="

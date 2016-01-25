@@ -2,9 +2,15 @@
 
 angular.module('experience.services.util', [])
 
-.filter('msToTimeSpan', function() {
+.filter('msToDate', function() {
   return function(ms) {
     return new Date(1970, 0, 1).setSeconds(0, ms);
+  };
+})
+
+.filter('msToTimeSpan', function(msToDateFilter, dateFilter) {
+  return function(val) {
+    return dateFilter(msToDateFilter(val), 'HH:mm:ss');
   };
 })
 
