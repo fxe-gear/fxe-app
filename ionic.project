@@ -6,10 +6,7 @@
     "watch"
   ],
   "watchPatterns": [
-    "app/**/*",
-    "www/**/*",
-    "scss/**/*",
-    "!www/lib/**/*"
+    "www/**/*"
   ],
   "browsers": [
     {

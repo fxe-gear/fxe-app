@@ -15,6 +15,7 @@ var templateCache = require('gulp-angular-templatecache');
 var appPaths = {
   styles: ['./scss/**/*.scss', './scss/**/*.css'],
   scripts: ['./app/**/*.js', './app/*.js'],
+  templates: 'templates/**/*.html',
 };
 
 var minifyCssOptions = {
@@ -27,6 +28,11 @@ var injectSrcOptions = {
 
 var injectOptions = {
   relative: true,
+};
+
+templateCacheOptions = {
+  standalone: true,
+  module: 'experience.templates',
 };
 
 var bowerCssFilter = [
@@ -54,13 +60,7 @@ gulp.task('styles', function(done) {
     .pipe(concat('style.min.css'))
     .pipe(gulp.dest('./www/css/'));
 
-  // inject
-  var libStream = gulp.src('./www/lib/**/*.css', injectSrcOptions);
-  var appStream = gulp.src('./www/css/**/*.css', injectSrcOptions);
-  gulp.src('./www/index.html')
-    .pipe(inject(series(libStream, appStream), injectOptions))
-    .pipe(gulp.dest('./www'));
-
+  gulp.start('inject');
   done();
 });
 
@@ -76,28 +76,16 @@ gulp.task('scripts', function(done) {
     /*.pipe(concat('app.js'))*/
     .pipe(gulp.dest('./www/js'));
 
-  // inject into index.html
-  var libStream = gulp.src([
-    './www/lib/angular.js',
-    './www/lib/angular*.js',
-    './www/lib/ionic.js',
-    './www/lib/ionic*.js',
-    './www/lib/ng*.js',
-    './www/lib/stacktrace.min.js',
-    './www/lib/stack*.js',
-    './www/lib/Chart.js',
-    './www/lib/*.js',
-  ], injectSrcOptions);
-  var appStream = gulp.src([
-    './www/js/services/*.js',
-    './www/js/controllers/*.js',
-    './www/js/directives/*.js',
-    './www/js/**/*.js',
-  ], injectSrcOptions);
-  gulp.src('./www/index.html')
-    .pipe(inject(series(libStream, appStream), injectOptions))
-    .pipe(gulp.dest('./www'));
+  gulp.start('inject');
+  done();
+});
 
+gulp.task('templates', function(done) {
+  gulp.src(appPaths.templates)
+    .pipe(templateCache(templateCacheOptions))
+    .pipe(gulp.dest('./www/js'));
+
+  gulp.start('inject');
   done();
 });
 
@@ -112,10 +100,40 @@ gulp.task('tag-git-head', function(done) {
   done();
 });
 
-gulp.task('watch', function(done) {
-  gulp.watch(appPaths.styles, ['styles']);
-  gulp.watch(appPaths.scripts, ['scripts']);
+gulp.task('inject', function(done) {
+  var libStream = gulp.src([
+    './www/lib/Chart.js',
+    './www/lib/angular.js',
+    './www/lib/angular*.js',
+    './www/lib/ionic.js',
+    './www/lib/ionic*.js',
+    './www/lib/ng*.js',
+    './www/lib/stacktrace.min.js',
+    './www/lib/stack*.js',
+    './www/lib/*.js',
+    './www/lib/**/*.css', // + CSS
+  ], injectSrcOptions);
+  var appStream = gulp.src([
+    './www/js/templates.js',
+    './www/js/services/*.js',
+    './www/js/controllers/*.js',
+    './www/js/directives/*.js',
+    './www/js/**/*.js',
+    './www/css/**/*.css', // + CSS
+  ], injectSrcOptions);
+
+  gulp.src('./www/index.html')
+    .pipe(inject(series(libStream, appStream), injectOptions))
+    .pipe(gulp.dest('./www'));
+
   done();
 });
 
-gulp.task('default', ['scripts', 'styles']);
+gulp.task('watch', function(done) {
+  gulp.watch(appPaths.styles, ['styles']);
+  gulp.watch(appPaths.scripts, ['scripts']);
+  gulp.watch(appPaths.templates, ['templates']);
+  done();
+});
+
+gulp.task('default', ['scripts', 'styles', 'templates', 'inject']);

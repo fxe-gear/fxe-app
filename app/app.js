@@ -22,6 +22,7 @@ angular.module('experience', [
   'experience.directives.account',
 
   'experience.routes',
+  'experience.templates',
 ])
 
 .run(function($ionicConfig, $ionicPlatform, $rootScope, storeService, experienceService) {

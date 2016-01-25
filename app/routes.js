@@ -6,45 +6,45 @@ angular.module('experience.routes', [])
 
   $stateProvider.state('welcome', {
     url: '/welcome',
-    templateUrl: 'templates/welcome.html',
+    templateUrl: 'welcome.html',
     controller: 'WelcomeController',
   });
 
   $stateProvider.state('create-account', {
     url: '/create-account',
-    templateUrl: 'templates/create-account.html',
+    templateUrl: 'create-account.html',
     controller: 'CreateAccountController',
   });
 
   $stateProvider.state('login', {
     url: '/login',
-    templateUrl: 'templates/login.html',
+    templateUrl: 'login.html',
     controller: 'LoginController',
   });
 
   $stateProvider.state('scanning', {
     url: '/scanning',
-    templateUrl: 'templates/scanning.html',
+    templateUrl: 'scanning.html',
     controller: 'ScanningController',
   });
 
   $stateProvider.state('pairing', {
     url: '/pairing',
-    templateUrl: 'templates/pairing.html',
+    templateUrl: 'pairing.html',
     controller: 'PairingController',
   });
 
   $stateProvider.state('main', {
     url: '/main',
     abstract: true,
-    templateUrl: 'templates/main/main.html',
+    templateUrl: 'main/main.html',
   });
 
   $stateProvider.state('main.jumping', {
     url: '/jumping',
     views: {
       jump: {
-        templateUrl: 'templates/main/jumping.html',
+        templateUrl: 'main/jumping.html',
         controller: 'JumpingController',
       },
     },
@@ -54,7 +54,7 @@ angular.module('experience.routes', [])
     url: '/history',
     views: {
       me: {
-        templateUrl: 'templates/main/me/history.html',
+        templateUrl: 'main/me/history.html',
         controller: 'HistoryController',
       },
     },
@@ -64,7 +64,7 @@ angular.module('experience.routes', [])
     url: '/lesson?startTime',
     views: {
       me: {
-        templateUrl: 'templates/main/me/lesson.html',
+        templateUrl: 'main/me/lesson.html',
         controller: 'LessonController',
         resolve: {
           lesson: function($stateParams, storeService) {
@@ -79,7 +79,7 @@ angular.module('experience.routes', [])
     url: '/settings',
     views: {
       settings: {
-        templateUrl: 'templates/main/settings/settings.html',
+        templateUrl: 'main/settings/settings.html',
         controller: 'SettingsController',
       },
     },
@@ -89,7 +89,7 @@ angular.module('experience.routes', [])
     url: '/settings/developer',
     views: {
       settings: {
-        templateUrl: 'templates/main/settings/developer.html',
+        templateUrl: 'main/settings/developer.html',
         controller: 'DeveloperController',
       },
     },

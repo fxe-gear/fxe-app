@@ -10,7 +10,7 @@ angular.module('experience.directives.account', [
     restrict: 'E',
     transclude: true,
     replace: false,
-    templateUrl: 'templates/directives/account.html',
+    templateUrl: 'directives/account.html',
     scope: {
       title: '@',
       user: '=',
