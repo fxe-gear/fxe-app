@@ -52,16 +52,10 @@ angular.module('experience.routes', [])
 
   $stateProvider.state('main.history', {
     url: '/history',
-    cache: false,
     views: {
       me: {
         templateUrl: 'templates/main/me/history.html',
         controller: 'HistoryController',
-        resolve: {
-          lessons: function($stateParams, storeService) {
-            return storeService.getAllLessons();
-          },
-        },
       },
     },
   });

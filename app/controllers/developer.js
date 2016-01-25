@@ -39,11 +39,11 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
   };
 
   $scope.clearAll = function() {
-    $localStorage.$reset();
-    $cordovaSQLite.deleteDB({
-      name: 'store.sqlite',
-    });
     experienceService.disconnect().then(function() {
+      $localStorage.$reset();
+      $cordovaSQLite.deleteDB({
+        name: 'store.sqlite',
+      });
       $state.go('welcome');
     });
   };
