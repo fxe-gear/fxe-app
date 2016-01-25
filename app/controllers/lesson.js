@@ -7,7 +7,7 @@ var module = angular.module('experience.controllers.lesson', [
 ]);
 
 // interval used in diff graph (in seconds)
-module.constant('diffGraphInterval', 90);
+module.constant('diffGraphInterval', 180);
 
 var LessonController = function($scope, $cordovaSocialSharing, $ionicPopup, $cordovaToast, storeService, diffGraphInterval, msToTimeSpanFilter, dateFilter, lesson) {
 
