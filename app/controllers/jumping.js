@@ -43,7 +43,7 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicHistory, 
 
   $scope.getDuration = function() {
     // return elapsed time from start of measurement (in milliseconds)
-    return $scope.lesson.startTime != null ? Date.now() - $scope.lesson.startTime : 0;
+    return $scope.lesson ? $scope.lesson.startTime != null ? Date.now() - $scope.lesson.startTime : 0 : 0;
   };
 
   var reconnect = function() {

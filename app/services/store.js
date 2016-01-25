@@ -58,10 +58,10 @@ angular.module('experience.services.store', [
         db = $cordovaSQLite.openDB({
           name: 'store.sqlite',
           bgType: true,
-          version: '0.2.0',
+          version: '0.3.0',
         });
       } else { // fallback to websql
-        db = window.openDatabase('store', '0.2.0', null, 2 * 1024 * 1024);
+        db = window.openDatabase('store', '0.3.0', null, 2 * 1024 * 1024);
       }
 
       createSchema(db);
