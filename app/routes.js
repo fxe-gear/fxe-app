@@ -95,6 +95,16 @@ angular.module('experience.routes', [])
     },
   });
 
+  $stateProvider.state('main.about', {
+    url: '/settings/about',
+    views: {
+      settings: {
+        templateUrl: 'main/settings/about.html',
+        controller: 'AboutController',
+      },
+    },
+  });
+
   $urlRouterProvider.otherwise(function($injector, $location) {
     var storeService = $injector.get('storeService');
 

@@ -90,12 +90,12 @@ gulp.task('templates', function(done) {
 });
 
 gulp.task('tag-git-head', function(done) {
-  gulp.src('./www/index.html')
+  gulp.src('./www/js/templates.js')
     .pipe(replace(
-      new RegExp('<!-- gulp-replace:git-head-sha:\\w+ -->'),
-      '<!-- gulp-replace:git-head-sha:' + git.long() + ' -->'
+      new RegExp('gulp-replace:git-head-sha:\\w+'),
+      'gulp-replace:git-head-sha:' + git.long()
     ))
-    .pipe(gulp.dest('./www'));
+    .pipe(gulp.dest('./www/js'));
 
   done();
 });

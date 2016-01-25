@@ -8,6 +8,7 @@ angular.module('experience', [
   'experience.services.store',
   'experience.services.experience',
 
+  'experience.controllers.welcome',
   'experience.controllers.account',
   'experience.controllers.history',
   'experience.controllers.jumping',
@@ -17,7 +18,7 @@ angular.module('experience', [
   'experience.controllers.scanning',
   'experience.controllers.settings',
   'experience.controllers.developer',
-  'experience.controllers.welcome',
+  'experience.controllers.about',
 
   'experience.directives.account',
 
