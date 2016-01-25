@@ -26,7 +26,7 @@ angular.module('experience', [
   'experience.templates',
 ])
 
-.run(function($ionicConfig, $ionicPlatform, $rootScope, storeService, experienceService) {
+.run(function($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, experienceService) {
   $ionicConfig.scrolling.jsScrolling(false);
 
   $ionicPlatform.ready(function() {
@@ -46,6 +46,24 @@ angular.module('experience', [
     // save "android" / "ios" variable to scope
     $rootScope.platform = ionic.Platform.platform();
   });
+
+  $ionicPlatform.registerBackButtonAction(function(e) {
+    e.preventDefault();
+
+    if ($ionicHistory.backView()) {
+      $ionicHistory.goBack();
+
+    } else {
+      // this is the history root: disconnect and exit
+      experienceService.isConnected().then(function(connected) {
+        if (connected) experienceService.disconnect();
+      });
+
+      $rootScope.$broadcast('exit');
+      ionic.Platform.exitApp();
+    }
+
+  }, 101);
 
   // app restored from background
   document.addEventListener('resume', function(event) {
