@@ -378,7 +378,8 @@ angular.module('experience.services.experience', [
           var x = dataView.getInt16(4, true);
           var y = dataView.getInt16(6, true);
           var z = dataView.getInt16(8, true);
-          var message = [t, x, y, z].join('\t');
+          var et = dataView.getUint8(10, true); //Extreme type (1=TOP, 2=BOTTOM, 3=OTHER)
+          var message = [t, x, y, z, et].join('\t');
           $log.debug('sending WS message: ' + message);
           websocket.send(message);
         });
