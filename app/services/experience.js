@@ -130,15 +130,24 @@ angular.module('experience.services.experience', [
   };
 
   var connect = function(deviceID) {
+    var q = $q.defer();
     $log.debug('connecting to ' + deviceID);
-    return $cordovaBLE.connect(deviceID).then(function(device) {
-      $log.info('connected to ' + deviceID);
-      storeService.setDeviceID(deviceID);
-      return deviceID;
-    }).catch(function(error) {
-      $log.error('connecting to ' + deviceID + ' failed');
-      throw error;
-    });
+
+    ble.connect(deviceID,
+      function(device) {
+        $log.info('connected to ' + deviceID);
+        storeService.setDeviceID(deviceID);
+        $rootScope.$broadcast('experienceConnectionStateChanged', true);
+        q.resolve(deviceID);
+      },
+
+      function(error) {
+        $log.error('connecting to ' + deviceID + ' failed / device disconnected later');
+        $rootScope.$broadcast('experienceConnectionStateChanged', false);
+        q.reject(error);
+      });
+
+    return q.promise;
   };
 
   var reconnect = function() {
@@ -155,6 +164,7 @@ angular.module('experience.services.experience', [
       $log.debug('disconnecting from ' + storeService.getDeviceID());
 
       return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
+        $rootScope.$broadcast('experienceConnectionStateChanged', false);
         $log.info('disconnected from ' + storeService.getDeviceID());
         return result;
       }).catch(function(error) {
