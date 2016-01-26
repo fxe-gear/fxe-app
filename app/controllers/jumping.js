@@ -5,8 +5,6 @@ var module = angular.module('experience.controllers.jumping', [
   'experience.services.store',
 ]);
 
-module.constant('reconnectTimeout', 3000); // in milliseconds
-
 module.filter('sumScore', function() {
   return function(score) {
     var res = 0;
@@ -34,7 +32,7 @@ module.directive('animateOnChange', function($animate, $timeout) {
   };
 });
 
-var JumpingController = function($scope, $state, $ionicPlatform, $ionicHistory, $interval, $timeout, experienceService, storeService, reconnectTimeout) {
+var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, $ionicHistory, $interval, $timeout, experienceService, storeService) {
   var timer = null;
 
   $scope.running = false;
@@ -46,30 +44,11 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicHistory, 
     return $scope.lesson ? $scope.lesson.startTime != null ? Date.now() - $scope.lesson.startTime : 0 : 0;
   };
 
-  var reconnect = function() {
-    experienceService.enable()
-      .then(experienceService.reconnect)
-      .then(experienceService.isConnected).then(function(connected) {
-        $scope.connected = connected;
-        if (!connected) {
-          throw 'not connected, but reconnect resolved successfully, don\'t know why';
-        }
-      }).catch(function(error) {
-        // if connecting failed, try again in 3 sec
-        $timeout(reconnect, reconnectTimeout);
-        throw error;
-      });
-  };
-
   $scope.start = function() {
-    experienceService.startMeasurement().then(function() {
+    return experienceService.startMeasurement().then(function() {
       $scope.lesson = storeService.getCurrentLesson();
       $scope.running = true;
       timer = $interval($scope.apply, 1000);
-    }).catch(function(error) {
-      // if connecting failed, try again in 3 sec
-      $timeout(reconnect, reconnectTimeout);
-      throw error;
     });
   };
 
@@ -83,15 +62,33 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicHistory, 
       $state.go('main.history').then(function() {
         $scope.running = false;
       });
-    }).catch(function(error) {
-      // if connecting failed, try again in 3 sec
-      $timeout(reconnect, reconnectTimeout);
-      throw error;
     });
   };
 
   $ionicPlatform.ready(function() {
-    reconnect();
+    var callback = function(connected) {
+      if (connected) {
+        experienceService.isMeasuring().then(function(measuring) {
+          if (measuring) return $scope.start();
+        }).then(function() {
+          // delay setting of $scope.connected due to GUI overlay
+          $scope.connected = connected;
+        });
+      } else {
+        $scope.connected = false;
+      }
+    };
+
+    // get current state
+    experienceService.isConnected().then(callback);
+
+    // listen for future state changes
+    $scope.$on('experienceConnectionStateChanged', function(e, state) {
+      callback(state);
+    });
+
+    // and ensure experience is connected for both, now and future
+    experienceService.holdConnectionState(true);
   });
 };
 

@@ -13,6 +13,9 @@ angular.module('experience.services.experience', [
       extreme: {
         uuid: '6b01',
       },
+      sleep: {
+        uuid: '6b03',
+      },
       control: {
         uuid: '6bff',
       },
@@ -37,7 +40,9 @@ angular.module('experience.services.experience', [
   },
 })
 
-.service('experienceService', function($rootScope, $cordovaBLE, $websocket, $q, $log, storeService, bleServices, scoreTypes) {
+.constant('reconnectTimeout', 3000) // in milliseconds
+
+.service('experienceService', function($rootScope, $cordovaBLE, $websocket, $q, $log, $timeout, storeService, reconnectTimeout, bleServices, scoreTypes) {
   // some shortcuts
   var bls = bleServices;
   var scoreUUIDs = [
@@ -154,7 +159,7 @@ angular.module('experience.services.experience', [
     if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
     return isConnected().then(function(connected) {
       if (connected) return;
-      else return scan().then(connect);
+      else return enable().then(scan).then(connect);
     });
   };
 
@@ -172,6 +177,34 @@ angular.module('experience.services.experience', [
         throw error;
       });
     });
+  };
+
+  var holdConnectionState = function(desiredState) {
+    $log.info('holding connection state: ' + (desiredState ? 'connected' : 'disconnected'));
+
+    var callback = function(state) {
+      // if not connected but should be
+      if (state == false && desiredState == true) {
+        reconnect().catch(function(error) {
+          // if connecting failed, try again in 3 sec
+          $log.error('reconnecting error in holdConnectionState, reconnecting again in ' + reconnectTimeout);
+          $timeout(function() {
+            callback(false);
+          }, reconnectTimeout);
+        });
+      }
+
+      // if connected but should not be
+      if (state == true && desiredState == false) disconnect();
+    };
+
+    // first time and then permanent callback
+    isConnected().then(callback);
+    $rootScope.$on('experienceConnectionStateChanged', function(e, state) {
+      callback(state);
+    }); // TODO possibility to unregister callback
+
+    return $q.resolve();
   };
 
   var ignore = function() {
@@ -218,11 +251,23 @@ angular.module('experience.services.experience', [
 
       // BLE raw data
       var zeroScore = new Float32Array([0]);
-      var startMeasurementCommand = new Uint8Array([0x1]);
+      var startMeasurementCommand = new Uint8Array([0x01]);
+      var timeoutLength = new Uint8Array([0xff]); // in seconds
+
+      // only if not measuring
+      isMeasuring().then(function(measuring) {
+        if (measuring) return;
+
+        storeService.startLesson();
+
+        // delete previous scores
+        angular.forEach(scoreUUIDs, function(uuid) {
+          $cordovaBLE.write(deviceID, bls.experience.uuid, uuid, zeroScore.buffer);
+        });
+      });
 
       // for each score type
       angular.forEach(scoreUUIDs, function(uuid) {
-        $cordovaBLE.write(deviceID, bls.experience.uuid, uuid, zeroScore.buffer); // delete previous scores
         $cordovaBLE.startNotification(deviceID, bls.experience.uuid, uuid, function(data) { // register callback
           // get score from BLE raw data
           var score = new Float32Array(data)[0];
@@ -245,10 +290,11 @@ angular.module('experience.services.experience', [
         });
       });
 
+      // write timeout
+      $cordovaBLE.write(deviceID, bls.experience.uuid, bls.experience.characteristics.sleep.uuid, timeoutLength.buffer);
+
       // start measurement
-      return $cordovaBLE.write(deviceID, bls.experience.uuid, bls.experience.characteristics.control.uuid, startMeasurementCommand.buffer)
-        .then(storeService.startLesson)
-        .then(function() {
+      return $cordovaBLE.write(deviceID, bls.experience.uuid, bls.experience.characteristics.control.uuid, startMeasurementCommand.buffer).then(function() {
           $log.info('measurement started');
         }).catch(function(error) {
           $log.error('starting measurement failed');
@@ -281,6 +327,18 @@ angular.module('experience.services.experience', [
           $log.error('stopping measurement failed');
           throw error;
         });
+    });
+  };
+
+  var isMeasuring = function() {
+    $log.debug('checking if measurement is running');
+
+    return $cordovaBLE.read(storeService.getDeviceID(), bls.experience.uuid, bls.experience.characteristics.control.uuid).then(function(data) {
+      var dataView = new DataView(data);
+      var controlValue = dataView.getUint8(0, true);
+      var res = controlValue == 0x01;
+      $log.debug('measurement ' + (res ? 'is' : 'is not') + ' running');
+      return res;
     });
   };
 
@@ -388,6 +446,7 @@ angular.module('experience.services.experience', [
   this.stopScan = stopScan;
   this.connect = connect;
   this.reconnect = reconnect;
+  this.holdConnectionState = holdConnectionState;
   this.disconnect = disconnect;
   this.ignore = ignore;
   this.clearIgnored = clearIgnored;
@@ -395,6 +454,7 @@ angular.module('experience.services.experience', [
   this.clearColor = clearColor;
   this.startMeasurement = startMeasurement;
   this.stopMeasurement = stopMeasurement;
+  this.isMeasuring = isMeasuring;
   this.pair = pair;
   this.unpair = unpair;
   this.isConnected = isConnected;
