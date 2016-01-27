@@ -186,9 +186,10 @@ form {
     text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
     font-size: 3rem;
     line-height: 1.4em;
-    margin-bottom: .5em;
+    margin-bottom: 1rem;
   }
   .score {
+    font-size: 5rem;
     transition: transform .1s ease-out;
     &.fresh {
         transform: scale(1.4);

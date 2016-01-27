@@ -10,7 +10,7 @@
 
     <canvas class="chart chart-line" chart-data="chartData" chart-labels="chartLabels" chart-options="
       {
-        tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value.toFixed(0) %>',
+        tooltipTemplate: '<%= value.toFixed(0) %>',
         scaleOverride: true,
         scaleSteps: 6,
         scaleStepWidth: 5,
