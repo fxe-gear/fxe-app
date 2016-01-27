@@ -66,25 +66,27 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, 
   };
 
   $ionicPlatform.ready(function() {
-    var callback = function(connected) {
-      if (connected) {
+    // callback displaying GUI overlay and start / stop screen
+    var connectionStateChanged = function(connected) {
+      if (!connected) {
+        $scope.connected = false;
+
+      } else {
         experienceService.isMeasuring().then(function(measuring) {
           if (measuring) return $scope.start();
         }).then(function() {
-          // delay setting of $scope.connected due to GUI overlay
+          // delay setting of $scope.connected due to GUI overlay after start
           $scope.connected = connected;
         });
-      } else {
-        $scope.connected = false;
       }
     };
 
     // get current state
-    experienceService.isConnected().then(callback);
+    experienceService.isConnected().then(connectionStateChanged);
 
     // listen for future state changes
     $scope.$on('experienceConnectionStateChanged', function(e, state) {
-      callback(state);
+      connectionStateChanged(state);
     });
 
     // and ensure experience is connected for both, now and future

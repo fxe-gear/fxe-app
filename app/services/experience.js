@@ -53,6 +53,7 @@ angular.module('experience.services.experience', [
 
   var scanning = false;
   var websocket = null;
+  var disableConnectionHolding = null;
 
   var enable = function() {
     var q = $q.defer();
@@ -182,6 +183,17 @@ angular.module('experience.services.experience', [
   var holdConnectionState = function(desiredState) {
     $log.info('holding connection state: ' + (desiredState ? 'connected' : 'disconnected'));
 
+    // disable previsously held state if needed
+    if (disableConnectionHolding) {
+      disableConnectionHolding();
+      disableConnectionHolding = null;
+    }
+
+    if (desiredState == null) {
+      // only disable holding
+      return;
+    }
+
     var callback = function(state) {
       // if not connected but should be
       if (state == false && desiredState == true) {
@@ -200,7 +212,7 @@ angular.module('experience.services.experience', [
 
     // first time and then permanent callback
     isConnected().then(callback);
-    $rootScope.$on('experienceConnectionStateChanged', function(e, state) {
+    disableConnectionHolding = $rootScope.$on('experienceConnectionStateChanged', function(e, state) {
       callback(state);
     }); // TODO possibility to unregister callback
 
