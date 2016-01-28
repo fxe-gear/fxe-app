@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Exit, if there's no ios here.
+[[ $CORDOVA_PLATFORMS == *"ios"* ]] || exit 0
+
+# This is needed until https://github.com/Wizcorp/phonegap-facebook-plugin/issues/1116 gets fixed.
+XCCONFIG_FILE="platforms/ios/cordova/build.xcconfig"
+if ! cat $XCCONFIG_FILE | grep -q "ENABLE_BITCODE"; then
+  echo "\nENABLE_BITCODE = NO" >> $XCCONFIG_FILE
+fi
+PBXPROJ_FILE=$(ls platforms/ios/*.xcodeproj/project.pbxproj)
+if ! cat $PBXPROJ_FILE | grep -q "ENABLE_BITCODE"; then
+  sed -i '' 's/\(GCC_VERSION = "";\)/\1\ ENABLE_BITCODE = NO;/g' $PBXPROJ_FILE
+fi
