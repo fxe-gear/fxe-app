@@ -144,6 +144,7 @@ angular.module('experience.services.store', [
       };
 
     } else if (startTime == Infinity) { // all lessons
+      query.push('WHERE end_time IS NOT NULL');
       query.push('ORDER BY start_time DESC');
       callback = function(res) {
         var ret = [];
@@ -173,39 +174,53 @@ angular.module('experience.services.store', [
 
   var getLessonDiffData = function(startTime, interval) {
     var q = $q.defer();
+    interval *= 1000; // convert seconds to milis
 
-    // sum all score types together (select lesson data grouped to N-seconds intervals)
-    var query = [];
-    query.push('SELECT SUM(s) as score, diffGroup FROM (');
-    query.push('  SELECT MAX(score) AS s, ((time - start_time) / ?) AS diffGroup');
-    query.push('  FROM score WHERE start_time = ? GROUP BY diffGroup, type ORDER BY diffGroup ASC');
-    query.push(') GROUP BY diffGroup');
+    // TODO optimize to one query and better promise flow
 
-    $cordovaSQLite.execute(getDB(), query.join(' '), [interval * 1000, startTime]).then(function(res) {
+    // get lesson start, end time
+    var query = 'SELECT start_time AS startTime, end_time as endTime FROM lesson WHERE start_time = ?';
+    $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
+      var startTime = res.rows.item(0).startTime;
+      var endTime = res.rows.item(0).endTime;
 
-      var ret = [];
-      var prevDiffGroup = -1;
-      var prevDiffGroupScore = 0;
+      // sum all score types together (select lesson data grouped to N-seconds intervals)
+      var query = [];
+      query.push('SELECT COALESCE(SUM(s), 0) as score, COALESCE(diffGroup, 0) as diffGroup FROM (');
+      query.push('  SELECT MAX(score) AS s, ((time - start_time) / ?) AS diffGroup');
+      query.push('  FROM score WHERE start_time = ? GROUP BY diffGroup, type ORDER BY diffGroup ASC');
+      query.push(') GROUP BY diffGroup');
 
-      for (var i = 0; i < res.rows.length; i++) {
-        var row = res.rows.item(i);
+      $cordovaSQLite.execute(getDB(), query.join(' '), [interval, startTime]).then(function(res) {
 
-        // we have to add missing diffGroups with zeroes! (with no score)
-        for (var j = prevDiffGroup + 1; j < row.diffGroup; j++) {
-          ret.push(0);
+        var ret = [];
+        var prevDiffGroupScore = 0;
+        var i = 0;
+
+        for (var relativeTime = startTime; relativeTime <= endTime; relativeTime += interval) {
+
+          // we don't have any more diffGroups, just add zeroes without computing anything
+          if (i >= res.rows.length) {
+            ret.push(0);
+            continue;
+          }
+
+          var row = res.rows.item(i);
+
+          var currentDiffGroup = (relativeTime - startTime) / interval;
+          if (row.diffGroup == currentDiffGroup) { // if currentDiffGroup matches current row
+            ret.push(row.score - prevDiffGroupScore);
+            i++; // take next row
+          } else {
+            ret.push(0);
+          }
+
+          prevDiffGroupScore = row.score;
         }
 
-        ret.push(row.score - prevDiffGroupScore);
-        prevDiffGroup = row.diffGroup;
-        prevDiffGroupScore = row.score;
-      }
+        q.resolve(ret);
+      });
 
-      // no score for whole lesson, return one diffGroup with 0 score
-      if (ret.length == 0) {
-        ret.push(0);
-      }
-
-      q.resolve(ret);
     }).catch(function(err) {
       $log.error('getting lesson diff data failed:', err.message);
       q.reject(err);
