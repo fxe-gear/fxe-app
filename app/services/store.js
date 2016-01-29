@@ -138,7 +138,7 @@ angular.module('experience.services.store', [
       };
 
     } else if (startTime == Infinity) { // all lessons
-      query.push('WHERE end_time IS NOT NULL');
+      query.splice(-1, 0, 'WHERE end_time IS NOT NULL');
       query.push('ORDER BY start_time DESC');
       callback = function(res) {
         var ret = [];
@@ -147,7 +147,8 @@ angular.module('experience.services.store', [
       };
 
     } else { // one lesson
-      query.push('WHERE start_time = ? LIMIT 1');
+      query.splice(-1, 0, 'WHERE start_time = ?');
+      query.push('LIMIT 1');
       inject.push(startTime);
       callback = function(res) {
         if (res.rows.length > 0) {
@@ -159,7 +160,7 @@ angular.module('experience.services.store', [
     }
 
     $cordovaSQLite.execute(getDB(), query.join(' '), inject).then(callback).catch(function(err) {
-      $log.error('getting lesson failed:', err.message);
+      $log.error('getting lesson failed:', err.message, 'in query', query.join(' '));
       q.reject(err);
     });
 
@@ -170,53 +171,44 @@ angular.module('experience.services.store', [
     var q = $q.defer();
     interval *= 1000; // convert seconds to milis
 
-    // TODO optimize to one query and better promise flow
+    // sum all score types together (select lesson data grouped to N-seconds intervals)
+    var query = [];
+    query.push('SELECT end_time AS endTime, start_time AS startTime, -1 as diffGroup, 0 as type, 0 as score FROM lesson WHERE start_time = ?'); // select lesson start + end time
+    query.push('UNION');
+    query.push('SELECT 0, start_time, ((time - start_time) / ?) AS diff_group, type, MAX(score) FROM score WHERE start_time = ? GROUP BY type, diff_group ORDER BY diff_group ASC');
 
-    // get lesson start, end time
-    var query = 'SELECT start_time AS startTime, end_time as endTime FROM lesson WHERE start_time = ?';
-    $cordovaSQLite.execute(getDB(), query, [startTime]).then(function(res) {
+    $cordovaSQLite.execute(getDB(), query.join(' '), [startTime, interval, startTime]).then(function(res) {
+      // lesson times are in the first row
       var startTime = res.rows.item(0).startTime;
       var endTime = res.rows.item(0).endTime;
 
-      // sum all score types together (select lesson data grouped to N-seconds intervals)
-      var query = [];
-      query.push('SELECT COALESCE(SUM(s), 0) as score, COALESCE(diffGroup, 0) as diffGroup FROM (');
-      query.push('  SELECT MAX(score) AS s, ((time - start_time) / ?) AS diffGroup');
-      query.push('  FROM score WHERE start_time = ? GROUP BY diffGroup, type ORDER BY diffGroup ASC');
-      query.push(') GROUP BY diffGroup');
+      // TODO use `scoreTypes`
+      var lastScore = {
+        1: 0,
+        2: 0,
+        3: 0,
+      };
 
-      $cordovaSQLite.execute(getDB(), query.join(' '), [interval, startTime]).then(function(res) {
+      var ret = [];
+      var rowNum = 1;
+      var diffScore = 0;
 
-        var ret = [];
-        var prevDiffGroupScore = 0;
-        var i = 0;
+      for (var relativeTime = startTime; relativeTime <= endTime; relativeTime += interval) {
+        var currentDiffGroup = (relativeTime - startTime) / interval;
 
-        for (var relativeTime = startTime; relativeTime <= endTime; relativeTime += interval) {
-
-          // we don't have any more diffGroups, just add zeroes without computing anything
-          if (i >= res.rows.length) {
-            ret.push(0);
-            continue;
-          }
-
-          var row = res.rows.item(i);
-
-          var currentDiffGroup = (relativeTime - startTime) / interval;
-          if (row.diffGroup == currentDiffGroup) { // if currentDiffGroup matches current row
-            ret.push(row.score - prevDiffGroupScore);
-            i++; // take next row
-          } else {
-            ret.push(0);
-          }
-
-          prevDiffGroupScore = row.score;
+        for (var row = res.rows.item(rowNum); row && currentDiffGroup == row.diffGroup; row = res.rows.item(++rowNum)) {
+          diffScore += row.score - lastScore[row.type];
+          lastScore[row.type] = row.score;
         }
 
-        q.resolve(ret);
-      });
+        ret.push(diffScore);
+        diffScore = 0;
+      }
+
+      q.resolve(ret);
 
     }).catch(function(err) {
-      $log.error('getting lesson diff data failed:', err.message);
+      $log.error('getting lesson diff data failed:', err.message, 'in query', query.join(' '));
       q.reject(err);
     });
 

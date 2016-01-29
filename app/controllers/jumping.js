@@ -65,25 +65,27 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, 
     });
   };
 
-  $ionicPlatform.ready(function() {
-    // callback displaying GUI overlay and start / stop screen
-    var connectionStateChanged = function(connected) {
-      if (!connected) {
-        $scope.connected = false;
+  // callback displaying GUI overlay and start / stop screen
+  var connectionStateChanged = function(connected) {
+    if (!connected) {
+      $scope.connected = false;
 
-      } else {
-        experienceService.isMeasuring().then(function(measuring) {
-          if (measuring) return $scope.start();
-        }).then(function() {
-          // delay setting of $scope.connected due to GUI overlay after start
-          $scope.connected = connected;
-        });
-      }
-    };
+    } else {
+      experienceService.isMeasuring().then(function(measuring) {
+        if (measuring) return $scope.start();
+      }).then(function() {
+        // delay setting of $scope.connected due to GUI overlay after start
+        $scope.connected = connected;
+      });
+    }
+  };
 
+  $scope.$on('$ionicView.beforeEnter', function() {
     // get current state
     experienceService.isConnected().then(connectionStateChanged);
+  });
 
+  $ionicPlatform.ready(function() {
     // listen for future state changes
     $scope.$on('experienceConnectionStateChanged', function(e, state) {
       connectionStateChanged(state);
