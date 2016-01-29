@@ -120,16 +120,10 @@ angular.module('experience.services.store', [
   var getLesson = function(startTime) {
     var q = $q.defer();
 
-    var query = ['SELECT'];
-    query.push('start_time AS startTime,');
-    query.push('end_time AS endTime,');
-    query.push('(end_time - start_time) AS duration,');
-    query.push('COALESCE(');
-    query.push('  (SELECT SUM(s) FROM');
-    query.push('    (SELECT MAX(score) as s, score.start_time FROM score WHERE score.start_time = lesson.start_time GROUP BY start_time, type)');
-    query.push('  GROUP BY start_time)');
-    query.push(', 0) AS score');
-    query.push('FROM lesson');
+    var query = [];
+    query.push('SELECT start_time AS startTime, end_time AS endTime, duration, COALESCE(SUM(score), 0) AS score FROM');
+    query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, s.type)');
+    query.push('GROUP BY start_time');
     var callback;
     var inject = [];
 
