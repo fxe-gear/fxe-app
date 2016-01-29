@@ -38,6 +38,14 @@ angular.module('experience.services.experience', [
       },
     },
   },
+  battery: {
+    uuid: '180f',
+    characteristics: {
+      level: {
+        uuid: '2a19',
+      },
+    },
+  },
 })
 
 .constant('reconnectTimeout', 3000) // in milliseconds
@@ -372,6 +380,21 @@ angular.module('experience.services.experience', [
     });
   };
 
+  // DEV function
+  var _getBatteryLevel = function() {
+    return isConnected().then(function(connected) {
+      if (!connected) throw 'experience not connected';
+      $log.debug('getting battery level');
+
+      return $cordovaBLE.read(storeService.getDeviceID(), bls.battery.uuid, bls.battery.characteristics.level.uuid).then(function(data) {
+        var dataView = new DataView(data);
+        var level = dataView.getUint8(0, true);
+        $log.debug('battery level is ' + level + '%');
+        return level / 100; // return in percent
+      });
+    });
+  };
+
   var subscribeExtremes = function(websocketIP, websocketPort) {
     var q = $q.defer();
 
@@ -476,5 +499,6 @@ angular.module('experience.services.experience', [
   this.subscribeExtremes = subscribeExtremes;
   this.unsubscribeExtremes = unsubscribeExtremes;
   this._sendCommand = _sendCommand;
+  this._getBatteryLevel = _getBatteryLevel;
 
 });
