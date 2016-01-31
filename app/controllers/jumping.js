@@ -65,35 +65,34 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, 
     });
   };
 
-  // callback displaying GUI overlay and start / stop screen
-  var connectionStateChanged = function(connected) {
-    if (!connected) {
-      $scope.connected = false;
+  // hide GUI overlay and display measuring screen
+  var onExperienceConnected = function() {
+    experienceService.isMeasuring().then(function(measuring) {
+      if (measuring) return $scope.start();
+    }).then(function() {
+      // delay setting of $scope.connected due to GUI overlay after start
+      $scope.connected = connected;
+    });
+  };
 
-    } else {
-      experienceService.isMeasuring().then(function(measuring) {
-        if (measuring) return $scope.start();
-      }).then(function() {
-        // delay setting of $scope.connected due to GUI overlay after start
-        $scope.connected = connected;
-      });
-    }
+  var onExperienceDisconnected = function() {
+    $scope.connected = false;
   };
 
   $scope.$on('$ionicView.beforeEnter', function() {
     // get current state
-    experienceService.isConnected().then(connectionStateChanged);
-  });
-
-  $ionicPlatform.ready(function() {
-    // listen for future state changes
-    $scope.$on('experienceConnectionStateChanged', function(e, state) {
-      connectionStateChanged(state);
+    experienceService.isConnected().then(function(connected) {
+      if (connected) onExperienceConnected();
+      else onExperienceDisconnected();
     });
-
-    // and ensure experience is connected for both, now and future
-    experienceService.holdConnectionState(true);
   });
+
+  // listen for future state changes
+  $scope.$on('experienceConnected', onExperienceConnected);
+  $scope.$on('experienceDisconnected', onExperienceDisconnected);
+
+  // and ensure experience is connected for both, now and future
+  $ionicPlatform.ready(experienceService.holdConnection);
 };
 
 module.controller('JumpingController', JumpingController);

@@ -83,6 +83,8 @@ angular.module('experience.services.experience', [
       } else {
         // Android
         $log.debug('enabling bluetooth');
+        $rootScope.$broadcast('experienceEnablingStarted');
+
         $cordovaBLE.enable().then(function() {
           $log.info('bluetooth enabled');
           q.resolve();
@@ -126,6 +128,7 @@ angular.module('experience.services.experience', [
       }
     }, q.reject);
 
+    $rootScope.$broadcast('experienceScanningStarted');
     $log.info('scanning started');
     return q.promise;
   };
@@ -134,8 +137,8 @@ angular.module('experience.services.experience', [
     if (!scanning) return $q.resolve();
     $log.debug('stopping ble scan');
     return $cordovaBLE.stopScan().then(function(result) {
-      $log.info('scanning stopped');
       scanning = false;
+      $log.info('scanning stopped');
       return result;
     }).catch(function(error) {
       $log.error('scanning stop failed');
@@ -146,18 +149,19 @@ angular.module('experience.services.experience', [
   var connect = function(deviceID) {
     var q = $q.defer();
     $log.debug('connecting to ' + deviceID);
+    $rootScope.$broadcast('experienceConnectingStarted');
 
     ble.connect(deviceID,
       function(device) {
         $log.info('connected to ' + deviceID);
         storeService.setDeviceID(deviceID);
-        $rootScope.$broadcast('experienceConnectionStateChanged', true);
+        $rootScope.$broadcast('experienceConnected');
         q.resolve(deviceID);
       },
 
       function(error) {
         $log.error('connecting to ' + deviceID + ' failed / device disconnected later');
-        $rootScope.$broadcast('experienceConnectionStateChanged', false);
+        $rootScope.$broadcast('experienceDisconnected');
         q.reject(error);
       });
 
@@ -166,6 +170,7 @@ angular.module('experience.services.experience', [
 
   var reconnect = function() {
     if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
+
     return isConnected().then(function(connected) {
       if (connected) return;
       else return enable().then(scan).then(connect);
@@ -178,7 +183,7 @@ angular.module('experience.services.experience', [
       $log.debug('disconnecting from ' + storeService.getDeviceID());
 
       return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
-        $rootScope.$broadcast('experienceConnectionStateChanged', false);
+        $rootScope.$broadcast('experienceDisconnected');
         $log.info('disconnected from ' + storeService.getDeviceID());
         return result;
       }).catch(function(error) {
@@ -188,8 +193,8 @@ angular.module('experience.services.experience', [
     });
   };
 
-  var holdConnectionState = function(desiredState) {
-    $log.info('holding connection state: ' + (desiredState ? 'connected' : 'disconnected'));
+  var holdConnection = function() {
+    $log.info('holding connection');
 
     // disable previsously held state if needed
     if (disableConnectionHolding) {
@@ -197,32 +202,20 @@ angular.module('experience.services.experience', [
       disableConnectionHolding = null;
     }
 
-    if (desiredState == null) {
-      // only disable holding
-      return;
-    }
-
     var callback = function(state) {
       // if not connected but should be
-      if (state == false && desiredState == true) {
-        reconnect().catch(function(error) {
-          // if connecting failed, try again in 3 sec
-          $log.error('reconnecting error in holdConnectionState, reconnecting again in ' + reconnectTimeout);
-          $timeout(function() {
-            callback(false);
-          }, reconnectTimeout);
-        });
-      }
-
-      // if connected but should not be
-      if (state == true && desiredState == false) disconnect();
+      reconnect().catch(function(error) {
+        // if connecting failed, try again in 3 sec
+        $log.error('reconnecting error during connection holding, trying again in ' + reconnectTimeout);
+        $timeout(function() {
+          callback();
+        }, reconnectTimeout);
+      });
     };
 
     // first time and then permanent callback
     isConnected().then(callback);
-    disableConnectionHolding = $rootScope.$on('experienceConnectionStateChanged', function(e, state) {
-      callback(state);
-    }); // TODO possibility to unregister callback
+    disableConnectionHolding = $rootScope.$on('experienceConnected', callback);
 
     return $q.resolve();
   };
@@ -320,11 +313,11 @@ angular.module('experience.services.experience', [
 
       // start measurement
       return $cordovaBLE.write(deviceID, bls.experience.uuid, bls.experience.characteristics.control.uuid, startMeasurementCommand.buffer).then(function() {
-          $log.info('measurement started');
-        }).catch(function(error) {
-          $log.error('starting measurement failed');
-          throw error;
-        });
+        $log.info('measurement started');
+      }).catch(function(error) {
+        $log.error('starting measurement failed');
+        throw error;
+      });
     });
   };
 
@@ -487,7 +480,7 @@ angular.module('experience.services.experience', [
   this.stopScan = stopScan;
   this.connect = connect;
   this.reconnect = reconnect;
-  this.holdConnectionState = holdConnectionState;
+  this.holdConnection = holdConnection;
   this.disconnect = disconnect;
   this.ignore = ignore;
   this.clearIgnored = clearIgnored;
