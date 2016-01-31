@@ -262,6 +262,27 @@ angular.module('experience.services.experience', [
     return setColor('#000000');
   };
 
+  var scoreChangedCallback = function(data) {
+    // get score from BLE raw data
+    var score = new Float32Array(data)[0];
+
+    // mapping of BLE characteristics to SQLite score types
+    var type;
+    switch (uuid) {
+      case bls.experience.characteristics.amplitude.uuid:
+        type = scoreTypes.amplitude;
+        break;
+      case bls.experience.characteristics.frequency.uuid:
+        type = scoreTypes.frequency;
+        break;
+      case bls.experience.characteristics.rhythm.uuid:
+        type = scoreTypes.rhythm;
+        break;
+    }
+
+    storeService.addScore(score, type);
+  };
+
   var startMeasurement = function() {
     return isConnected().then(function(connected) {
       if (!connected) throw 'experience not connected';
@@ -274,40 +295,24 @@ angular.module('experience.services.experience', [
       var startMeasurementCommand = new Uint8Array([0x01]);
       var timeoutLength = new Uint8Array([0xff]); // in seconds
 
-      // only if not measuring
       isMeasuring().then(function(measuring) {
-        if (measuring) return;
+        if (measuring) {
+          // read previous scores
+          $cordovaBLE.read(deviceID, bls.experience.uuid, uuid).then(scoreChangedCallback);
 
-        storeService.startLesson();
+        } else {
+          // delete previous scores
+          storeService.startLesson();
+          angular.forEach(scoreUUIDs, function(uuid) {
+            $cordovaBLE.write(deviceID, bls.experience.uuid, uuid, zeroScore.buffer);
+          });
 
-        // delete previous scores
-        angular.forEach(scoreUUIDs, function(uuid) {
-          $cordovaBLE.write(deviceID, bls.experience.uuid, uuid, zeroScore.buffer);
-        });
+        }
       });
 
       // for each score type
       angular.forEach(scoreUUIDs, function(uuid) {
-        $cordovaBLE.startNotification(deviceID, bls.experience.uuid, uuid, function(data) { // register callback
-          // get score from BLE raw data
-          var score = new Float32Array(data)[0];
-
-          // mapping of BLE characteristics to SQLite score types
-          var type;
-          switch (uuid) {
-            case bls.experience.characteristics.amplitude.uuid:
-              type = scoreTypes.amplitude;
-              break;
-            case bls.experience.characteristics.frequency.uuid:
-              type = scoreTypes.frequency;
-              break;
-            case bls.experience.characteristics.rhythm.uuid:
-              type = scoreTypes.rhythm;
-              break;
-          }
-
-          storeService.addScore(score, type);
-        });
+        $cordovaBLE.startNotification(deviceID, bls.experience.uuid, uuid, scoreChangedCallback);
       });
 
       // write timeout
