@@ -6,7 +6,14 @@ var module = angular.module('experience.controllers.pairing', [
 ]);
 
 var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, experienceService, shuffleService) {
-  var colors = {red: '#ff0000', green: '#00ff00', blue: '#0000ff', yellow: '#ffff00', white: '#ffffff', cyan: '#00ffff'};
+  var colors = {
+    red: '#ff0000',
+    green: '#00ff00',
+    blue: '#0000ff',
+    yellow: '#ffff00',
+    white: '#ffffff',
+    cyan: '#00ffff',
+  };
   var colorNamesShuffled = shuffleService.shuffle(Object.keys(colors));
 
   $scope.stepCount = 4;
@@ -23,7 +30,9 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
       // on the end of pairing process
       experienceService.pair();
       return experienceService.clearColor().then(function() {
-        $ionicHistory.nextViewOptions({historyRoot: true});
+        $ionicHistory.nextViewOptions({
+          historyRoot: true,
+        });
         $state.go('main.jumping');
       });
     }
@@ -42,18 +51,19 @@ var PairingController = function($scope, $state, $ionicHistory, $ionicPopup, exp
 
   $scope.no = function() {
     $ionicPopup.alert({
-      title: 'Paring failed',
-      template: 'Sorry, we have unintentionally connected to another Experience. Please try it again.',
-      okType: 'button-energized',
-    })
-    .then(experienceService.clearColor)
-    .then(experienceService.ignore)
-    .then(function() {
-      return $state.go('scanning');
-    }).catch(function(error) {
-      $state.go('scanning');
-      throw error;
-    });
+        title: 'Paring failed',
+        template: 'Sorry, we have unintentionally connected to another Experience. Please try it again.',
+        okType: 'button-energized',
+      })
+      .then(experienceService.clearColor)
+      .then(experienceService.ignore)
+      .then(experienceService.disconnect)
+      .then(function() {
+        return $state.go('scanning');
+      }).catch(function(error) {
+        $state.go('scanning');
+        throw error;
+      });
   };
 
   $scope.cannotRecognize = function() {

@@ -61,7 +61,7 @@ angular.module('experience.services.experience', [
 
   var scanning = false;
   var websocket = null;
-  var disableConnectionHolding = null;
+  var _disableConnectionHolding = null;
 
   var enable = function() {
     var q = $q.defer();
@@ -182,7 +182,9 @@ angular.module('experience.services.experience', [
       if (!connected) throw 'experience not connected';
       $log.debug('disconnecting from ' + storeService.getDeviceID());
 
-      return $cordovaBLE.disconnect(storeService.getDeviceID()).then(function(result) {
+      return disableConnectionHolding().then(function() {
+        return $cordovaBLE.disconnect(storeService.getDeviceID());
+      }).then(function(result) {
         $rootScope.$broadcast('experienceDisconnected');
         $log.info('disconnected from ' + storeService.getDeviceID());
         return result;
@@ -194,19 +196,15 @@ angular.module('experience.services.experience', [
   };
 
   var holdConnection = function() {
-    $log.info('holding connection');
-
     // disable previsously held state if needed
-    if (disableConnectionHolding) {
-      disableConnectionHolding();
-      disableConnectionHolding = null;
-    }
+    disableConnectionHolding();
 
+    $log.info('holding connection');
     var onConnect = function() {
       // if not connected but should be
       reconnect().catch(function(error) {
         // if connecting failed, try again in 3 sec
-        $log.error('reconnecting error during connection holding, trying again in ' + reconnectTimeout);
+        $log.error('reconnecting error during connection holding: ' + error + ', trying again in ' + reconnectTimeout);
         $timeout(function() {
           onConnect();
         }, reconnectTimeout);
@@ -214,10 +212,20 @@ angular.module('experience.services.experience', [
     };
 
     // permanent callback and first time trigger
-    disableConnectionHolding = $rootScope.$on('experienceConnected', onConnect);
+    _disableConnectionHolding = $rootScope.$on('experienceConnected', onConnect);
     isConnected().then(function(connected) {
       if (!connected) onConnect();
     });
+
+    return $q.resolve();
+  };
+
+  var disableConnectionHolding = function() {
+    if (_disableConnectionHolding) {
+      $log.info('disabling connection holding');
+      _disableConnectionHolding();
+      _disableConnectionHolding = null;
+    }
 
     return $q.resolve();
   };
