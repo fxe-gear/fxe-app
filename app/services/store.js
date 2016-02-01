@@ -169,7 +169,6 @@ angular.module('experience.services.store', [
 
   var getLessonDiffData = function(startTime, interval) {
     var q = $q.defer();
-    interval *= 1000; // convert seconds to milis
 
     // sum all score types together (select lesson data grouped to N-seconds intervals)
     var query = [];
