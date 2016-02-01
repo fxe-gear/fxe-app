@@ -53,20 +53,24 @@ angular.module('experience.services.store', [
   var db;
 
   var getDB = function() {
-    if (!db) {
-      if (window.sqlitePlugin) { // native sqlite DB
-        db = $cordovaSQLite.openDB({
-          name: 'store.sqlite',
-          bgType: true,
-          version: '0.3.1',
-        });
-      } else { // fallback to websql
-        db = window.openDatabase('store', '0.3.1', null, 2 * 1024 * 1024);
-      }
-
-      createSchema(db);
+    if (db) {
+      return db;
     }
 
+    // TODO handle version number mismatch
+
+    if (window.sqlitePlugin) { // native sqlite DB
+      db = $cordovaSQLite.openDB({
+        name: 'store.sqlite',
+        bgType: true,
+        version: '0.3.1',
+      });
+
+    } else { // fallback to websql
+      db = window.openDatabase('store', '0.3.1', null, 2 * 1024 * 1024);
+    }
+
+    createSchema(db);
     return db;
   };
 

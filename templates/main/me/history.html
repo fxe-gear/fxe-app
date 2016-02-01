@@ -1,14 +1,20 @@
 <ion-view title="{{ user.name }}">
-  <ion-content class="history">
+  <ion-content padding="true" class="history">
 
-    <div class="list">
-      <a class="item dark" ui-sref="main.lesson({startTime: lesson.startTime})" ng-repeat="lesson in lessons">
+    <h2 class="shadow text-center">Your recent activity</h2>
+    <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels"></canvas>
+
+    <div class="card list">
+      <div class="item item-divider">
+        History
+      </div>
+      <a class="item dark" ui-sref="main.lesson({startTime: lesson.startTime})" ng-repeat="lesson in lessons track by lesson.startTime">
         <h2 class="dark">Lesson {{ ::lesson.startTime | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
       </a>
+      <p class="item dark no-lessons" ng-hide="lessons.length">No lesson found, go jumping!</p>
     </div>
 
-    <p class="no-lessons" ng-hide="lessons.length">No lesson found, go jumping!</p>
 
   </ion-content>
 </ion-view>
