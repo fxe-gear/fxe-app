@@ -2,7 +2,13 @@
   <ion-content padding="true" class="history">
 
     <h2 class="shadow text-center">Your recent activity</h2>
-    <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels"></canvas>
+    <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
+      {
+        barStrokeWidth: 1,
+        barValueSpacing: 2,
+        scaleShowVerticalLines: false,
+      }
+    "></canvas>
 
     <div class="card list">
       <div class="item item-divider">
