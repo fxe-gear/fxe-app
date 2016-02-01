@@ -18,7 +18,13 @@
 
     <div ng-hide="connected" class="reconnecting">
       <ion-spinner icon="lines" class="spinner-balanced"></ion-spinner>
-      <p>Reconnecting...</p>
+      <p>
+        <span ng-show="status == 'reconnecting'">Reconnecting</span>
+        <span ng-show="status == 'enabling'">Enabling bluetooth</span>
+        <span ng-show="status == 'scanning'">Scanning</span>
+        <span ng-show="status == 'connecting'">Connecting</span>
+        ...
+      </p>
     </div>
 
   </ion-content>

@@ -37,6 +37,7 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, 
 
   $scope.running = false;
   $scope.connected = false;
+  $scope.status = 'reconnecting';
   $scope.lesson = null;
 
   $scope.getDuration = function() {
@@ -71,17 +72,20 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, 
       if (measuring) return $scope.start();
     }).then(function() {
       // delay setting of $scope.connected due to GUI overlay after start
-      $scope.connected = connected;
+      $scope.connected = true;
     });
   };
 
   var onExperienceDisconnected = function() {
+    $scope.status = 'reconnecting';
     $scope.connected = false;
   };
 
   $scope.$on('$ionicView.beforeEnter', function() {
     // get current state
-    experienceService.isConnected().then(function(connected) {
+    $ionicPlatform.ready()
+    .then(experienceService.isConnected)
+    .then(function(connected) {
       if (connected) onExperienceConnected();
       else onExperienceDisconnected();
     });
@@ -90,6 +94,19 @@ var JumpingController = function($scope, $state, $ionicPlatform, $ionicLoading, 
   // listen for future state changes
   $scope.$on('experienceConnected', onExperienceConnected);
   $scope.$on('experienceDisconnected', onExperienceDisconnected);
+
+  // update text in overlay
+  $scope.$on('experienceEnablingStarted', function() {
+    $scope.status = 'enabling';
+  });
+
+  $scope.$on('experienceScanningStarted', function() {
+    $scope.status = 'scanning';
+  });
+
+  $scope.$on('experienceConnectingStarted', function() {
+    $scope.status = 'connecting';
+  });
 
   // and ensure experience is connected for both, now and future
   $ionicPlatform.ready(experienceService.holdConnection);

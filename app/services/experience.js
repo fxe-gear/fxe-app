@@ -202,20 +202,22 @@ angular.module('experience.services.experience', [
       disableConnectionHolding = null;
     }
 
-    var callback = function(state) {
+    var onConnect = function() {
       // if not connected but should be
       reconnect().catch(function(error) {
         // if connecting failed, try again in 3 sec
         $log.error('reconnecting error during connection holding, trying again in ' + reconnectTimeout);
         $timeout(function() {
-          callback();
+          onConnect();
         }, reconnectTimeout);
       });
     };
 
-    // first time and then permanent callback
-    isConnected().then(callback);
-    disableConnectionHolding = $rootScope.$on('experienceConnected', callback);
+    // permanent callback and first time trigger
+    disableConnectionHolding = $rootScope.$on('experienceConnected', onConnect);
+    isConnected().then(function(connected) {
+      if (!connected) onConnect();
+    });
 
     return $q.resolve();
   };
@@ -255,7 +257,7 @@ angular.module('experience.services.experience', [
     return setColor('#000000');
   };
 
-  var scoreChangedCallback = function(data) {
+  var scoreChangedCallback = function(uuid, data) {
     // get score from BLE raw data
     var score = new Float32Array(data)[0];
 
@@ -291,7 +293,11 @@ angular.module('experience.services.experience', [
       isMeasuring().then(function(measuring) {
         if (measuring) {
           // read previous scores
-          $cordovaBLE.read(deviceID, bls.experience.uuid, uuid).then(scoreChangedCallback);
+          angular.forEach(scoreUUIDs, function(uuid) {
+            $cordovaBLE.read(deviceID, bls.experience.uuid, uuid).then(function(data) {
+              scoreChangedCallback(uuid, data);
+            });
+          });
 
         } else {
           // delete previous scores
@@ -305,7 +311,9 @@ angular.module('experience.services.experience', [
 
       // for each score type
       angular.forEach(scoreUUIDs, function(uuid) {
-        $cordovaBLE.startNotification(deviceID, bls.experience.uuid, uuid, scoreChangedCallback);
+        $cordovaBLE.startNotification(deviceID, bls.experience.uuid, uuid, function(data) {
+          scoreChangedCallback(uuid, data);
+        });
       });
 
       // write timeout
