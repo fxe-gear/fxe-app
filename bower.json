@@ -7,7 +7,7 @@
   "dependencies": {
     "angular-chart.js": "~0.8.8",
     "Chart.js": "~1.0.2",
-    "ngstorage": "~0.3.10",
+    "ngstorage": "~0.4.00",
     "ionic": "~1.2.4",
     "angular": "~1.4.8",
     "stacktrace-js": "~1.0.1",
