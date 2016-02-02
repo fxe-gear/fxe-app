@@ -1,0 +1,14 @@
+<ion-view title="Friends">
+  <ion-content class="friends">
+
+    <div class="list">
+      <div class="item item-avatar dark" ng-repeat="person in friends.facebook track by person.id">
+        <img src="{{ ::person.picture }}" alt="avatar">
+        <h2 class="dark">{{ ::person.name | date:'short' }}</h2>
+        <p><strong>0 points</strong> in this week</p>
+      </div>
+      <p class="item dark no-result" ng-hide="friends.facebook.length">None of your friends is using Experience.</p>
+    </div>
+
+  </ion-content>
+</ion-view>

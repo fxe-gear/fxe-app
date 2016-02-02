@@ -49,7 +49,7 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
       $cordovaSQLite.deleteDB({
         name: 'store.sqlite',
       });
-      $state.go('welcome');
+      ionic.Platform.exitApp();
     });
   };
 

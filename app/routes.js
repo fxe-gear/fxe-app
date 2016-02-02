@@ -75,6 +75,16 @@ angular.module('experience.routes', [])
     },
   });
 
+  $stateProvider.state('main.friends', {
+    url: '/friends',
+    views: {
+      friends: {
+        templateUrl: 'main/friends/friends.html',
+        controller: 'FriendsController',
+      },
+    },
+  });
+
   $stateProvider.state('main.settings', {
     url: '/settings',
     views: {

@@ -18,7 +18,7 @@
         <h2 class="dark">Lesson {{ ::lesson.startTime | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
       </a>
-      <p class="item dark no-lessons" ng-hide="lessons.length">No lesson found, go jumping!</p>
+      <p class="item dark no-result" ng-hide="lessons.length">No lesson found, go jumping!</p>
     </div>
 
 

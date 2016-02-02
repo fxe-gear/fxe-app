@@ -44,6 +44,16 @@ angular.module('experience.services.store', [
       age: null,
       gender: null,
       units: null,
+
+      friends: {
+        loaded: {
+          // mktime
+          facebook: null,
+          google: null,
+        },
+        facebook: [],
+        google: [],
+      },
     },
   });
   $localStorage.$default({

@@ -11,6 +11,7 @@ angular.module('experience', [
   'experience.controllers.welcome',
   'experience.controllers.account',
   'experience.controllers.history',
+  'experience.controllers.friends',
   'experience.controllers.jumping',
   'experience.controllers.lesson',
   'experience.controllers.login',

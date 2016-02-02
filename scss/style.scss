@@ -45,7 +45,7 @@
   }
 }
 .platform-android .tab-title {
-  padding-left: 1em;
+  padding-left: .3em;
   font-size: .8rem;
 }
 
@@ -204,8 +204,6 @@ form {
   }
 }
 
-.history {
-  .no-lessons {
-    text-align: center;
-  }
+.no-result {
+  text-align: center;
 }
