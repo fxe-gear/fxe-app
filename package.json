@@ -32,7 +32,10 @@
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
     "com.ionic.keyboard",
-    "cordova-plugin-ble-central",
+    {
+      "id": "cordova-plugin-ble-central",
+      "locator": "../cordova-plugin-ble-central"
+    },
     {
       "id": "cordova-sqlite-storage",
       "locator": "https://github.com/litehelpers/Cordova-sqlite-storage.git"
