@@ -9,7 +9,7 @@ var module = angular.module('experience.controllers.lesson', [
 // interval used in diff graph (in miliseconds)
 module.constant('diffGraphInterval', 180 * 1e3);
 
-var LessonController = function($scope, $cordovaSocialSharing, $ionicPopup, $cordovaToast, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson) {
+var LessonController = function($scope, $cordovaSocialSharing, $ionicPopup, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson) {
 
   var share = function() {
     // TODO Facebook for Android not working! http://ngcordova.com/docs/plugins/socialSharing/

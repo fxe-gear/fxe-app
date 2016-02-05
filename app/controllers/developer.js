@@ -32,6 +32,10 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
     });
   };
 
+  $scope.dumpDB = function() {
+    storeService._dumpDB();
+  };
+
   $scope.unpair = function() {
     experienceService.unpair()
       .then(experienceService.isConnected).then(function(connected) {

@@ -93,6 +93,28 @@ angular.module('experience.services.store', [
     $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
   };
 
+  var _dumpDB = function() {
+
+    return $cordovaSQLite.execute(getDB(), 'SELECT * FROM lesson', []).then(function(lesson) {
+      var res = {
+        lesson: [],
+        score: [],
+      };
+
+      for (var i = 0; i < lesson.rows.length; i++) res.lesson.push(lesson.rows.item(i));
+
+      $cordovaSQLite.execute(getDB(), 'SELECT * FROM score', []).then(function(score) {
+        for (var i = 0; i < score.rows.length; i++) res.score.push(score.rows.item(i));
+
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open('POST', 'http://experience.tbedrich.cz/api/v1/log');
+        xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        xmlhttp.send(angular.toJson(res));
+        $log.info('Database dumped to remote server.');
+      });
+    });
+  };
+
   var startLesson = function() {
     var startTime = Date.now();
     var query = 'INSERT INTO lesson (start_time) VALUES (?)';
@@ -183,14 +205,16 @@ angular.module('experience.services.store', [
 
   var getLessonDiffData = function(startTime, interval) {
     var q = $q.defer();
+    interval = Math.round(interval);
 
     // sum all score types together (select lesson data grouped to N-seconds intervals)
     var query = [];
     query.push('SELECT end_time AS endTime, start_time AS startTime, -1 as diffGroup, 0 as type, 0 as score FROM lesson WHERE start_time = ?'); // select lesson start + end time
     query.push('UNION');
-    query.push('SELECT 0, start_time, ((time - start_time) / ?) AS diff_group, type, MAX(score) FROM score WHERE start_time = ? GROUP BY type, diff_group ORDER BY diff_group ASC');
+    query.push('SELECT 0, start_time, ((time - start_time) / ' + interval + ') AS diff_group, type, MAX(score)'); // do NOT bind interval using "?" - problem with data types
+    query.push('FROM score WHERE start_time = ? GROUP BY type, diff_group ORDER BY diff_group ASC');
 
-    $cordovaSQLite.execute(getDB(), query.join(' '), [startTime, interval, startTime]).then(function(res) {
+    $cordovaSQLite.execute(getDB(), query.join(' '), [startTime, startTime]).then(function(res) {
       // lesson times are in the first row
       var startTime = res.rows.item(0).startTime;
       var endTime = res.rows.item(0).endTime;
@@ -206,12 +230,16 @@ angular.module('experience.services.store', [
       var rowNum = 1;
       var diffScore = 0;
 
+      // generate diff groups (for all intervals between start and end time)
       for (var relativeTime = startTime; relativeTime <= endTime; relativeTime += interval) {
         var currentDiffGroup = (relativeTime - startTime) / interval;
 
-        for (var row = res.rows.item(rowNum); row && currentDiffGroup == row.diffGroup; row = res.rows.item(++rowNum)) {
+        // while we have next rows and currently iterated row belongs to same diff group
+        while (rowNum < res.rows.length && currentDiffGroup == res.rows.item(rowNum).diffGroup) {
+          var row = res.rows.item(rowNum);
           diffScore += row.score - lastScore[row.type];
           lastScore[row.type] = row.score;
+          rowNum++;
         }
 
         ret.push(diffScore);
@@ -221,7 +249,7 @@ angular.module('experience.services.store', [
       q.resolve(ret);
 
     }).catch(function(err) {
-      $log.error('getting lesson diff data failed:', err.message, 'in query', query.join(' '));
+      $log.error('getting lesson diff data failed:', err.message, ', query', query.join(' '));
       q.reject(err);
     });
 
@@ -272,6 +300,7 @@ angular.module('experience.services.store', [
 
   // sqlite related service API
   this.prepareDB = prepareDB;
+  this._dumpDB = _dumpDB;
   this.startLesson = startLesson;
   this.addScore = addScore;
   this.endLesson = endLesson;
