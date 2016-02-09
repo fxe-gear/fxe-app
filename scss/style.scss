@@ -1,36 +1,22 @@
 @import "variables";
-
 // ionic components overrides ----------------------------------------------------------------------
-
 .pane {
-  background: $base-background-color url('../img/background.jpg') no-repeat center fixed;
+  background: $base-background-color url(../img/background.jpg) no-repeat center fixed;
   background-size: cover;
-
-  // &:before {
-  //   content: " ";
-  //   display: block;
-  //   position: absolute;
-  //   top: 0;
-  //   left: 0;
-  //   right: 0;
-  //   height: 44px;
-  //   background-color: red;
-  // }
 }
-
 /*
   Allow angular.js to be loaded in body, hiding cloaked elements until
   templates compile.  The !important is important given that there may be
   other selectors that are more specific or come later and might alter display.
  */
-[ng\:cloak], [ng-cloak], .ng-cloak {
+[ng\:cloak],
+[ng-cloak],
+.ng-cloak {
   display: none !important;
 }
-
 // tabs
 .tabs-balanced>.tabs {
   background-color: rgba($balanced, $bar-transparency) !important;
-
   // add borders on iOS
   .platform-ios & {
     padding-top: 0;
@@ -39,76 +25,66 @@
       padding-top: 2px;
     }
     .tab-item-active {
-      padding-top: 0px;
+      padding-top: 0;
       border-top: 2px solid $balanced !important;
     }
   }
 }
 .platform-android .tab-title {
-  padding-left: .3em;
-  font-size: .8rem;
+  padding-left: 0.3em;
+  font-size: 0.8rem;
 }
-
 // nav bar
 .platform-ios .bar {
   border-bottom: 1px solid rgba($balanced, .4) !important;
 }
-
 // because of statusbar
 .platform-ios .scroll-content:not(.has-header) {
   padding-top: 1rem;
 }
-
 // popup
-.popup, .popup-title, .popup-sub-title, .popup-body {
+.popup,
+.popup-title,
+.popup-sub-title,
+.popup-body {
   color: #000;
 }
 .popup-head {
   border-bottom: 1px solid $dark;
 }
-
 // button-bar inside list
 .list .item-input .button-bar {
   flex-basis: 65%;
   padding-right: $padding-large-horizontal;
 }
-
 form {
   .required .input-label::after {
     content: "*";
     color: $assertive;
-    margin-left: .2em;
+    margin-left: 0.2em;
   }
-
   .invalid {
     box-shadow: inset 0 0 0 1000px rgba($assertive, .15);
     border-bottom: 3px solid $assertive;
     padding-bottom: $padding-base-vertical - 3px;
-    .input-label, .ng-invalid {
+    .input-label,
+    .ng-invalid {
       color: $assertive;
     }
   }
-
   .validation {
     color: $assertive;
   }
-
 }
-
-
-
 // custom views ------------------------------------------------------------------------------------
-
 .shadow {
-  text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 1);
 }
-
 .welcome {
   width: 100%;
   height: 100%;
   overflow: hidden;
   position: absolute;
-
   .inner {
     $height: 400px;
     text-align: center;
@@ -117,42 +93,37 @@ form {
     height: $height;
     max-width: 400px;
     margin: -$height/2 auto 0;
-
     .buttons {
       animation: fadeIn 2s;
     }
   }
 }
-
 .scanning {
   text-align: center;
-
   .status {
     margin-top: 2rem;
     .text {
-      text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+      text-shadow: 0 0 4px rgba(0, 0, 0, 1);
       font-size: 2rem;
       line-height: 1.4em;
       margin: 1em 0;
     }
   }
-
   .ignored {
     margin-top: 3rem;
     &.ng-enter {
       animation: fadeIn 1s;
     }
     &.ng-leave {
-      animation: fadeOut .5s;
+      animation: fadeOut 0.5s;
     }
   }
 }
-
 .pairing {
   text-align: center;
   .color {
     .step {
-      font-size: .8rem;
+      font-size: 0.8rem;
       margin: 1em 0;
     }
     .led {
@@ -164,15 +135,15 @@ form {
       animation: infinite pulse 2s;
     }
     .question {
-      text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+      text-shadow: 0 0 4px rgba(0, 0, 0, 1);
       font-size: 2rem;
       line-height: 1.4em;
       margin: 1em 0;
     }
   }
 }
-
-.jumping, .lesson {
+.jumping,
+.lesson {
   text-align: center;
   .reconnecting {
     position: absolute;
@@ -186,24 +157,29 @@ form {
     border-radius: $border-radius-large;
   }
   .label {
-    text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+    text-shadow: 0 0 4px rgba(0, 0, 0, 1);
     font-size: 1.2rem;
   }
-  .score, .time {
-    text-shadow: 0px 0px 4px rgba(0, 0, 0, 1);
+  .score,
+  .time {
+    text-shadow: 0 0 4px rgba(0, 0, 0, 1);
     font-size: 3rem;
     line-height: 1.4em;
     margin-bottom: 1rem;
   }
   .score {
     font-size: 5rem;
-    transition: transform .1s ease-out;
+    transition: transform 0.1s ease-out;
     &.fresh {
-        transform: scale(1.4);
+      transform: scale(1.4);
     }
   }
 }
-
+.history {
+  .first {
+    background-color: mix($balanced, white, 20%);
+  }
+}
 .no-result {
   text-align: center;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.jumping.experience" version="0.4.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Experience</name>
-  <description/>
+  <description></description>
   <author email="ja@tbedrich.cz" href="http://tbedrich.cz/">Tomáš Bedřich</author>
   <content src="index.html"/>
   <access origin="*"/>
