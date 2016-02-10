@@ -1,7 +1,13 @@
 <ion-view title="{{ user.name }}">
   <ion-content padding="true" class="history">
 
-    <h2 class="shadow text-center">Your recent activity</h2>
+  <div class="button-bar">
+    <button ng-click="changeGrouping('days')" ng-class="{'button-outline': grouping != 'days'}" class="button button-light button-small">{{ ::historyChartLength.days }} days</button>
+    <!-- <button ng-click="changeGrouping('weeks')" ng-class="{'button-outline': grouping != 'weeks'}" class="button button-light button-small">{{ ::historyChartLength.weeks }} weeks</button> -->
+    <!-- <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">{{ ::historyChartLength.months }} months</button> -->
+    <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">1 year</button>
+  </div>
+
     <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
       {
         barStrokeWidth: 1,
@@ -14,7 +20,7 @@
       <div class="item item-divider">
         History
       </div>
-      <a class="item dark" ui-sref="main.lesson({startTime: lesson.startTime})" ng-repeat="lesson in lessons track by lesson.startTime" ng-class="{'first': $first}">
+      <a class="item dark" ui-sref="main.lesson({startTime: lesson.startTime})" ng-repeat="lesson in lessons track by lesson.startTime" ng-class="{'last': $first}">
         <h2 class="dark">Lesson {{ ::lesson.startTime | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
       </a>

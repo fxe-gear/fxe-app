@@ -1,7 +1,7 @@
 @import "variables";
 // ionic components overrides ----------------------------------------------------------------------
 .pane {
-  background: $base-background-color url(../img/background.jpg) no-repeat center fixed;
+  background: $base-background-color url("../img/background.jpg") no-repeat center fixed;
   background-size: cover;
 }
 /*
@@ -176,8 +176,14 @@ form {
   }
 }
 .history {
-  .first {
-    background-color: mix($balanced, white, 20%);
+  .chart {
+    margin: 1em auto 0;
+  }
+  .list .item {
+    background-color: mix(gray, white, 10%);
+    &.last {
+      background-color: white;
+    }
   }
 }
 .no-result {
