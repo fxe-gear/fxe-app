@@ -2,7 +2,7 @@
 
 angular.module('experience.routes', [])
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function ($stateProvider, $urlRouterProvider) {
 
   $stateProvider.state('welcome', {
     url: '/welcome',
@@ -67,7 +67,7 @@ angular.module('experience.routes', [])
         templateUrl: 'main/me/lesson.html',
         controller: 'LessonController',
         resolve: {
-          lesson: function($stateParams, storeService) {
+          lesson: function ($stateParams, storeService) {
             return $stateParams.startTime ? storeService.getLesson($stateParams.startTime) : storeService.getLastLesson();
           },
         },
@@ -115,7 +115,7 @@ angular.module('experience.routes', [])
     },
   });
 
-  $urlRouterProvider.otherwise(function($injector, $location) {
+  $urlRouterProvider.otherwise(function ($injector, $location) {
     var storeService = $injector.get('storeService');
 
     if (storeService.isPaired())

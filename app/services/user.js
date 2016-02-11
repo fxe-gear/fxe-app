@@ -10,17 +10,17 @@ angular.module('experience.services.user', [
 
 .constant('friendsUpdateInterval', 1e3 * 60 * 60 * 24 * 7) // = one week in miliseconds
 
-.service('userService', function($rootScope, $http, $log, $cordovaFacebook, storeService, $q, friendsUpdateInterval) {
+.service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, $q, friendsUpdateInterval) {
 
   var user = storeService.getUser();
 
-  var getAge = function(ISOdate) {
+  var getAge = function (ISOdate) {
     return Math.floor((Date.now() - Date.parse(ISOdate)) / (1000 * 60 * 60 * 24 * 365));
   };
 
-  var loginFacebook = function() {
+  var loginFacebook = function () {
     return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
-      .then(function(response) {
+      .then(function (response) {
         user.provider = 'facebook';
         user.accessToken = response.authResponse.accessToken;
         user.expiresIn = response.authResponse.expiresIn;
@@ -28,12 +28,12 @@ angular.module('experience.services.user', [
       });
   };
 
-  var loginGoogle = function() {
+  var loginGoogle = function () {
     var q = $q.defer();
 
     window.plugins.googleplus.login({
       offline: true,
-    }, function(response) {
+    }, function (response) {
       user.provider = 'google';
       user.accessToken = response.oauthToken;
       user.expiresIn = 0;
@@ -51,27 +51,27 @@ angular.module('experience.services.user', [
     return q.promise;
   };
 
-  var loadFromFacebook = function() {
+  var loadFromFacebook = function () {
     return $http.get('https://graph.facebook.com/v2.5/me', {
       params: {
         // TODO handle token expiration
         access_token: user.accessToken,
         fields: 'email,name,birthday,gender,locale',
       },
-    }).then(function(response) {
+    }).then(function (response) {
       user.email = response.data.email;
       user.name = response.data.name;
       user.gender = response.data.gender;
       user.age = getAge(response.data.birthday);
       user.units = response.data.locale == 'en' ? 'imperial' : 'metric';
       $log.info('user data loaded from Facebook');
-    }).catch(function(error) {
+    }).catch(function (error) {
       $log.error('Facebook graph API error: ' + error);
       throw error;
     });
   };
 
-  var loadFromGoogle = function() {
+  var loadFromGoogle = function () {
     return $http.get('https://www.googleapis.com/plus/v1/people/me', {
       params: {
         fields: 'emails,displayName,birthday,gender,language',
@@ -79,16 +79,16 @@ angular.module('experience.services.user', [
       headers: {
         Authorization: 'Bearer ' + user.accessToken,
       },
-    }).then(function(response) {
+    }).then(function (response) {
       user.units = response.language == 'en' ? 'imperial' : 'metric';
       $log.info('user data loaded from Google');
-    }).catch(function(error) {
+    }).catch(function (error) {
       $log.error('Google API error: ' + error);
       throw error;
     });
   };
 
-  var makeFriendObject = function(provider, id, name, picture) {
+  var makeFriendObject = function (provider, id, name, picture) {
     return {
       provider: provider,
       id: id,
@@ -97,7 +97,7 @@ angular.module('experience.services.user', [
     };
   };
 
-  var loadFriendsFacebook = function(force) {
+  var loadFriendsFacebook = function (force) {
     if (!force && user.friends.loaded.facebook != null && (new Date() - user.friends.loaded.facebook) < friendsUpdateInterval) {
       return;
     }
@@ -109,15 +109,15 @@ angular.module('experience.services.user', [
         access_token: user.accessToken,
         fields: 'name,id,picture',
       },
-    }).then(function(response) {
+    }).then(function (response) {
       user.friends.facebook = [];
-      angular.forEach(response.data.data, function(person) {
+      angular.forEach(response.data.data, function (person) {
         user.friends.facebook.push(makeFriendObject('facebook', person.id, person.name, person.picture.data.url));
       });
 
       user.friends.loaded.facebook = Date.now();
       $log.info('friends loaded from Facebook');
-    }).catch(function(error) {
+    }).catch(function (error) {
       $log.error('Facebook graph API error: ' + error);
       throw error;
     });

@@ -2,6 +2,6 @@
 
 var module = angular.module('experience.controllers.about', []);
 
-var AboutController = function($scope) {};
+var AboutController = function ($scope) {};
 
 module.controller('AboutController', AboutController);

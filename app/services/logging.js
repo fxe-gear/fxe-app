@@ -4,22 +4,22 @@
 
 var loggingModule = angular.module('talis.services.logging', []);
 
-loggingModule.service('stackTraceService', function() {
+loggingModule.service('stackTraceService', function () {
   return StackTrace;
 });
 
 loggingModule.provider('$exceptionHandler', {
-  $get: function(exceptionLoggingService) {
+  $get: function (exceptionLoggingService) {
     return (exceptionLoggingService);
   },
 });
 
-loggingModule.factory('exceptionLoggingService', ['$log', '$window', 'stackTraceService', function($log, $window, stackTraceService) {
+loggingModule.factory('exceptionLoggingService', function ($log, $window, stackTraceService) {
   function error(exception, cause) {
     $log.error.apply($log, arguments);
     var errorMessage = exception.toString();
 
-    stackTraceService.fromError(exception).then(function(stacktrace) {
+    stackTraceService.fromError(exception).then(function (stacktrace) {
       try {
         // do NOT use angular service
         var xmlhttp = new XMLHttpRequest();
@@ -41,4 +41,4 @@ loggingModule.factory('exceptionLoggingService', ['$log', '$window', 'stackTrace
   };
 
   return (error);
-}]);
+});

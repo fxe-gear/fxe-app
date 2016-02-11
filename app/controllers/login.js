@@ -2,6 +2,6 @@
 
 var module = angular.module('experience.controllers.login', []);
 
-var LoginController = function() {};
+var LoginController = function () {};
 
 module.controller('LoginController', LoginController);

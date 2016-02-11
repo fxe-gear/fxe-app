@@ -7,23 +7,23 @@ module.constant('historyChartLength', {
   months: 12,
 });
 
-var HistoryController = function($scope, storeService, dateFilter, historyChartLength) {
+var HistoryController = function ($scope, storeService, dateFilter, historyChartLength) {
   $scope.user = storeService.getUser();
   $scope.lessons = null;
   $scope.historyChartLength = historyChartLength;
   $scope.grouping = null;
 
   var groupingFn = {
-    days: function(d1, d2) {
+    days: function (d1, d2) {
       return (d1.getDate() == d2.getDate() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear());
     },
 
-    months: function(d1, d2) {
+    months: function (d1, d2) {
       return (d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear());
     },
   };
 
-  var prepareChartData = function() {
+  var prepareChartData = function () {
 
     $scope.chartLabels = [];
     $scope.chartData = [
@@ -62,13 +62,13 @@ var HistoryController = function($scope, storeService, dateFilter, historyChartL
     }
   };
 
-  $scope.changeGrouping = function(type) {
+  $scope.changeGrouping = function (type) {
     $scope.grouping = type;
     prepareChartData();
   };
 
-  $scope.$on('$ionicView.beforeEnter', function() {
-    storeService.getAllLessons().then(function(lessons) {
+  $scope.$on('$ionicView.beforeEnter', function () {
+    storeService.getAllLessons().then(function (lessons) {
       $scope.lessons = lessons;
       $scope.changeGrouping('days');
     });

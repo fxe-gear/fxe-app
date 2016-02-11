@@ -4,77 +4,77 @@ var module = angular.module('experience.controllers.scanning', [
   'experience.services.experience',
 ]);
 
-var ScanningController = function($scope, $state, $ionicPopup, experienceService) {
+var ScanningController = function ($scope, $state, $ionicPopup, experienceService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
 
-  $scope.clearIgnored = function() {
+  $scope.clearIgnored = function () {
     experienceService.clearIgnored();
     experienceService.stopScan().then(enter);
   };
 
-  var enter = function() {
+  var enter = function () {
     $scope.ignoredDevices = 0;
     enableBluetooth()
-    .then(disconnect)
-    .then(scan)
-    .then(connect)
-    .then(function() {
-      // prevent changing state when the process has aleready been canceled
-      // if ($state.current.controller != 'ScanningController') return;
-      $state.go('pairing');
-    }, null, function(device) {
-      // ignored device found
-      $scope.ignoredDevices++;
-    });
+      .then(disconnect)
+      .then(scan)
+      .then(connect)
+      .then(function () {
+        // prevent changing state when the process has aleready been canceled
+        // if ($state.current.controller != 'ScanningController') return;
+        $state.go('pairing');
+      }, null, function (device) {
+        // ignored device found
+        $scope.ignoredDevices++;
+      });
   };
 
   $scope.tryAgain = enter;
 
-  var enableBluetooth = function() {
+  var enableBluetooth = function () {
     $scope.working = true;
     $scope.status = 'Enabling bluetooth...';
-    return experienceService.enable().catch(function(error) {
+    return experienceService.enable().catch(function (error) {
       $scope.working = false;
       $scope.status = 'Cannot enable bluetooth. Please enable it manually.';
       throw error;
     });
   };
 
-  var disconnect = function() {
+  var disconnect = function () {
     $scope.working = true;
     $scope.status = 'Disconnecting previously connected devices...';
-    return experienceService.isConnected().then(function(connected) {
+    return experienceService.isConnected().then(function (connected) {
       if (connected) experienceService.disconnect();
-    }).catch(function(error) {
+    }).catch(function (error) {
       $scope.working = false;
       $scope.status = 'Disconnecting failed';
       throw error;
     });
   };
 
-  var scan = function() {
+  var scan = function () {
     $scope.working = true;
     $scope.status = 'Scanning...';
-    return experienceService.scan().catch(function(error) {
+    return experienceService.scan().catch(function (error) {
       $scope.working = false;
       $scope.status = 'Scanning failed';
       throw error;
     });
   };
 
-  var connect = function(device) {
+  var connect = function (device) {
     $scope.working = true;
     $scope.status = 'Connecting...';
-    return experienceService.connect(device).catch(function(error) {
+    return experienceService.connect(device).catch(function (error) {
       $scope.working = false;
       $scope.status = 'Connecting failed';
       throw error;
     });
   };
 
-  var exit = function() {
+  var exit = function () {
     $scope.working = false;
     $scope.status = 'Ready';
     return experienceService.stopScan();

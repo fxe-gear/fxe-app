@@ -46,7 +46,7 @@ var bowerJsFilter = [
   '!*.map.js',
 ];
 
-gulp.task('styles', function(done) {
+gulp.task('styles', function (done) {
   // copy bower component styles
   gulp.src(mainBowerFiles())
     .pipe(filter(bowerCssFilter))
@@ -64,7 +64,7 @@ gulp.task('styles', function(done) {
   done();
 });
 
-gulp.task('scripts', function(done) {
+gulp.task('scripts', function (done) {
 
   // copy bower component scripts
   gulp.src(mainBowerFiles())
@@ -80,7 +80,7 @@ gulp.task('scripts', function(done) {
   done();
 });
 
-gulp.task('templates', function(done) {
+gulp.task('templates', function (done) {
   gulp.src(appPaths.templates)
     .pipe(templateCache(templateCacheOptions))
     .pipe(gulp.dest('./www/js'));
@@ -89,7 +89,7 @@ gulp.task('templates', function(done) {
   done();
 });
 
-gulp.task('tag-git-head', function(done) {
+gulp.task('tag-git-head', function (done) {
   gulp.src('./www/js/templates.js')
     .pipe(replace(
       new RegExp('gulp-replace:git-head-sha:\\w+'),
@@ -100,7 +100,7 @@ gulp.task('tag-git-head', function(done) {
   done();
 });
 
-gulp.task('inject', function(done) {
+gulp.task('inject', function (done) {
   var libStream = gulp.src([
     './www/lib/Chart.js',
     './www/lib/angular.js',
@@ -129,7 +129,7 @@ gulp.task('inject', function(done) {
   done();
 });
 
-gulp.task('watch', function(done) {
+gulp.task('watch', function (done) {
   gulp.watch(appPaths.styles, ['styles']);
   gulp.watch(appPaths.scripts, ['scripts']);
   gulp.watch(appPaths.templates, ['templates']);

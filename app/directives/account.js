@@ -5,7 +5,7 @@ angular.module('experience.directives.account', [
   'ngMessages',
 ])
 
-.directive('jumpAccount', function() {
+.directive('jumpAccount', function () {
   return {
     restrict: 'E',
     transclude: true,

@@ -7,7 +7,7 @@ var module = angular.module('experience.controllers.developer', [
   'ngStorage',
 ]);
 
-var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite, experienceService, storeService) {
+var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, experienceService, storeService) {
 
   $localStorage.$default({
     websocket: {
@@ -18,7 +18,7 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
   $scope.extremesSubscribed = false;
   $scope.websocket = $localStorage.websocket;
 
-  $scope.toggleSubscribeExtremes = function() {
+  $scope.toggleSubscribeExtremes = function () {
     var action;
 
     if (!$scope.extremesSubscribed) {
@@ -27,28 +27,28 @@ var DeveloperController = function($scope, $state, $localStorage, $cordovaSQLite
       action = experienceService.unsubscribeExtremes();
     }
 
-    action.then(function() {
+    action.then(function () {
       $scope.extremesSubscribed = !$scope.extremesSubscribed;
     });
   };
 
-  $scope.dumpDB = function() {
+  $scope.dumpDB = function () {
     storeService._dumpDB();
   };
 
-  $scope.unpair = function() {
+  $scope.unpair = function () {
     experienceService.unpair()
-      .then(experienceService.isConnected).then(function(connected) {
+      .then(experienceService.isConnected).then(function (connected) {
         if (connected) return experienceService.disconnect();
-      }).then(function() {
+      }).then(function () {
         $state.go('scanning');
       });
   };
 
-  $scope.clearAll = function() {
-    experienceService.isConnected().then(function(connected) {
+  $scope.clearAll = function () {
+    experienceService.isConnected().then(function (connected) {
       if (connected) return experienceService.disconnect();
-    }).then(function() {
+    }).then(function () {
       $localStorage.$reset();
       $cordovaSQLite.deleteDB({
         name: 'store.sqlite',

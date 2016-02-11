@@ -27,10 +27,10 @@ angular.module('experience', [
   'experience.templates',
 ])
 
-.run(function($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, experienceService) {
+.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, experienceService) {
   $ionicConfig.scrolling.jsScrolling(false);
 
-  $ionicPlatform.ready(function() {
+  $ionicPlatform.ready(function () {
     // keyboard setup
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -48,7 +48,7 @@ angular.module('experience', [
     $rootScope.platform = ionic.Platform.platform();
   });
 
-  $ionicPlatform.registerBackButtonAction(function(e) {
+  $ionicPlatform.registerBackButtonAction(function (e) {
     e.preventDefault();
 
     if ($ionicHistory.backView()) {
@@ -56,7 +56,7 @@ angular.module('experience', [
 
     } else {
       // this is the history root: disconnect and exit
-      experienceService.isConnected().then(function(connected) {
+      experienceService.isConnected().then(function (connected) {
         if (connected) experienceService.disconnect();
       });
 
@@ -67,18 +67,18 @@ angular.module('experience', [
   }, 101);
 
   // app restored from background
-  document.addEventListener('resume', function(event) {
+  document.addEventListener('resume', function (event) {
     $rootScope.$broadcast('resume');
   });
 
   // app paused (to background)
-  document.addEventListener('pause', function(event) {
+  document.addEventListener('pause', function (event) {
     $rootScope.$broadcast('pause');
   });
 
   // related to live reload
-  window.onbeforeunload = function(e) {
-    experienceService.isConnected().then(function(connected) {
+  window.onbeforeunload = function (e) {
+    experienceService.isConnected().then(function (connected) {
       if (connected) experienceService.disconnect();
     });
 
@@ -87,7 +87,7 @@ angular.module('experience', [
   };
 
   // related to live reload
-  window.onload = function(e) {
+  window.onload = function (e) {
     $rootScope.$broadcast('livereload');
   };
 
