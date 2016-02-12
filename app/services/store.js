@@ -153,6 +153,21 @@ angular.module('experience.services.store', [
     return query;
   };
 
+  var getLessonCount = function () {
+    var q = $q.defer();
+
+    var query = 'SELECT COUNT(1) as count FROM lesson';
+
+    $cordovaSQLite.execute(getDB(), query, []).then(function (res) {
+      q.resolve(res.rows.item(0).count);
+    }).catch(function (err) {
+      $log.error('getting lesson count failed:', err.message, 'in query', query);
+      q.reject(err);
+    });
+
+    return q.promise;
+  };
+
   var getLastLesson = function () {
     return getLesson(-1);
   };
@@ -329,6 +344,7 @@ angular.module('experience.services.store', [
   this.startLesson = startLesson;
   this.addScore = addScore;
   this.endLesson = endLesson;
+  this.getLessonCount = getLessonCount;
   this.getCurrentLesson = getCurrentLesson;
   this.getLastLesson = getLastLesson;
   this.getAllLessons = getAllLessons;

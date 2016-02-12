@@ -10,14 +10,27 @@ module.constant('historyChartLength', {
 var HistoryController = function ($scope, storeService, dateFilter, historyChartLength) {
   $scope.user = storeService.getUser();
   $scope.historyChartLength = historyChartLength;
-  $scope.lessons = [];
-  $scope.average = {
-    score: 0,
-    duration: 0,
-  };
-  $scope.grouping = 'days';
+  $scope.lessons = null;
+  $scope.average = null;
+  $scope.grouping = null;
 
-  var initialDate = null;
+  var startDate = null;
+  var endDate = null;
+  var allLessonCount = 0;
+
+  // requires $scope.grouping to be set
+  var shiftStartDate = function () {
+    startDate = new Date(endDate);
+
+    if ($scope.grouping == 'days') {
+      startDate.setDate(startDate.getDate() - historyChartLength.days);
+    } else if ($scope.grouping == 'months') {
+      startDate.setMonth(startDate.getMonth() - historyChartLength.months, 1);
+    }
+
+    // start of the day
+    startDate.setHours(0, 0, 0, 0);
+  };
 
   var groupingFn = {
     days: function (d1, d2) {
@@ -29,21 +42,8 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
     },
   };
 
-  // requires $scope.grouping to be set
-  var computeInitialDate = function () {
-    initialDate = new Date();
-    if ($scope.grouping == 'days') {
-      initialDate.setDate(initialDate.getDate() - historyChartLength.days);
-    } else if ($scope.grouping == 'months') {
-      initialDate.setMonth(initialDate.getMonth() - historyChartLength.months, 1);
-    }
-
-    // start of the day
-    initialDate.setHours(0, 0, 0, 0);
-  };
-
   // requires $scope.lessons to be set
-  var prepareChartData = function () {
+  var fillChartData = function () {
 
     $scope.chartLabels = [];
     $scope.chartData = [
@@ -54,8 +54,7 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
     var currentLesson = $scope.lessons.length - 1;
 
     // setup for cycle
-    var date = new Date(initialDate);
-    var today = new Date();
+    var date = new Date(startDate);
 
     do {
       // take all lessons for this group and sum their score
@@ -79,9 +78,12 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
 
   };
 
-  var computeAverages = function () {
-    $scope.average.score = 0;
-    $scope.average.duration = 0;
+  // requires $scope.lessons to be set
+  var fillAverages = function () {
+    $scope.average = {
+      score: 0,
+      duration: 0,
+    };
 
     for (var i = 0; i < $scope.lessons.length; i++) {
       var lesson = $scope.lessons[i];
@@ -89,22 +91,46 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
       $scope.average.duration += lesson.duration;
     }
 
-    $scope.average.score /= $scope.lessons.length;
-    $scope.average.duration /= $scope.lessons.length;
+    if ($scope.lessons.length) {
+      // to prevent zero division
+      $scope.average.score /= $scope.lessons.length;
+      $scope.average.duration /= $scope.lessons.length;
+    }
+  };
+
+  $scope.canLoadMore = function () {
+    return $scope.lessons.length < allLessonCount;
+  };
+
+  $scope.loadMore = function () {
+    shiftStartDate();
+
+    // load lessons for this date interval
+    var promise = storeService.getLessonsBetween(startDate.getTime(), endDate.getTime()).then(function (lessons) {
+      console.log('loadMore res', lessons);
+      for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
+      $scope.$broadcast('scroll.infiniteScrollComplete');
+    });
+
+    endDate = startDate;
+    return promise;
   };
 
   $scope.changeGrouping = function (type) {
     $scope.grouping = type;
-    computeInitialDate();
-    storeService.getLessonsBetween(initialDate.getTime(), new Date().getTime()).then(function (lessons) {
-      $scope.lessons = lessons;
-      prepareChartData();
-      computeAverages();
+    $scope.lessons = [];
+    endDate = new Date();
+    $scope.loadMore().then(function () {
+      fillChartData();
+      fillAverages();
     });
   };
 
   $scope.$on('$ionicView.beforeEnter', function () {
     $scope.changeGrouping('days');
+    storeService.getLessonCount().then(function (count) {
+      allLessonCount = count;
+    });
   });
 };
 

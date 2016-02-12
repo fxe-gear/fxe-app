@@ -43,6 +43,7 @@
       <p class="item dark no-result" ng-hide="lessons.length">No lesson found, go jumping!</p>
     </div>
 
+    <ion-infinite-scroll on-infinite="loadMore()" ng-if="canLoadMore()" distance="10%" spinner="lines"></ion-infinite-scroll>
 
   </ion-content>
 </ion-view>
