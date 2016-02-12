@@ -1,12 +1,12 @@
 <ion-view title="{{ user.name }}">
   <ion-content padding="true" class="history">
 
-  <div class="button-bar">
-    <button ng-click="changeGrouping('days')" ng-class="{'button-outline': grouping != 'days'}" class="button button-light button-small">{{ ::historyChartLength.days }} days</button>
-    <!-- <button ng-click="changeGrouping('weeks')" ng-class="{'button-outline': grouping != 'weeks'}" class="button button-light button-small">{{ ::historyChartLength.weeks }} weeks</button> -->
-    <!-- <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">{{ ::historyChartLength.months }} months</button> -->
-    <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">1 year</button>
-  </div>
+    <div class="button-bar">
+      <button ng-click="changeGrouping('days')" ng-class="{'button-outline': grouping != 'days'}" class="button button-light button-small">{{ ::historyChartLength.days }} days</button>
+      <!-- <button ng-click="changeGrouping('weeks')" ng-class="{'button-outline': grouping != 'weeks'}" class="button button-light button-small">{{ ::historyChartLength.weeks }} weeks</button> -->
+      <!-- <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">{{ ::historyChartLength.months }} months</button> -->
+      <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">1 year</button>
+    </div>
 
     <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
       {
@@ -15,6 +15,22 @@
         scaleShowVerticalLines: false,
       }
     "></canvas>
+
+    <div class="card dark averages">
+      <div class="item item-divider">
+        Averages
+      </div>
+
+      <div class="row">
+        <div class="col">Score:</div>
+        <div class="col">Time:</div>
+      </div>
+      <div class="row">
+        <div class="col"><span class="score">{{ average.score | number:2 }}</span></div>
+        <div class="col"><span class="time">{{ average.duration | msToTimeSpan }}</span></div>
+      </div>
+
+    </div>
 
     <div class="card list">
       <div class="item item-divider">

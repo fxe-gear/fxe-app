@@ -145,6 +145,14 @@ angular.module('experience.services.store', [
     return $localStorage.currentLesson;
   };
 
+  var _getLessonsQuery = function () {
+    var query = [];
+    query.push('SELECT start_time AS startTime, end_time AS endTime, duration, COALESCE(SUM(score), 0) AS score FROM');
+    query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, s.type)');
+    query.push('GROUP BY start_time');
+    return query;
+  };
+
   var getLastLesson = function () {
     return getLesson(-1);
   };
@@ -153,13 +161,30 @@ angular.module('experience.services.store', [
     return getLesson(Infinity);
   };
 
+  var getLessonsBetween = function (date1, date2) {
+    var q = $q.defer();
+
+    var query = _getLessonsQuery();
+    query.splice(-1, 0, 'WHERE end_time IS NOT NULL');
+    query.splice(-1, 0, 'AND start_time BETWEEN ? AND ?');
+    query.push('ORDER BY start_time DESC');
+
+    $cordovaSQLite.execute(getDB(), query.join(' '), [date1, date2]).then(function (res) {
+      var ret = [];
+      for (var i = 0; i < res.rows.length; i++) ret.push(res.rows.item(i));
+      q.resolve(ret);
+    }).catch(function (err) {
+      $log.error('getting lesson failed:', err.message, 'in query', query.join(' '));
+      q.reject(err);
+    });
+
+    return q.promise;
+  };
+
   var getLesson = function (startTime) {
     var q = $q.defer();
 
-    var query = [];
-    query.push('SELECT start_time AS startTime, end_time AS endTime, duration, COALESCE(SUM(score), 0) AS score FROM');
-    query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, s.type)');
-    query.push('GROUP BY start_time');
+    var query = _getLessonsQuery();
     var callback;
     var inject = [];
 
@@ -307,6 +332,7 @@ angular.module('experience.services.store', [
   this.getCurrentLesson = getCurrentLesson;
   this.getLastLesson = getLastLesson;
   this.getAllLessons = getAllLessons;
+  this.getLessonsBetween = getLessonsBetween;
   this.getLesson = getLesson;
   this.getLessonDiffData = getLessonDiffData;
 

@@ -177,7 +177,13 @@ form {
 }
 .history {
   .chart {
-    margin: 1em auto 0;
+    margin-top: 2rem;
+    margin-bottom: 0;
+  }
+  .averages {
+    .score, .time {
+      font-size: 2rem;
+    }
   }
   .list .item {
     background-color: mix(gray, white, 10%);
