@@ -2,47 +2,57 @@
 
 var module = angular.module('experience.controllers.history', []);
 
-module.constant('historyChartLength', {
-  days: 14,
-  months: 12,
-});
-
-var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilter, historyChartLength) {
+var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();
-  $scope.historyChartLength = historyChartLength;
   $scope.lessons = [];
   $scope.average = {
     score: 0,
     duration: 0,
   };
-  $scope.grouping = null;
+  $scope.range = null;
 
-  var startDate = null;
-  var endDate = null;
+  $scope.startDate = null;
+  $scope.endDate = null;
   var allLessonCount = 0;
 
-  // requires $scope.grouping to be set
-  var shiftStartDate = function () {
-    startDate = new Date(endDate);
+  // requires $scope.range to be set
+  var computeDateRange = function () {
+    $scope.endDate = new Date();
+    $scope.startDate = new Date();
 
-    if ($scope.grouping == 'days') {
-      startDate.setDate(startDate.getDate() - historyChartLength.days);
-    } else if ($scope.grouping == 'months') {
-      startDate.setMonth(startDate.getMonth() - historyChartLength.months, 1);
+    if ($scope.range == 'week') {
+      var weekDay = $scope.startDate.getDay();
+      $scope.startDate.setDate($scope.startDate.getDate() - weekDay);
+      $scope.endDate.setDate($scope.endDate.getDate() + 6 - weekDay);
+
+    } else if ($scope.range == 'month') {
+      $scope.startDate.setDate(1);
+      $scope.endDate.setMonth($scope.endDate.getMonth() + 1, 0);
+
+    } else if ($scope.range == 'year') {
+      $scope.startDate.setMonth(0, 1);
+      $scope.endDate.setMonth(12, 0);
     }
 
-    // start of the day
-    startDate.setHours(0, 0, 0, 0);
+    // start / end of the day
+    $scope.startDate.setHours(0, 0, 0, 0);
+    $scope.endDate.setHours(23, 59, 59, 999);
   };
 
-  var groupingFn = {
-    days: function (d1, d2) {
+  var isSame = {
+    day: function (d1, d2) {
       return (d1.getDate() == d2.getDate() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear());
     },
 
-    months: function (d1, d2) {
+    month: function (d1, d2) {
       return (d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear());
     },
+  };
+
+  var groupingFn = {
+    week: isSame.day,
+    month: isSame.day,
+    year: isSame.month,
   };
 
   // requires $scope.lessons to be set
@@ -58,29 +68,34 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
 
     // setup for cycle
     var end = false;
-    var date = new Date(startDate);
-    var today = new Date();
+    var date = new Date($scope.startDate);
 
     do {
-      // grouping fn returns true for today => we want to create last column
-      if (groupingFn[$scope.grouping](date, today)) end = true;
+      // grouping fn returns true for endDate => end chart (last column)
+      if (groupingFn[$scope.range](date, $scope.endDate)) end = true;
 
       // take all lessons for this group and sum their score
       var sum = 0;
-      for (; currentLesson >= 0 && groupingFn[$scope.grouping](date, new Date($scope.lessons[currentLesson].startTime)); currentLesson--) {
+      for (; currentLesson >= 0 && groupingFn[$scope.range](date, new Date($scope.lessons[currentLesson].startTime)); currentLesson--) {
         sum += $scope.lessons[currentLesson].score;
       }
 
       $scope.chartData[0].push(sum.toFixed(0));
 
       // generate date group and add label
-      if ($scope.grouping == 'days') {
-        $scope.chartLabels.push(dateFilter(date, 'shortDate'));
+      if ($scope.range == 'week') {
+        $scope.chartLabels.push(dateFilter(date, 'MM/dd'));
         date.setDate(date.getDate() + 1);
-      } else if ($scope.grouping == 'months') {
-        $scope.chartLabels.push(dateFilter(date, 'MMM y'));
+
+      } else if ($scope.range == 'month') {
+        $scope.chartLabels.push(dateFilter(date, 'd') + ordinalFilter(date.getDate()));
+        date.setDate(date.getDate() + 1);
+
+      } else if ($scope.range == 'year') {
+        $scope.chartLabels.push(dateFilter(date, 'MMM'));
         date.setMonth(date.getMonth() + 1);
       }
+
     } while (!end);
 
   };
@@ -97,44 +112,50 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
     }
 
     if ($scope.lessons.length) {
-      // to prevent zero division
+      // to prevent division by zero
       $scope.average.score /= $scope.lessons.length;
       $scope.average.duration /= $scope.lessons.length;
     }
   };
 
-  $scope.canLoadMore = function () {
-    return $scope.lessons.length < allLessonCount;
-  };
-
-  $scope.loadMore = function () {
-    shiftStartDate();
-
-    // load lessons for this date interval
-    var promise = storeService.getLessonsBetween(startDate.getTime(), endDate.getTime()).then(function (lessons) {
-      for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
-      $scope.$broadcast('scroll.infiniteScrollComplete');
-    });
-
-    endDate = startDate;
-    return promise;
-  };
-
-  $scope.changeGrouping = function (type) {
-    $scope.grouping = type;
+  var reloadLessons = function () {
     $scope.lessons.length = 0;
-    endDate = new Date();
-    $scope.loadMore().then(function () {
+
+    // load lessons for current date interval
+    storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime()).then(function (lessons) {
+      for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
       fillChartData();
       fillAverages();
     });
   };
 
+  $scope.changeRange = function (range) {
+    $scope.shifted = false;
+    $scope.range = range;
+    computeDateRange();
+    reloadLessons();
+  };
+
+  $scope.shiftRange = function (offset) {
+    $scope.shifted = true;
+
+    if ($scope.range == 'week') {
+      $scope.startDate.setDate($scope.startDate.getDate() + 7 * offset);
+      $scope.endDate.setDate($scope.endDate.getDate() + 7 * offset);
+    } else if ($scope.range == 'month') {
+      $scope.startDate.setMonth($scope.startDate.getMonth() + offset, 1);
+      $scope.endDate.setMonth($scope.endDate.getMonth() + offset + 1, 0);
+    } else if ($scope.range == 'year') {
+      $scope.startDate.setFullYear($scope.startDate.getFullYear() + offset);
+      $scope.endDate.setFullYear($scope.endDate.getFullYear() + offset);
+    }
+
+    reloadLessons();
+  };
+
+  // TODO refresh when new lesson was added
   $ionicPlatform.ready(function () {
-    $scope.changeGrouping('days');
-    storeService.getLessonCount().then(function (count) {
-      allLessonCount = count;
-    });
+    $scope.changeRange('week');
   });
 
 };

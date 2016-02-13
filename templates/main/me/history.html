@@ -1,18 +1,24 @@
 <ion-view title="{{ user.name }}">
   <ion-content padding="true" class="history">
 
-    <div class="button-bar">
-      <button ng-click="changeGrouping('days')" ng-class="{'button-outline': grouping != 'days'}" class="button button-light button-small">{{ ::historyChartLength.days }} days</button>
-      <!-- <button ng-click="changeGrouping('weeks')" ng-class="{'button-outline': grouping != 'weeks'}" class="button button-light button-small">{{ ::historyChartLength.weeks }} weeks</button> -->
-      <!-- <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">{{ ::historyChartLength.months }} months</button> -->
-      <button ng-click="changeGrouping('months')" ng-class="{'button-outline': grouping != 'months'}" class="button button-light button-small">1 year</button>
+    <div class="row button-bar range-bar">
+      <button ng-click="changeRange('week')" ng-class="{'button-outline': shifted || range != 'week'}" class="col button button-light">week</button>
+      <button ng-click="changeRange('month')" ng-class="{'button-outline': shifted || range != 'month'}" class="col button button-light">month</button>
+      <button ng-click="changeRange('year')" ng-class="{'button-outline': shifted || range != 'year'}" class="col button button-light">year</button>
+    </div>
+    <div class="row button-bar date-bar">
+      <button ng-click="shiftRange(-1)" class="col col-10 button button-outline button-light icon ion-chevron-left"></button>
+      <button ng-click="changeDate()" ng-class="{'button-outline': !shifted}" class="col button button-light">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
+      <button ng-click="shiftRange(1)" class="col col-10 button button-outline button-light icon ion-chevron-right"></button>
     </div>
 
     <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
       {
         barStrokeWidth: 1,
-        barValueSpacing: 2,
+        barValueSpacing: 1,
         scaleShowVerticalLines: false,
+        scaleFontSize: 8,
+        animationSteps: 30,
       }
     "></canvas>
 
@@ -42,8 +48,6 @@
       </a>
       <p class="item dark no-result" ng-hide="lessons.length">No lesson found, go jumping!</p>
     </div>
-
-    <ion-infinite-scroll on-infinite="loadMore()" ng-if="canLoadMore()" immediate-check="false" distance="10%" spinner="lines"></ion-infinite-scroll>
 
   </ion-content>
 </ion-view>

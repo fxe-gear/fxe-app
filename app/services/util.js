@@ -14,6 +14,22 @@ angular.module('experience.services.util', [])
   };
 })
 
+.filter('ordinal', function () {
+  return function (val) {
+    if (val > 3 && val < 21) return 'th';
+    switch (val % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  };
+})
+
 // ------------------------------------------------------------------------------------------------
 
 // Fisher–Yates shuffle
