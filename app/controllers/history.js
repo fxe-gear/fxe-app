@@ -7,11 +7,14 @@ module.constant('historyChartLength', {
   months: 12,
 });
 
-var HistoryController = function ($scope, storeService, dateFilter, historyChartLength) {
+var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilter, historyChartLength) {
   $scope.user = storeService.getUser();
   $scope.historyChartLength = historyChartLength;
-  $scope.lessons = null;
-  $scope.average = null;
+  $scope.lessons = [];
+  $scope.average = {
+    score: 0,
+    duration: 0,
+  };
   $scope.grouping = null;
 
   var startDate = null;
@@ -54,9 +57,14 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
     var currentLesson = $scope.lessons.length - 1;
 
     // setup for cycle
+    var end = false;
     var date = new Date(startDate);
+    var today = new Date();
 
     do {
+      // grouping fn returns true for today => we want to create last column
+      if (groupingFn[$scope.grouping](date, today)) end = true;
+
       // take all lessons for this group and sum their score
       var sum = 0;
       for (; currentLesson >= 0 && groupingFn[$scope.grouping](date, new Date($scope.lessons[currentLesson].startTime)); currentLesson--) {
@@ -73,17 +81,14 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
         $scope.chartLabels.push(dateFilter(date, 'MMM y'));
         date.setMonth(date.getMonth() + 1);
       }
-
-    } while (currentLesson >= 0);
+    } while (!end);
 
   };
 
   // requires $scope.lessons to be set
   var fillAverages = function () {
-    $scope.average = {
-      score: 0,
-      duration: 0,
-    };
+    $scope.average.score = 0;
+    $scope.average.duration = 0;
 
     for (var i = 0; i < $scope.lessons.length; i++) {
       var lesson = $scope.lessons[i];
@@ -107,7 +112,6 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
 
     // load lessons for this date interval
     var promise = storeService.getLessonsBetween(startDate.getTime(), endDate.getTime()).then(function (lessons) {
-      console.log('loadMore res', lessons);
       for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
       $scope.$broadcast('scroll.infiniteScrollComplete');
     });
@@ -118,7 +122,7 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
 
   $scope.changeGrouping = function (type) {
     $scope.grouping = type;
-    $scope.lessons = [];
+    $scope.lessons.length = 0;
     endDate = new Date();
     $scope.loadMore().then(function () {
       fillChartData();
@@ -126,12 +130,13 @@ var HistoryController = function ($scope, storeService, dateFilter, historyChart
     });
   };
 
-  $scope.$on('$ionicView.beforeEnter', function () {
+  $ionicPlatform.ready(function () {
     $scope.changeGrouping('days');
     storeService.getLessonCount().then(function (count) {
       allLessonCount = count;
     });
   });
+
 };
 
 module.controller('HistoryController', HistoryController);

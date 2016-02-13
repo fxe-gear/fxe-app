@@ -4,7 +4,7 @@ var module = angular.module('experience.controllers.scanning', [
   'experience.services.experience',
 ]);
 
-var ScanningController = function ($scope, $state, $ionicPopup, experienceService) {
+var ScanningController = function ($scope, $state, $ionicPlatform, $ionicPopup, experienceService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
@@ -16,7 +16,8 @@ var ScanningController = function ($scope, $state, $ionicPopup, experienceServic
 
   var enter = function () {
     $scope.ignoredDevices = 0;
-    enableBluetooth()
+    $ionicPlatform.ready()
+      .then(enableBluetooth)
       .then(disconnect)
       .then(scan)
       .then(connect)

@@ -2,10 +2,10 @@
 
 var module = angular.module('experience.controllers.friends', []);
 
-var FriendsController = function ($scope, storeService, userService) {
+var FriendsController = function ($scope, $ionicPlatform, storeService, userService) {
   $scope.friends = storeService.getUser().friends;
 
-  $scope.$on('$ionicView.beforeEnter', function () {
+  $ionicPlatform.ready(function () {
     if (storeService.getUser().provider == 'facebook') {
       userService.loadFriendsFacebook();
     }

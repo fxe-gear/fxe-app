@@ -5,7 +5,7 @@ var module = angular.module('experience.controllers.pairing', [
   'experience.services.util',
 ]);
 
-var PairingController = function ($scope, $state, $ionicHistory, $ionicPopup, experienceService, shuffleService) {
+var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, shuffleService) {
   var colors = {
     red: '#ff0000',
     green: '#00ff00',
@@ -72,7 +72,7 @@ var PairingController = function ($scope, $state, $ionicHistory, $ionicPopup, ex
 
   $scope.$on('$ionicView.beforeEnter', function () {
     $scope.step = 0;
-    setRandomColor();
+    $ionicPlatform.ready().then(setRandomColor);
   });
 };
 
