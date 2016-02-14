@@ -1,20 +1,10 @@
 <ion-view title="Jump!">
-  <ion-content padding="true" scroll="false" class="jumping">
+  <ion-content padding="true" scroll="false" class="jumping" ng-class="running ? 'running' : 'not-running'">
 
-    <!-- start measurement -->
-    <div ng-hide="running" class="start">
-      <a ng-click="start()" ng-disabled="!connected" class="button button-balanced button-block button-large icon-left ion-ios-play">Start jumping!</a>
-      <a ng-click="join()" ng-disabled="!connected" class="button button-balanced button-block button-large button-outline icon-left ion-person-stalker">Join lesson</a>
-    </div>
-
-    <!-- running measurement -->
-    <div ng-show="running" class="info">
-      <div class="label">Your score:</div>
-      <div class="score" animate-on-change="lesson.score | sumScore">{{ lesson.score | sumScore | number:0 }}</div>
-      <div class="label">Time:</div>
-      <div class="time">{{ getDuration() | msToTimeSpan }}</div>
-      <a ng-click="stop()" ng-disabled="!connected" class="button button-balanced button-block button-large icon-left ion-stop">Stop</a>
-    </div>
+    <div class="label">Your score:</div>
+    <div class="score" animate-on-change="lesson.score | sumScore">{{ lesson.score | sumScore | number:0 }}</div>
+    <div class="label">Time:</div>
+    <div class="time">{{ getDuration() | msToTimeSpan }}</div>
 
     <div ng-hide="connected" class="reconnecting">
       <ion-spinner icon="lines" class="spinner-balanced"></ion-spinner>
@@ -22,10 +12,12 @@
         <span ng-show="status == 'reconnecting'">Reconnecting</span>
         <span ng-show="status == 'enabling'">Enabling bluetooth</span>
         <span ng-show="status == 'scanning'">Scanning</span>
-        <span ng-show="status == 'connecting'">Connecting</span>
-        ...
+        <span ng-show="status == 'connecting'">Connecting</span> ...
       </p>
     </div>
+
+    <a ng-click="running ? stop() : start()" ng-disabled="!connected" ng-class="running ? 'ion-stop button-assertive' : 'ion-ios-play button-balanced'" class="start-stop button button-block button-large icon-left">{{ running ? 'End lesson' : 'Start jumping!'}}</a>
+    <a ng-click="join()" ng-hide="running" ng-disabled="!connected" class="button button-balanced button-block button-large button-outline icon-left ion-person-stalker">Join lesson</a>
 
   </ion-content>
 </ion-view>
