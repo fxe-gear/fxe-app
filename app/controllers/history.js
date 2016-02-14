@@ -5,7 +5,7 @@ var module = angular.module('experience.controllers.history', []);
 var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();
   $scope.lessons = [];
-  $scope.average = {
+  $scope.summary = {
     score: 0,
     duration: 0,
   };
@@ -56,7 +56,7 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
   };
 
   // requires $scope.lessons to be set
-  var fillChartData = function () {
+  var fillChart = function () {
 
     $scope.chartLabels = [];
     $scope.chartData = [
@@ -101,20 +101,14 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
   };
 
   // requires $scope.lessons to be set
-  var fillAverages = function () {
-    $scope.average.score = 0;
-    $scope.average.duration = 0;
+  var fillSummary = function () {
+    $scope.summary.score = 0;
+    $scope.summary.duration = 0;
 
     for (var i = 0; i < $scope.lessons.length; i++) {
       var lesson = $scope.lessons[i];
-      $scope.average.score += lesson.score;
-      $scope.average.duration += lesson.duration;
-    }
-
-    if ($scope.lessons.length) {
-      // to prevent division by zero
-      $scope.average.score /= $scope.lessons.length;
-      $scope.average.duration /= $scope.lessons.length;
+      $scope.summary.score += lesson.score;
+      $scope.summary.duration += lesson.duration;
     }
   };
 
@@ -124,21 +118,18 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
     // load lessons for current date interval
     storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime()).then(function (lessons) {
       for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
-      fillChartData();
-      fillAverages();
+      fillChart();
+      fillSummary();
     });
   };
 
   $scope.changeRange = function (range) {
-    $scope.shifted = false;
     $scope.range = range;
     computeDateRange();
     reloadLessons();
   };
 
   $scope.shiftRange = function (offset) {
-    $scope.shifted = true;
-
     if ($scope.range == 'week') {
       $scope.startDate.setDate($scope.startDate.getDate() + 7 * offset);
       $scope.endDate.setDate($scope.endDate.getDate() + 7 * offset);

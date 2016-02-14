@@ -2,13 +2,13 @@
   <ion-content padding="true" class="history">
 
     <div class="row button-bar range-bar">
-      <button ng-click="changeRange('week')" ng-class="{'button-outline': shifted || range != 'week'}" class="col button button-light">week</button>
-      <button ng-click="changeRange('month')" ng-class="{'button-outline': shifted || range != 'month'}" class="col button button-light">month</button>
-      <button ng-click="changeRange('year')" ng-class="{'button-outline': shifted || range != 'year'}" class="col button button-light">year</button>
+      <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-light">week</button>
+      <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-light">month</button>
+      <button ng-click="changeRange('year')" ng-class="{'button-outline': range != 'year'}" class="col button button-light">year</button>
     </div>
     <div class="row button-bar date-bar">
       <button ng-click="shiftRange(-1)" class="col col-10 button button-outline button-light icon ion-chevron-left"></button>
-      <button ng-click="changeDate()" ng-class="{'button-outline': !shifted}" class="col button button-light">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
+      <button ng-click="changeDate()" class="col button button-outline button-light">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
       <button ng-click="shiftRange(1)" class="col col-10 button button-outline button-light icon ion-chevron-right"></button>
     </div>
 
@@ -22,23 +22,38 @@
       }
     "></canvas>
 
-    <div class="card dark averages">
+    <div class="card list dark data">
+
       <div class="item item-divider">
-        Averages
+        Average
+      </div>
+      <div class="item">
+        <div class="row headers">
+          <div class="col">Score:</div>
+          <div class="col">Duration:</div>
+        </div>
+        <div class="row values">
+          <div class="col"><span class="score">{{ (summary.score / lessons.length || 0) | number:2 }}</span></div>
+          <div class="col"><span class="time">{{ (summary.duration / lessons.length || 0) | msToTimeSpan }}</span></div>
+        </div>
       </div>
 
-      <div class="row">
-        <div class="col">Score:</div>
-        <div class="col">Time:</div>
+      <div class="item item-divider">
+        Total
       </div>
-      <div class="row">
-        <div class="col"><span class="score">{{ average.score | number:2 }}</span></div>
-        <div class="col"><span class="time">{{ average.duration | msToTimeSpan }}</span></div>
+      <div class="item">
+        <div class="row headers">
+          <div class="col col-25">Count:</div>
+          <div class="col col-25">Score:</div>
+          <div class="col col-50">Duration:</div>
+        </div>
+        <div class="row values">
+          <div class="col col-25"><span class="count">{{ lessons.length | number }}</span></div>
+          <div class="col col-25"><span class="score">{{ summary.score | number:0 }}</span></div>
+          <div class="col col-50"><span class="time">{{ summary.duration | msToTimeSpan }}</span></div>
+        </div>
       </div>
 
-    </div>
-
-    <div class="card list">
       <div class="item item-divider">
         History
       </div>
@@ -47,6 +62,7 @@
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
       </a>
       <p class="item dark no-result" ng-hide="lessons.length">No lesson found, go jumping!</p>
+
     </div>
 
   </ion-content>

@@ -1,4 +1,4 @@
-<ion-view title="Lesson">
+<ion-view title="Lesson {{ ::lesson.startTime | date:'short' }}">
   <ion-content padding="true" class="lesson">
 
     <div class="info">
@@ -18,9 +18,7 @@
       }
     "></canvas>
 
-    <button class="button button-balanced icon ion-share" ng-click="share()"> Share</button>
-
-    <br> <!-- TODO: CSS? -->
+    <button class="button button-balanced icon ion-share share" ng-click="share()"> Share</button>
 
   </ion-content>
 </ion-view>
