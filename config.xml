@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version='1.0' encoding='utf-8'?>
 <widget id="com.jumping.experience" version="0.4.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Experience</name>
-  <description></description>
+  <description/>
   <author email="ja@tbedrich.cz" href="http://tbedrich.cz/">Tomáš Bedřich</author>
   <content src="index.html"/>
   <access origin="*"/>
@@ -16,8 +16,8 @@
   <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect"/>
   <preference name="xwalkMode" value="embedded"/>
   <preference name="xwalkMultipleApk" value="true"/>
-  <hook type="before_build" src="hooks/010_gulp.js"/>
-  <hook type="before_run" src="hooks/010_gulp.js"/>
+  <hook src="hooks/010_gulp.js" type="before_build"/>
+  <hook src="hooks/010_gulp.js" type="before_run"/>
   <feature name="StatusBar">
     <param name="ios-package" onload="true" value="CDVStatusBar"/>
   </feature>
@@ -60,6 +60,7 @@
     <icon density="xxhdpi" src="resources/android/icon/drawable-xxhdpi-icon.png"/>
     <icon density="xxxhdpi" src="resources/android/icon/drawable-xxxhdpi-icon.png"/>
   </platform>
+  <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
   <plugin name="cordova-plugin-facebook4" spec="~1.3.0-0">
     <variable name="APP_ID" value="702447366556323"/>
     <variable name="APP_NAME" value="Experience"/>
@@ -67,5 +68,17 @@
   <plugin name="cordova-plugin-googleplus" spec="~4.0.6">
     <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.457117701129-1l9i4gdlnjgaglqugue3ksvg1ptvoc3o"/>
   </plugin>
-  <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
+  <plugin name="cordova-plugin-device" spec="~1.1.0"/>
+  <plugin name="cordova-plugin-console" spec="~1.0.2"/>
+  <plugin name="cordova-plugin-whitelist" spec="~1.2.1"/>
+  <plugin name="cordova-plugin-splashscreen" spec="~3.1.0"/>
+  <plugin name="com.ionic.keyboard" spec="~1.0.4"/>
+  <plugin name="cordova-sqlite-storage" spec="https://github.com/litehelpers/Cordova-sqlite-storage.git"/>
+  <plugin name="cordova-plugin-x-socialsharing" spec="~5.0.9"/>
+  <plugin name="cordova-plugin-x-toast" spec="~2.3.2"/>
+  <plugin name="cordova-plugin-crosswalk-webview" spec="~1.5.0"/>
+  <plugin name="cordova-plugin-inappbrowser" spec="~1.2.0"/>
+  <plugin name="cordova-plugin-statusbar" spec="~2.1.0"/>
+  <plugin name="cordova-plugin-ble-central" spec="../cordova-plugin-ble-central"/>
+  <plugin name="cordova-plugin-datepicker" spec="~0.9.3"/>
 </widget>
