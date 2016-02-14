@@ -58,7 +58,8 @@
     "cordova-plugin-x-socialsharing",
     "cordova-plugin-x-toast",
     "cordova-plugin-inappbrowser",
-    "cordova-plugin-statusbar"
+    "cordova-plugin-statusbar",
+    "cordova-plugin-datepicker"
   ],
   "cordovaPlatforms": [
     "android",

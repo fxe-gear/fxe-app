@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.history', []);
 
-var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilter, ordinalFilter) {
+var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, storeService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();
   $scope.lessons = [];
   $scope.summary = {
@@ -16,9 +16,9 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
   var allLessonCount = 0;
 
   // requires $scope.range to be set
-  var computeDateRange = function () {
-    $scope.endDate = new Date();
-    $scope.startDate = new Date();
+  var computeDateRange = function (base) {
+    $scope.startDate = new Date(base);
+    $scope.endDate = new Date(base);
 
     if ($scope.range == 'week') {
       var weekDay = $scope.startDate.getDay();
@@ -125,8 +125,25 @@ var HistoryController = function ($scope, $ionicPlatform, storeService, dateFilt
 
   $scope.changeRange = function (range) {
     $scope.range = range;
-    computeDateRange();
+    if (!$scope.startDate) $scope.startDate = new Date();
+    computeDateRange($scope.startDate);
+
+    // alternative solution (resets date every time when switching between ranges)
+    // computeDateRange(new Date());
+
     reloadLessons();
+  };
+
+  $scope.changeDate = function () {
+    var options = {
+      date: $scope.startDate,
+      todayText: 'Today',
+      androidTheme: 5, // nice calendar widget
+    };
+    $cordovaDatePicker.show(options).then(function (date) {
+      computeDateRange(date);
+      reloadLessons();
+    });
   };
 
   $scope.shiftRange = function (offset) {
