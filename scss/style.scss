@@ -1,46 +1,30 @@
 @import "variables";
-// ionic components overrides ----------------------------------------------------------------------
-.pane {
-  background: $base-background-color url("../img/background.jpg") no-repeat center fixed;
-  background-size: cover;
-}
 /*
-  Allow angular.js to be loaded in body, hiding cloaked elements until
-  templates compile.  The !important is important given that there may be
-  other selectors that are more specific or come later and might alter display.
- */
+Allow angular.js to be loaded in body, hiding cloaked elements until
+templates compile.  The !important is important given that there may be
+other selectors that are more specific or come later and might alter display.
+*/
 [ng\:cloak],
 [ng-cloak],
 .ng-cloak {
   display: none !important;
 }
+// ionic components overrides ----------------------------------------------------------------------
+.pane {
+  background: $base-background-color url("../img/background.jpg") no-repeat center fixed;
+  background-size: cover;
+}
 // tabs
-.tabs-balanced>.tabs {
+.tabs-background-balanced>.tabs {
   background-color: rgba($balanced, $bar-transparency) !important;
-  // add borders on iOS
+  // remove borders on iOS
   .platform-ios & {
-    padding-top: 0;
-    border-top: 1px solid rgba($balanced, .4) !important;
-    .tab-item {
-      padding-top: 2px;
-    }
-    .tab-item-active {
-      padding-top: 0;
-      border-top: 2px solid $balanced !important;
-    }
+    border-bottom: 0 !important;
   }
 }
 .platform-android .tab-title {
   padding-left: 0.3em;
   font-size: 0.8rem;
-}
-// nav bar
-.platform-ios .bar {
-  border-bottom: 1px solid rgba($balanced, .4) !important;
-}
-// because of statusbar
-.platform-ios .scroll-content:not(.has-header) {
-  padding-top: 1rem;
 }
 // popup
 .popup,
@@ -160,13 +144,13 @@ form {
     border-radius: $border-radius-large;
   }
   .start-stop {
-    $scale: 1.6;
+    $scale: 1.2;
     height: $button-large-height * $scale;
-    font-size: $button-large-font-size * $scale;
+    font-size: $button-large-font-size * 1.6;
     padding: 0 $button-large-padding * $scale;
     line-height: $button-large-height * $scale - $button-border-width;
     &:before {
-      font-size: $button-large-icon-size * $scale;
+      font-size: $button-large-icon-size * 1.6;
       line-height: $button-large-height * $scale - ($button-border-width * 2) - 1;
     }
   }

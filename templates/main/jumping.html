@@ -1,5 +1,5 @@
 <ion-view title="Jump!">
-  <ion-content padding="true" scroll="false" class="jumping" ng-class="running ? 'running' : 'not-running'">
+  <ion-content padding="true" class="jumping" ng-class="running ? 'running' : 'not-running'">
 
     <div class="label">Your score:</div>
     <div class="score" animate-on-change="lesson.score | sumScore">{{ lesson.score | sumScore | number:0 }}</div>

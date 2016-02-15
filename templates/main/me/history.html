@@ -2,14 +2,14 @@
   <ion-content padding="true" class="history">
 
     <div class="row button-bar range-bar">
-      <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-light">week</button>
-      <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-light">month</button>
-      <button ng-click="changeRange('year')" ng-class="{'button-outline': range != 'year'}" class="col button button-light">year</button>
+      <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-small button-light">week</button>
+      <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-small button-light">month</button>
+      <button ng-click="changeRange('year')" ng-class="{'button-outline': range != 'year'}" class="col button button-small button-light">year</button>
     </div>
     <div class="row button-bar date-bar">
-      <button ng-click="shiftRange(-1)" class="col col-10 button button-outline button-light icon ion-chevron-left"></button>
-      <button ng-click="changeDate()" class="col button button-outline button-light">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
-      <button ng-click="shiftRange(1)" class="col col-10 button button-outline button-light icon ion-chevron-right"></button>
+      <button ng-click="shiftRange(-1)" class="col button button-outline button-small button-light icon ion-chevron-left"></button>
+      <button ng-click="changeDate()" style="flex-basis:75%;" class="col button button-outline button-small button-light">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
+      <button ng-click="shiftRange(1)" class="col button button-outline button-small button-light icon ion-chevron-right"></button>
     </div>
 
     <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
@@ -43,13 +43,13 @@
       </div>
       <div class="item">
         <div class="row headers">
-          <div class="col col-25">Count:</div>
-          <div class="col col-25">Score:</div>
+          <!-- <div class="col col-25">Count:</div> -->
+          <div class="col col-50">Score:</div>
           <div class="col col-50">Duration:</div>
         </div>
         <div class="row values">
-          <div class="col col-25"><span class="count">{{ lessons.length | number }}</span></div>
-          <div class="col col-25"><span class="score">{{ summary.score | number:0 }}</span></div>
+          <!-- <div class="col col-25"><span class="count">{{ lessons.length | number }}</span></div> -->
+          <div class="col col-50"><span class="score">{{ summary.score | number:0 }}</span></div>
           <div class="col col-50"><span class="time">{{ summary.duration | msToTimeSpan }}</span></div>
         </div>
       </div>
