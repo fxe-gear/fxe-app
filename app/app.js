@@ -34,6 +34,7 @@ angular.module('experience', [
     // keyboard setup
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+      cordova.plugins.Keyboard.disableScroll(true);
     }
 
     // statusbar setup
