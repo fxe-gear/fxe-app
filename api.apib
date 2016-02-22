@@ -1,0 +1,289 @@
+FORMAT: 1A
+
+# Experience
+
+This API describes a communication between [Experience application](https://github.com/tomasbedrich/experience-app) and its server counterpart. Please keep in mind that this API **is not private**, so every input must be validated and nonsense input values musn't influence anyone other than current user in any serious manner.
+
+Other common API design principles apply:
+- server endpoint should be prefixed with API version number (`.../api/v1/...`)
+- unknown or empty (`null`) JSON data in requests should be ignored, empty keys should be omitted in responses
+- for malformed requests, HTTP code 400 should be returned
+- a request rate should be limited to *N* requests per hour (a specific limit can be agreed later)
+
+
+
+## Group User
+
+### POST /login/{provider}
+
+User can authenticate using 3 different providers:
+- `jumping` - using the email and password
+- `facebook` - using Facebook access token
+- `google` - using Google access token
+
+When using facebook or google token based authentication, server must make a request during the user request to validate the token. This may take a little longer time, but the application is aware of it.
+
+Successfully authenticated user gets a jumping token which is used for an application to server communication. One user can have more than one jumping token (when logged in on multiple devices), but the response should contain a latest jumping token issued for current device (app instalation).
+
++ Parameters
+    + provider: `jumping` (required, enum[string]) - Login provider.
+
++ Request login by jumping account (application/json)
+
+        {
+            "email": "test@example.com",
+            "password": "pass",
+        }
+
++ Request login by facebook token (application/json)
+
+        {
+            "token": "vud65egq1bzvligub813",
+            "expiresAt": 1455638078520107,
+        }
+
++ Request login by google token (application/json)
+
+        {
+            "token": "plfkwvffgv67u0zteyvf",
+            "expiresAt": 1455638078520107,
+        }
+
++ Response 200 (application/json)
+
+        {
+            "token": "bpnjxsrb1ivyd9xf2m1k",
+            "expiresAt": 1455638078520107,
+        }
+
++ Response 401
+
+### GET /me
+
+If the user is already authenticated (has a jumping token), an application can request its details using this endpoint.
+
++ Request
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+        {
+            "email": "test@example.com",
+            "name": "Tester",
+            "weight": 123,
+            "age": 321,
+            "gender": "male",
+            "units": "metric",
+            "provider": {
+                "facebook": {
+                    "token": "vud65egq1bzvligub813",
+                    "expiresAt": 1455638078520107,
+                },
+                "google": {
+                    "token": "plfkwvffgv67u0zteyvf",
+                    "expiresAt": 1455638078520107,
+                },
+                "jumping": {
+                    "token": "bpnjxsrb1ivyd9xf2m1k",
+                    "expiresAt": 1455638078520107,
+                }
+            }
+        }
+
+
+
+## Group Lessons
+
+A lesson is a time range started and ended by user by clicking a button in the application. Lessons can be associated with [events](#reference/events). User can have many score records for one lesson.
+
+A score record is created when score changes during a lesson (between its start time and end time). It contains a timestamp, score type and absolute score value for that type. In other words: one lesson has multiple score types and the total lesson score is a sum of maximum scores of every type.
+
+
+## /lessons
+
+### GET
+
+Return all lessons stored on a server for current user.
+
++ Request
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "event": 1234,
+                    "start": 1453940353233,
+                    "end": 1453940633196,
+                    "score": [
+                        {
+                            "time": 1453886545769,
+                            "score": 1,
+                            "type": 1
+                        }, {
+                            "time": 1453886819723,
+                            "score": 5,
+                            "type": 1
+                        }, {
+                            "time": 1453886820397,
+                            "score": 3,
+                            "type": 3
+                        }, {
+                            "time": 1453886826682,
+                            "score": 6,
+                            "type": 1
+                        }, {
+                            "time": 1453886827805,
+                            "score": 4,
+                            "type": 3
+                        }
+                    ]
+                },
+                {
+                    "start": 1453944138998,
+                    "end": 1453944142224,
+                    "score": [
+                        {
+                            "time": 1453886545769,
+                            "score": 1,
+                            "type": 1
+                        }
+                    ]
+                },
+                {
+                    "start": 1453944230279,
+                    "end": 1453944249447,
+                    "score": []
+                }
+            ]
+
++ Response 401
+
+
+### POST
+
+Upload an array of new lessons.
+
++ Request (application/json)
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
+    + Body
+
+            [
+                {
+                    "start": 1453944138998,
+                    "end": 1453944142224,
+                    "score": [
+                        {
+                            "time": 1453886545769,
+                            "score": 1,
+                            "type": 1
+                        }
+                    ]
+                }
+            ]
+
++ Response 200
+
++ Response 401
+
+
+### DELETE /lesson/{start}
+
+Delete a lesson including all its score records.
+
++ Parameters
+    + start: `1453944138998` (required, int) - Start time of the lesson, which is its unique ID for current user.
+
++ Request (application/json)
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200
+
++ Response 401
+
++ Response 404
+
+
+
+## Group Events
+
+An event is created by a trainer (currently only via website). Other users than can use its ID to join their lessons with that event.
+
+## GET /events{?name,lat,lon,from,limit}
+
+Return a filtered list of events.
+
++ Parameters
+    + name: `jumping party` (optional, string) - Filter events by their name.
+        It should be compared case insensitive with `startsWith` method and sorted by event start in descending order.
+    + lat: `49.0992133` (optional, float) - Filter events by their GPS position.
+        This parameter should be ignored unless `lon` parameter is also presented. When applied, [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) should be computed between each event location and GPS position based on `lat` and `lon` parameters. The result list should be sorted by that distance in descending order. When applied together with `name` filter, `AND` operator should be used.
+    + lon: `-13.2889922` (optional, float) - See `lon` parameter description.
+    + from: `1253886827805` (optional, int) - Limit result set to events whose start time is newer than this value.
+    + limit: `2` (required, int) - Limit the result set to certain number of items. Valid range: `<1; 100>`.
+
++ Request
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 1234,
+                "name": "Jumping party summer edition 2015",
+                "start": 1453886827805,
+                "lat": 49.2192133,
+                "lon": -13.2192133
+            },
+            {
+                "id": 666,
+                "name": "Jumping party summer edition 2014",
+                "start": 1353886826682,
+                "end": 1353886827805,
+                "lat": 49.2192133,
+                "lon": -13.2192133
+            }
+        ]
+
++ Response 401
+
+
+## GET /event/{id}
+
+Get a specific event by its ID.
+
++ Parameters
+    + id: `666` (required, int) - An event ID.
+
++ Request
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+        {
+            "id": 666,
+            "name": "Jumping party summer edition 2014",
+            "start": 1353886826682,
+            "end": 1353886827805,
+            "lat": 49.2192133,
+            "lon": -13.2192133
+        }
+
++ Response 401
+
++ Response 404
