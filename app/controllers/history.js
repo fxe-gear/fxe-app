@@ -126,10 +126,10 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
   $scope.changeRange = function (range) {
     $scope.range = range;
     if (!$scope.startDate) $scope.startDate = new Date();
-    computeDateRange($scope.startDate);
 
     // alternative solution (resets date every time when switching between ranges)
-    // computeDateRange(new Date());
+    // computeDateRange($scope.startDate);
+    computeDateRange(new Date());
 
     reloadLessons();
   };
