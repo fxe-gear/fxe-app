@@ -2,7 +2,7 @@ FORMAT: 1A
 
 # Experience
 
-This API describes a communication between [Experience application](https://github.com/tomasbedrich/experience-app) and its server counterpart. Please keep in mind that this API **is not private**, so every input must be validated and nonsense input values musn't influence anyone other than current user in any serious manner.
+This API describes a communication between [Experience application](https://github.com/tomasbedrich/experience-app) and its server counterpart. Please keep in mind that this API **is not private**, so every input must be validated and nonsense input values mustn't influence anyone other than a current user in any serious manner.
 
 Other common API design principles apply:
 - server endpoint should be prefixed with API version number (`.../api/v1/...`)
@@ -23,9 +23,9 @@ A user can authenticate using 3 different providers:
 - `facebook` - using Facebook access token
 - `google` - using Google access token
 
-When using Facebook or Google token based authentication, server must make a request during the user request to validate the token. This may take a little longer time, but the application is aware of it.
+When using Facebook or Google token based authentication, a server must make a request during the user request to validate the token. This may take a little longer time, but the application is aware of it.
 
-Successfully authenticated user should get a jumping token which is used for an application to server communication. One user can have more than one jumping token (when logged in on multiple devices), but the response should contain a latest jumping token issued for current device (app instalation).
+The successfully authenticated user should get a jumping token which is used for an application to server communication. One user can have more than one jumping token (when logged in on multiple devices), but the response should contain a latest jumping token issued for current device (app installation).
 
 + Parameters
     + provider: `jumping` (required, enum[string]) - Login provider.
@@ -100,16 +100,16 @@ Return all details for a current user.
 
 ## Group Lessons
 
-A lesson is a time range started and ended by user by clicking a button in the application. Lessons can be associated with [events](#reference/events). User can have many score records for one lesson.
+A lesson is a time range started and ended by a user by clicking a button in the application. Lessons can be associated with [events](#reference/events). The user can have many score records for one lesson.
 
-A score record is created when score changes during a lesson (between its start time and end time). It contains a timestamp, score type and absolute score value for that type. In other words: one lesson has multiple score types and the total lesson score is a sum of maximum scores of every type.
+A scoring record is created when the score changes during a lesson (between its start time and end time). It contains a timestamp, score type and absolute score value for that type. In other words: one lesson has multiple score types and the total lesson score is a sum of maximum scores of every type.
 
 
 ## /lessons{?from,fields}
 
 + Parameters
     + from: `1253886827805` (optional, int) - Limit result set to lessons whose start time is newer than this value.
-    + fields: `start,end` (optional, string) - Coma separated list of fields, which should be included in a lesson object in a response. If omitted, all avaliable fields should be returned.
+    + fields: `start,end` (optional, string) - Coma-separated list of fields, which should be included in a lesson object in a response. If omitted, all available fields should be returned.
 
 ### GET
 
@@ -235,7 +235,7 @@ Upload an array of new lessons for a current user.
 Delete a lesson including all its score records.
 
 + Parameters
-    + start: `1453944138998` (required, int) - Start time of the lesson, which is its unique ID for current user.
+    + start: `1453944138998` (required, int) - Start time of the lesson, which is its unique ID for a current user.
 
 + Request (application/json)
     + Headers
@@ -252,7 +252,7 @@ Delete a lesson including all its score records.
 
 ## Group Events
 
-An event is created by a trainer (currently only via website). Other users than can use its ID to join their lessons with that event.
+An event is created by a trainer (currently only via website). Other users then can use its ID to join their lessons with that event.
 
 ## GET /events{?name,lat,lon,from,limit}
 
@@ -265,7 +265,7 @@ Return a filtered list of events.
         This parameter should be ignored unless `lon` parameter is also presented. When applied, [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) should be computed between each event location and GPS position based on `lat` and `lon` parameters. The result list should be sorted by that distance in descending order. When applied together with `name` filter, `AND` operator should be used.
     + lon: `-13.2889922` (optional, float) - See `lon` parameter description.
     + from: `1253886827805` (optional, int) - Limit result set to events whose start time is newer than this value.
-    + limit: `2` (required, int) - Limit the result set to certain number of items. Valid range: `<1; 100>`.
+    + limit: `2` (required, int) - Limit the result set to a certain number of items. Valid range: `<1; 100>`.
 
 + Request
     + Headers
@@ -328,7 +328,7 @@ Get a specific event by its ID.
 
 ### GET /friends{?fields,scores}
 
-Return an array of a current user *and* his friends together with their scores. The friends who use this application can be loaded from Facebook or Google using their APIs and the result should be merged from all these informations.
+Return an array of a current user *and* his friends together with their scores. The friends who use this application can be loaded from Facebook or Google using their APIs and the result should be merged using all these data.
 
 There are 3 different score ranges (similar to ranges in the mobile application "Me" tab):
 - `last` - score for the last lesson (or zero if user has no lessons)
@@ -338,8 +338,8 @@ There are 3 different score ranges (similar to ranges in the mobile application 
 This request can be repeated very often, therefore server-side caching is recommended (to prevent assembling the whole response during every request, which can lead to bad mobile application performance).
 
 + Parameters
-    + fields: `id,score` (optional, string) - Coma separated list of fields, which should be included in a user object in a response. Only fields `id`, `name`, `picture` and `score` should be accessible. Warning, **do NOT** return any private user data (such as access tokens, age, email, ...) under any circumstances! If omitted, all accessible fields should be returned.
-    + scores: `last,week` (optional, string) - Coma separated list of score ranges, which should be included in a score object in a response. If omitted, all score ranges should be returned.
+    + fields: `id,score` (optional, string) - Coma-separated list of fields, which should be included in a user object in a response. Only fields `id`, `name`, `picture` and `score` should be accessible. Warning, **do NOT** return any private user data (such as access tokens, age, email, ...) under any circumstances! If omitted, all accessible fields should be returned.
+    + scores: `last,week` (optional, string) - Coma-separated list of score ranges, which should be included in a score object in a response. If omitted, all score ranges should be returned.
 
 + Request all fields with all score ranges
     + Headers
