@@ -394,8 +394,7 @@ angular.module('experience.services.experience', [
     });
   };
 
-  // DEV function
-  var _getBatteryLevel = function () {
+  var getBatteryLevel = function () {
     return isConnected().then(function (connected) {
       if (!connected) throw 'experience not connected';
       $log.debug('getting battery level');
@@ -510,9 +509,9 @@ angular.module('experience.services.experience', [
   this.isConnected = isConnected;
 
   // DEV functions
+  this.getBatteryLevel = getBatteryLevel;
   this.subscribeExtremes = subscribeExtremes;
   this.unsubscribeExtremes = unsubscribeExtremes;
   this._sendCommand = _sendCommand;
-  this._getBatteryLevel = _getBatteryLevel;
 
 });

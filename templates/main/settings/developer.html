@@ -16,9 +16,11 @@
       <a ng-click="toggleSubscribeExtremes()" class="item {{ extremesSubscribed ? 'assertive' : 'balanced' }}">{{ extremesSubscribed ? 'Stop' : 'Start' }} publishing</a>
     </div>
 
-    <p><strong>Warning</strong>, no confirmation!</p>
+    <button ng-click="getBatteryLevel()" class="button button-block">Get battery level</button>
 
     <button ng-click="dumpDB()" class="button button-block">Dump DB to remote server</button>
+
+    <p><strong>Warning</strong>, no confirmation!</p>
 
     <button ng-click="unpair()" class="button assertive button-block">Unpair device</button>
 

@@ -3,7 +3,7 @@
 
     <div class="list">
       <div class="item item-avatar dark" ng-repeat="person in friends.facebook track by person.id">
-        <img src="{{ ::person.picture }}" alt="avatar">
+        <img ng-src="{{ ::person.picture }}" alt="avatar">
         <h2 class="dark">{{ ::person.name | date:'short' }}</h2>
         <p><strong>{{ ::person.score || 0 | number:0 }} points</strong> in this week</p>
       </div>

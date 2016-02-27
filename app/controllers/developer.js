@@ -7,7 +7,7 @@ var module = angular.module('experience.controllers.developer', [
   'ngStorage',
 ]);
 
-var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, experienceService, storeService) {
+var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, experienceService, storeService) {
 
   $localStorage.$default({
     websocket: {
@@ -32,13 +32,23 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
     });
   };
 
+  $scope.getBatteryLevel = function () {
+    experienceService.getBatteryLevel().then(function (level) {
+      $ionicPopup.alert({
+        title: 'Battery level',
+        template: (level * 100).toFixed(0) + '%',
+      });
+    });
+  };
+
   $scope.dumpDB = function () {
     storeService._dumpDB();
   };
 
   $scope.unpair = function () {
     experienceService.unpair()
-      .then(experienceService.isConnected).then(function (connected) {
+      .then(experienceService.isConnected)
+      .then(function (connected) {
         if (connected) return experienceService.disconnect();
       }).then(function () {
         $state.go('scanning');
