@@ -101,11 +101,15 @@ A lesson is a time range started and ended by user by clicking a button in the a
 A score record is created when score changes during a lesson (between its start time and end time). It contains a timestamp, score type and absolute score value for that type. In other words: one lesson has multiple score types and the total lesson score is a sum of maximum scores of every type.
 
 
-## /lessons
+## /lessons{?from,fields}
+
++ Parameters
+    + from: `1253886827805` (optional, int) - Limit result set to lessons whose start time is newer than this value.
+    + fields: `start,end` (optional, string) - Coma separated list of fields, which should be included in a lesson object in a response. If omitted, all avaliable fields should be returned.
 
 ### GET
 
-Return all lessons stored on a server for current user.
+Return lessons stored on a server for current user.
 
 + Request
     + Headers
@@ -162,6 +166,7 @@ Return all lessons stored on a server for current user.
                     "score": []
                 }
             ]
+
 
 + Response 401
 
