@@ -16,14 +16,16 @@ Other common API design principles apply:
 
 ### POST /login/{provider}
 
-User can authenticate using 3 different providers:
+Authenticate a user and return his jumping token.
+
+A user can authenticate using 3 different providers:
 - `jumping` - using the email and password
 - `facebook` - using Facebook access token
 - `google` - using Google access token
 
-When using facebook or google token based authentication, server must make a request during the user request to validate the token. This may take a little longer time, but the application is aware of it.
+When using Facebook or Google token based authentication, server must make a request during the user request to validate the token. This may take a little longer time, but the application is aware of it.
 
-Successfully authenticated user gets a jumping token which is used for an application to server communication. One user can have more than one jumping token (when logged in on multiple devices), but the response should contain a latest jumping token issued for current device (app instalation).
+Successfully authenticated user should get a jumping token which is used for an application to server communication. One user can have more than one jumping token (when logged in on multiple devices), but the response should contain a latest jumping token issued for current device (app instalation).
 
 + Parameters
     + provider: `jumping` (required, enum[string]) - Login provider.
@@ -60,7 +62,7 @@ Successfully authenticated user gets a jumping token which is used for an applic
 
 ### GET /me
 
-If the user is already authenticated (has a jumping token), an application can request its details using this endpoint.
+Return all details for a current user.
 
 + Request
     + Headers
@@ -70,12 +72,14 @@ If the user is already authenticated (has a jumping token), an application can r
 + Response 200 (application/json)
 
         {
+            "id": 1234,
             "email": "test@example.com",
             "name": "Tester",
             "weight": 123,
             "age": 321,
             "gender": "male",
             "units": "metric",
+            "picture": "https://scontent.xx.fbcdn.net/hprofile-xtf1/v/t1.0-1/p50x50/11742902_10206238865187722_6561986711368507868_n.jpg?oh=5910af96fa640187a4854963b59dd08f&oe=574CAFF0",
             "provider": {
                 "facebook": {
                     "token": "vud65egq1bzvligub813",
@@ -109,9 +113,9 @@ A score record is created when score changes during a lesson (between its start 
 
 ### GET
 
-Return lessons stored on a server for current user.
+Return lessons stored on a server for a current user.
 
-+ Request
++ Request all lessons with all data
     + Headers
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
@@ -167,13 +171,38 @@ Return lessons stored on a server for current user.
                 }
             ]
 
++ Response 401
+
++ Request only certain fields
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "start": 1453940353233,
+                    "end": 1453940633196,
+                },
+                {
+                    "start": 1453944138998,
+                    "end": 1453944142224,
+                },
+                {
+                    "start": 1453944230279,
+                    "end": 1453944249447,
+                }
+            ]
 
 + Response 401
 
 
 ### POST
 
-Upload an array of new lessons.
+Upload an array of new lessons for a current user.
 
 + Request (application/json)
     + Headers
@@ -292,3 +321,80 @@ Get a specific event by its ID.
 + Response 401
 
 + Response 404
+
+
+
+## Group Friends
+
+### GET /friends{?fields,scores}
+
+Return an array of a current user *and* his friends together with their scores. The friends who use this application can be loaded from Facebook or Google using their APIs and the result should be merged from all these informations.
+
+There are 3 different score ranges (similar to ranges in the mobile application "Me" tab):
+- `last` - score for the last lesson (or zero if user has no lessons)
+- `week` - sum of scores for all lessons in the current week (should reset to zero each Monday or Sunday at midnight, depending on the current user `units` settings)
+- `month` - sum of scores for all lessons in the current month (should reset to zero each 1st day in a month at midnight)
+
+This request can be repeated very often, therefore server-side caching is recommended (to prevent assembling the whole response during every request, which can lead to bad mobile application performance).
+
++ Parameters
+    + fields: `id,score` (optional, string) - Coma separated list of fields, which should be included in a user object in a response. Only fields `id`, `name`, `picture` and `score` should be accessible. Warning, **do NOT** return any private user data (such as access tokens, age, email, ...) under any circumstances! If omitted, all accessible fields should be returned.
+    + scores: `last,week` (optional, string) - Coma separated list of score ranges, which should be included in a score object in a response. If omitted, all score ranges should be returned.
+
++ Request all fields with all score ranges
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 1234,
+                "name": "Tester",
+                "picture": "https://scontent.xx.fbcdn.net/hprofile-xtf1/v/t1.0-1/p50x50/11742902_10206238865187722_6561986711368507868_n.jpg?oh=5910af96fa640187a4854963b59dd08f&oe=574CAFF0",
+                "score": {
+                    "last": 123,
+                    "week": 453,
+                    "month": 3223
+                }
+            },
+            {
+                "id": 4321,
+                "name": "Another tester",
+                "picture": "https://scontent.xx.fbcdn.net/hprofile-xtf1/v/t1.0-1/p50x50/11742902_10206238865187722_6561986711368507868_n.jpg?oh=5910af96fa640187a4854963b59dd08f&oe=574CAFF0",
+                "score": {
+                    "last": 123,
+                    "week": 453,
+                    "month": 3223
+                }
+            }
+        ]
+
++ Response 401
+
++ Request only user IDs with their scores for the last lesson and the current week
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 1234,
+                "score": {
+                    "last": 123,
+                    "week": 453
+                }
+            },
+            {
+                "id": 4321,
+                "score": {
+                    "last": 123,
+                    "week": 453
+                }
+            }
+        ]
+
++ Response 401
