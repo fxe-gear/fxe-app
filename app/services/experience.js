@@ -200,21 +200,21 @@ angular.module('experience.services.experience', [
     disableConnectionHolding();
 
     $log.info('holding connection');
-    var onConnect = function () {
+    var onDisconnect = function () {
       // if not connected but should be
       reconnect().catch(function (error) {
         // if connecting failed, try again in 3 sec
         $log.error('reconnecting error during connection holding: ' + error + ', trying again in ' + reconnectTimeout);
         $timeout(function () {
-          onConnect();
+          onDisconnect();
         }, reconnectTimeout);
       });
     };
 
     // permanent callback and first time trigger
-    _disableConnectionHolding = $rootScope.$on('experienceConnected', onConnect);
+    _disableConnectionHolding = $rootScope.$on('experienceDisconnected', onDisconnect);
     isConnected().then(function (connected) {
-      if (!connected) onConnect();
+      if (!connected) onDisconnect();
     });
 
     return $q.resolve();

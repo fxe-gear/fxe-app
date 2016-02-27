@@ -32,7 +32,7 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var JumpingController = function ($scope, $state, $ionicPlatform, $ionicLoading, $ionicHistory, $interval, $timeout, experienceService, storeService) {
+var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicLoading, $ionicHistory, $interval, $timeout, experienceService, storeService) {
   var timer = null;
 
   $scope.running = false;
@@ -92,19 +92,19 @@ var JumpingController = function ($scope, $state, $ionicPlatform, $ionicLoading,
   });
 
   // listen for future state changes
-  $scope.$on('experienceConnected', onExperienceConnected);
-  $scope.$on('experienceDisconnected', onExperienceDisconnected);
+  $rootScope.$on('experienceConnected', onExperienceConnected);
+  $rootScope.$on('experienceDisconnected', onExperienceDisconnected);
 
   // update text in overlay
-  $scope.$on('experienceEnablingStarted', function () {
+  $rootScope.$on('experienceEnablingStarted', function () {
     $scope.status = 'enabling';
   });
 
-  $scope.$on('experienceScanningStarted', function () {
+  $rootScope.$on('experienceScanningStarted', function () {
     $scope.status = 'scanning';
   });
 
-  $scope.$on('experienceConnectingStarted', function () {
+  $rootScope.$on('experienceConnectingStarted', function () {
     $scope.status = 'connecting';
   });
 
