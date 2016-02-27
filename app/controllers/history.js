@@ -125,10 +125,11 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
 
   $scope.changeRange = function (range) {
     $scope.range = range;
-    if (!$scope.startDate) $scope.startDate = new Date();
+
+    // if (!$scope.startDate) $scope.startDate = new Date();
+    // computeDateRange($scope.startDate);
 
     // alternative solution (resets date every time when switching between ranges)
-    // computeDateRange($scope.startDate);
     computeDateRange(new Date());
 
     reloadLessons();
@@ -161,11 +162,14 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
     reloadLessons();
   };
 
-  // TODO refresh when new lesson was added
   $ionicPlatform.ready(function () {
-    $scope.changeRange('week');
+    $scope.range = 'week';
+    computeDateRange(new Date());
   });
 
+  $scope.$on('$ionicView.beforeEnter', function () {
+    $ionicPlatform.ready().then(reloadLessons);
+  });
 };
 
 module.controller('HistoryController', HistoryController);
