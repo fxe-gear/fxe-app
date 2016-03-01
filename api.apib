@@ -7,8 +7,10 @@ This API describes a communication between [Experience application](https://gith
 Other common API design principles apply:
 - server endpoint should be prefixed with API version number (`.../api/v1/...`)
 - unknown or empty (`null`) JSON data in requests should be ignored, empty keys should be omitted in responses
-- for malformed requests, HTTP code 400 should be returned
-- a request rate should be limited to *N* requests per hour (a specific limit can be agreed later)
+- for all GET requests an ETag header should be returned and the application should then use a If-None-Match header - based on that, the HTTP code 304 could be returned instead of 200
+- for malformed requests, HTTP code 400 with optional JSON body explaining an error should be returned
+- for all requests using a jumping access token, HTTP code 401 should be returned if the token is invalid
+- a request rate should be limited to *N* requests per hour (a specific limit can be agreed later), then HTTP code 429 should be returned
 
 
 
@@ -58,8 +60,6 @@ The successfully authenticated user should get a jumping token which is used for
             "expiresAt": 1455638078520107
         }
 
-+ Response 401
-
 
 ### POST /logout
 
@@ -71,8 +71,6 @@ Revoke a jumping token.
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
 + Response 205
-
-+ Response 401
 
 
 ## /user
@@ -206,8 +204,6 @@ Fields not specified in the request should remain unchanged. The fields `id` and
             }
         ]
 
-+ Response 401
-
 
 ### POST /user/resetPassword
 
@@ -296,8 +292,6 @@ Return lessons stored on a server for a current user.
             }
         ]
 
-+ Response 401
-
 + Request only certain fields
     + Headers
 
@@ -319,8 +313,6 @@ Return lessons stored on a server for a current user.
                 "end": 1453944249447
             }
         ]
-
-+ Response 401
 
 
 ### POST
@@ -351,8 +343,6 @@ Upload an array of new lessons for a current user.
 
 + Response 204
 
-+ Response 401
-
 
 ### DELETE /lesson/{start}
 
@@ -368,8 +358,6 @@ Delete a lesson including all its score records.
 
 + Response 204
 
-+ Response 401
-
 + Response 404
 
 
@@ -378,7 +366,7 @@ Delete a lesson including all its score records.
 
 An event is created by a trainer (currently only via website). Other users then can use its ID to join their lessons with that event.
 
-## GET /events{?name,lat,lon,from,limit}
+### GET /events{?name,lat,lon,from,limit}
 
 Return a filtered list of events.
 
@@ -416,10 +404,8 @@ Return a filtered list of events.
             }
         ]
 
-+ Response 401
 
-
-## GET /event/{id}
+### GET /event/{id}
 
 Get a specific event by its ID.
 
@@ -442,8 +428,6 @@ Get a specific event by its ID.
             "lon": -13.2192133
         }
 
-+ Response 401
-
 + Response 404
 
 
@@ -452,7 +436,9 @@ Get a specific event by its ID.
 
 ### GET /friends{?fields,scores}
 
-Return an array of a current user *and* his friends together with their scores. The friends who use this application can be loaded from Facebook or Google using their APIs and the result should be merged using all these data.
+Return an array of a current user *and* his friends together with their scores.
+
+The friends who use this application can be loaded from Facebook or Google using their APIs and the result should be merged using all these data.
 
 There are 3 different score ranges (similar to ranges in the mobile application "Me" tab):
 - `last` - score for the last lesson (or zero if user has no lessons)
@@ -495,8 +481,6 @@ This request can be repeated very often, therefore server-side caching is recomm
             }
         ]
 
-+ Response 401
-
 + Request only user IDs with their scores for the last lesson and the current week
     + Headers
 
@@ -520,5 +504,3 @@ This request can be repeated very often, therefore server-side caching is recomm
                 }
             }
         ]
-
-+ Response 401
