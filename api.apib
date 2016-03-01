@@ -34,35 +34,105 @@ The successfully authenticated user should get a jumping token which is used for
 
         {
             "email": "test@example.com",
-            "password": "pass",
+            "password": "pass"
         }
 
 + Request login by facebook token (application/json)
 
         {
             "token": "vud65egq1bzvligub813",
-            "expiresAt": 1455638078520107,
+            "expiresAt": 1455638078520107
         }
 
 + Request login by google token (application/json)
 
         {
             "token": "plfkwvffgv67u0zteyvf",
-            "expiresAt": 1455638078520107,
+            "expiresAt": 1455638078520107
         }
 
 + Response 200 (application/json)
 
         {
             "token": "bpnjxsrb1ivyd9xf2m1k",
-            "expiresAt": 1455638078520107,
+            "expiresAt": 1455638078520107
         }
 
 + Response 401
 
-### GET /me
+
+### POST /logout
+
+Revoke a jumping token.
+
++ Request
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
++ Response 205
+
++ Response 401
+
+
+## /user
+
+
+### POST
+
+Create a new jumping account for a user.
+
+An email verification procedure should be done by the server. Only `email` and `password` fields are required. The response should be in the same format as for `POST /login/{provider}`.
+
++ Request (application/json)
+
+        {
+            "email": "test@example.com",
+            "password": "pass",
+            "name": "Tester",
+            "weight": 123,
+            "age": 321,
+            "gender": "male",
+            "units": "metric"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "token": "bpnjxsrb1ivyd9xf2m1k",
+            "expiresAt": 1455638078520107
+        }
+
++ Response 400 (application/json)
+
+        [
+            {
+              "code" : 5432,
+              "field" : "email",
+              "message" : "Email is required."
+            },
+            {
+               "code" : 5622,
+               "field" : "password",
+               "message" : "Password must be at least 6 characters long."
+            }
+        ]
+
+
+### GET
 
 Return all details for a current user.
+
+The returned details are provided either by a user during a registration, downloaded from Facebook and/or Google using their APIs or both.
+
+Following response fields deserves closer explanation:
+- `id` is the internal jumping user ID
+- `verified` should contain an information, if an email address has been verified or not
+- `age` should be in years, it should be automatically updated according to the user last update date (it is not nescessary to have the age very accurate)
+- `weight` should be in kilograms (imperial unit conversion should be done by the application)
+- `gender` can be `male` or `female`
+- `units` can be `metric` or `imperial`
+- `provider` can contain access tokens for Facebook and/or Google
 
 + Request
     + Headers
@@ -74,6 +144,7 @@ Return all details for a current user.
         {
             "id": 1234,
             "email": "test@example.com",
+            "verified": false,
             "name": "Tester",
             "weight": 123,
             "age": 321,
@@ -83,18 +154,74 @@ Return all details for a current user.
             "provider": {
                 "facebook": {
                     "token": "vud65egq1bzvligub813",
-                    "expiresAt": 1455638078520107,
+                    "expiresAt": 1455638078520107
                 },
                 "google": {
                     "token": "plfkwvffgv67u0zteyvf",
-                    "expiresAt": 1455638078520107,
-                },
-                "jumping": {
-                    "token": "bpnjxsrb1ivyd9xf2m1k",
-                    "expiresAt": 1455638078520107,
+                    "expiresAt": 1455638078520107
                 }
             }
         }
+
+
+### PUT
+
+Update details for a current user.
+
+Fields not specified in the request should remain unchanged. The fields `id` and `verified` cannot be updated using this endpoint.
+
++ Request (application/json)
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
+    + Body
+
+            {
+                "age": 222,
+                "gender": "male",
+                "units": "imperial",
+                "provider": {
+                    "facebook": {
+                        "token": "vud65egq1bzvligub813",
+                        "expiresAt": 1455638078520107
+                    }
+                }
+            }
+
++ Response 204
+
++ Response 400 (application/json)
+
+        [
+            {
+              "code" : 5222,
+              "field" : "age",
+              "message" : "Age cannot be negative."
+            },
+            {
+               "code" : 5823,
+               "field" : "units",
+               "message" : "Possible values are 'metric' or 'imperial'."
+            }
+        ]
+
++ Response 401
+
+
+### POST /user/resetPassword
+
+Send an email with a password reset link to a user.
+
+The rest of the password reset procedure should be processed via the website.
+
++ Request (application/json)
+
+        {
+            "email": "test@example.com"
+        }
+
++ Response 204
 
 
 
@@ -122,54 +249,52 @@ Return lessons stored on a server for a current user.
 
 + Response 200 (application/json)
 
-    + Body
-
-            [
-                {
-                    "event": 1234,
-                    "start": 1453940353233,
-                    "end": 1453940633196,
-                    "score": [
-                        {
-                            "time": 1453886545769,
-                            "score": 1,
-                            "type": 1
-                        }, {
-                            "time": 1453886819723,
-                            "score": 5,
-                            "type": 1
-                        }, {
-                            "time": 1453886820397,
-                            "score": 3,
-                            "type": 3
-                        }, {
-                            "time": 1453886826682,
-                            "score": 6,
-                            "type": 1
-                        }, {
-                            "time": 1453886827805,
-                            "score": 4,
-                            "type": 3
-                        }
-                    ]
-                },
-                {
-                    "start": 1453944138998,
-                    "end": 1453944142224,
-                    "score": [
-                        {
-                            "time": 1453886545769,
-                            "score": 1,
-                            "type": 1
-                        }
-                    ]
-                },
-                {
-                    "start": 1453944230279,
-                    "end": 1453944249447,
-                    "score": []
-                }
-            ]
+        [
+            {
+                "event": 1234,
+                "start": 1453940353233,
+                "end": 1453940633196,
+                "score": [
+                    {
+                        "time": 1453886545769,
+                        "score": 1,
+                        "type": 1
+                    }, {
+                        "time": 1453886819723,
+                        "score": 5,
+                        "type": 1
+                    }, {
+                        "time": 1453886820397,
+                        "score": 3,
+                        "type": 3
+                    }, {
+                        "time": 1453886826682,
+                        "score": 6,
+                        "type": 1
+                    }, {
+                        "time": 1453886827805,
+                        "score": 4,
+                        "type": 3
+                    }
+                ]
+            },
+            {
+                "start": 1453944138998,
+                "end": 1453944142224,
+                "score": [
+                    {
+                        "time": 1453886545769,
+                        "score": 1,
+                        "type": 1
+                    }
+                ]
+            },
+            {
+                "start": 1453944230279,
+                "end": 1453944249447,
+                "score": []
+            }
+        ]
 
 + Response 401
 
@@ -180,22 +305,20 @@ Return lessons stored on a server for a current user.
 
 + Response 200 (application/json)
 
-    + Body
-
-            [
-                {
-                    "start": 1453940353233,
-                    "end": 1453940633196,
-                },
-                {
-                    "start": 1453944138998,
-                    "end": 1453944142224,
-                },
-                {
-                    "start": 1453944230279,
-                    "end": 1453944249447,
-                }
-            ]
+        [
+            {
+                "start": 1453940353233,
+                "end": 1453940633196
+            },
+            {
+                "start": 1453944138998,
+                "end": 1453944142224
+            },
+            {
+                "start": 1453944230279,
+                "end": 1453944249447
+            }
+        ]
 
 + Response 401
 
@@ -226,7 +349,7 @@ Upload an array of new lessons for a current user.
                 }
             ]
 
-+ Response 200
++ Response 204
 
 + Response 401
 
@@ -243,7 +366,7 @@ Delete a lesson including all its score records.
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200
++ Response 204
 
 + Response 401
 
