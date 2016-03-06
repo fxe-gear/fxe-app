@@ -33,18 +33,31 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
         return dateFilter(msToDateFilter(val), (lesson.duration > 3600 * 1e3) ? 'HH:mm:ss' : 'mm:ss');
       };
 
-      // fill labels
-      $scope.chartLabels = [];
-      for (var i = 0; i < interval * (data.length + 1); i += interval) { // add one label after data
-        $scope.chartLabels.push(makeLabel(i));
-      }
+      $scope.chartOptions = {
+        chart: {
+          type: 'lineChart',
+          height: 500,
+          x: function (d) {
+            return d.x;
+          },
+          y: function (d) {
+            return d.y;
+          },
+          showLabels: true,
+          duration: 500,
+        }
+      };
 
-      // fill score
-      $scope.chartData = [
-        [0],
-      ];
+      $scope.chartData = [{
+        values: [],
+        key: 'Sine Wave',
+      }];
+
       for (var i = 0; i < data.length; i++) {
-        $scope.chartData[0].push(data[i]);
+        $scope.chartData[0].values.push({
+          x: makeLabel(i * interval),
+          y: data[i],
+        });
       }
 
     });

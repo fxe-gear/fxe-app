@@ -4,14 +4,13 @@
   "dependencies": {
     "ionic": "git://github.com/tomasbedrich/ionic#7d8a83e58796b29a5b4f52183ad7d821ba9cb30e",
     "ngCordova": "git://github.com/tomasbedrich/ng-cordova.git#b7fc33404c97893c4186a4f6dec4394ce8059c8e",
-    "angular-chart.js": "*",
-    "Chart.js": "1.x",
     "angular": "1.x",
     "stacktrace-js": "1.x",
     "angular-websocket": "1.x",
     "angular-messages": "1.x",
     "ngstorage": "*",
-    "angular-animate": "1.x"
+    "angular-animate": "1.x",
+    "angular-nvd3": "~1.0.5"
   },
   "overrides": {
     "stacktrace-js": {

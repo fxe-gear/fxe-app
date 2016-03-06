@@ -106,7 +106,8 @@ gulp.task('templates', function (done) {
 
 gulp.task('inject', ['templates', 'scripts', 'styles'], function (done) {
   var libStream = gulp.src([
-    'Chart.js',
+    'd3.js',
+    'nv.d3.js',
     'angular.js',
     'angular*.js',
     'ionic.js',
