@@ -1,23 +1,24 @@
 {
   "name": "experience",
   "private": "true",
-  "devDependencies": {
-    "ionic": "driftyco/ionic-bower#*"
-  },
   "dependencies": {
+    "ionic": "git://github.com/tomasbedrich/ionic#7d8a83e58796b29a5b4f52183ad7d821ba9cb30e",
+    "ngCordova": "git://github.com/tomasbedrich/ng-cordova.git#b7fc33404c97893c4186a4f6dec4394ce8059c8e",
     "angular-chart.js": "*",
     "Chart.js": "1.x",
-    "ionic": "git@github.com:tomasbedrich/ionic#360629ed67cb18e71c5068e3c381c051a9a4fb30",
     "angular": "1.x",
     "stacktrace-js": "1.x",
-    "ngCordova": "git@github.com:tomasbedrich/ng-cordova.git#b7fc33404c97893c4186a4f6dec4394ce8059c8e",
     "angular-websocket": "1.x",
     "angular-messages": "1.x",
-    "ngstorage": "*"
+    "ngstorage": "*",
+    "angular-animate": "1.x"
   },
   "overrides": {
     "stacktrace-js": {
       "main": "./dist/stacktrace.min.js"
     }
+  },
+  "resolutions": {
+    "angular": "1.5.0"
   }
 }

@@ -28,13 +28,20 @@ angular.module('experience', [
 ])
 
 .run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, experienceService) {
-  $ionicConfig.scrolling.jsScrolling(false);
 
   $ionicPlatform.ready(function () {
     // keyboard setup
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
       cordova.plugins.Keyboard.disableScroll(true);
+    }
+
+    if (ionic.Platform.platform() == "ios") {
+      $ionicConfig.scrolling.jsScrolling(true);
+
+    } else if (ionic.Platform.platform() == "android") {
+      $ionicConfig.scrolling.jsScrolling(false);
+
     }
 
     // statusbar setup
