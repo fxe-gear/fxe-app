@@ -32,8 +32,9 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicLoading, $ionicHistory, $interval, $timeout, experienceService, storeService) {
+var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, $timeout, experienceService, storeService) {
   var timer = null;
+  var batteryPopup = null;
 
   $scope.running = false;
   $scope.connected = false;
@@ -81,6 +82,18 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     $scope.connected = false;
   };
 
+  var onBatteryLow = function (event, level) {
+    if (batteryPopup) {
+      batteryPopup.close();
+    }
+
+    batteryPopup = $ionicPopup.alert({
+      title: (level * 100).toFixed(0) + '% of battery remains',
+      template: 'Please charge your Experience soon.',
+      okType: 'button-energized',
+    });
+  };
+
   $scope.$on('$ionicView.beforeEnter', function () {
     // get current state
     $ionicPlatform.ready()
@@ -94,6 +107,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   // listen for future state changes
   $rootScope.$on('experienceConnected', onExperienceConnected);
   $rootScope.$on('experienceDisconnected', onExperienceDisconnected);
+  $rootScope.$on('experienceBatteryLow', onBatteryLow);
 
   // update text in overlay
   $rootScope.$on('experienceEnablingStarted', function () {

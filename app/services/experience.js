@@ -50,7 +50,9 @@ angular.module('experience.services.experience', [
 
 .constant('reconnectTimeout', 3000) // in milliseconds
 
-.service('experienceService', function ($rootScope, $cordovaBLE, $websocket, $q, $log, $timeout, storeService, reconnectTimeout, bleServices, scoreTypes) {
+.constant('lowBatteryLevel', 0.1) // in percent
+
+.service('experienceService', function ($rootScope, $cordovaBLE, $websocket, $q, $log, $timeout, storeService, reconnectTimeout, bleServices, scoreTypes, lowBatteryLevel) {
   // some shortcuts
   var bls = bleServices;
   var scoreUUIDs = [
@@ -157,6 +159,7 @@ angular.module('experience.services.experience', [
         storeService.setDeviceID(deviceID);
         $rootScope.$broadcast('experienceConnected');
         q.resolve(deviceID);
+        enableBatteryWarning();
       },
 
       function (error) {
@@ -182,16 +185,18 @@ angular.module('experience.services.experience', [
       if (!connected) throw 'experience not connected';
       $log.debug('disconnecting from ' + storeService.getDeviceID());
 
-      return disableConnectionHolding().then(function () {
-        return $cordovaBLE.disconnect(storeService.getDeviceID());
-      }).then(function (result) {
-        $rootScope.$broadcast('experienceDisconnected');
-        $log.info('disconnected from ' + storeService.getDeviceID());
-        return result;
-      }).catch(function (error) {
-        $log.error('disconnecting from ' + deviceID + ' failed');
-        throw error;
-      });
+      return disableConnectionHolding()
+        .then(disableBatteryWarning)
+        .then(function () {
+          return $cordovaBLE.disconnect(storeService.getDeviceID());
+        }).then(function (result) {
+          $rootScope.$broadcast('experienceDisconnected');
+          $log.info('disconnected from ' + storeService.getDeviceID());
+          return result;
+        }).catch(function (error) {
+          $log.error('disconnecting from ' + deviceID + ' failed');
+          throw error;
+        });
     });
   };
 
@@ -376,6 +381,34 @@ angular.module('experience.services.experience', [
     });
   };
 
+  var enableBatteryWarning = function (level) {
+    return isConnected().then(function (connected) {
+      if (!connected) throw 'experience not connected';
+
+      var handler = function (raw) {
+        var level = parseBatteryLevel(raw);
+        if (level <= lowBatteryLevel) {
+          $rootScope.$broadcast('experienceBatteryLow', level);
+        }
+      };
+
+      $cordovaBLE.startNotification(storeService.getDeviceID(), bls.battery.uuid, bls.battery.characteristics.level.uuid, handler);
+      $cordovaBLE.read(storeService.getDeviceID(), bls.battery.uuid, bls.battery.characteristics.level.uuid).then(handler);
+
+      $log.debug('battery warning enabled');
+    });
+  };
+
+  var disableBatteryWarning = function () {
+    return isConnected().then(function (connected) {
+      if (!connected) throw 'experience not connected';
+
+      $cordovaBLE.stopNotification(storeService.getDeviceID(), bls.battery.uuid, bls.battery.characteristics.level.uuid);
+
+      $log.debug('battery warning disabled');
+    });
+  };
+
   // DEV function
   var _sendCommand = function (cmd) {
     return isConnected().then(function (connected) {
@@ -399,13 +432,15 @@ angular.module('experience.services.experience', [
       if (!connected) throw 'experience not connected';
       $log.debug('getting battery level');
 
-      return $cordovaBLE.read(storeService.getDeviceID(), bls.battery.uuid, bls.battery.characteristics.level.uuid).then(function (data) {
-        var dataView = new DataView(data);
-        var level = dataView.getUint8(0, true);
-        $log.debug('battery level is ' + level + '%');
-        return level / 100; // return in percent
-      });
+      return $cordovaBLE.read(storeService.getDeviceID(), bls.battery.uuid, bls.battery.characteristics.level.uuid).then(parseBatteryLevel);
     });
+  };
+
+  var parseBatteryLevel = function (raw) {
+    var dataView = new DataView(raw);
+    var level = dataView.getUint8(0, true);
+    $log.debug('battery level is ' + level + '%');
+    return level / 100; // return in percent
   };
 
   var subscribeExtremes = function (websocketIP, websocketPort) {
@@ -504,6 +539,8 @@ angular.module('experience.services.experience', [
   this.startMeasurement = startMeasurement;
   this.stopMeasurement = stopMeasurement;
   this.isMeasuring = isMeasuring;
+  this.enableBatteryWarning = enableBatteryWarning;
+  this.disableBatteryWarning = disableBatteryWarning;
   this.pair = pair;
   this.unpair = unpair;
   this.isConnected = isConnected;
