@@ -67,17 +67,17 @@ angular.module('experience.services.store', [
       return db;
     }
 
-    // TODO handle version number mismatch
+    // empty version means "doesn't care"
 
     if (window.sqlitePlugin) { // native sqlite DB
       db = $cordovaSQLite.openDB({
         name: 'store.sqlite',
         bgType: true,
-        version: '0.5.0',
+        version: '',
       });
 
     } else { // fallback to websql
-      db = window.openDatabase('store', '0.5.0', null, 2 * 1024 * 1024);
+      db = window.openDatabase('store', '', null, 2 * 1024 * 1024);
     }
 
     createSchema(db);
