@@ -6,6 +6,7 @@ angular.module('experience', [
 
   'experience.services.util',
   'experience.services.store',
+  'experience.services.api',
   'experience.services.experience',
 
   'experience.controllers.welcome',
