@@ -32,28 +32,28 @@ The successfully authenticated user should get a jumping token which is used for
 + Parameters
     + provider: `jumping` (required, enum[string]) - Login provider.
 
-+ Request login by jumping account (application/json)
++ Request login by jumping account (application/json;charset=UTF-8)
 
         {
             "email": "test@example.com",
             "password": "pass"
         }
 
-+ Request login by facebook token (application/json)
++ Request login by facebook token (application/json;charset=UTF-8)
 
         {
             "token": "vud65egq1bzvligub813",
             "expiresAt": 1455638078520107
         }
 
-+ Request login by google token (application/json)
++ Request login by google token (application/json;charset=UTF-8)
 
         {
             "token": "plfkwvffgv67u0zteyvf",
             "expiresAt": 1455638078520107
         }
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         {
             "token": "bpnjxsrb1ivyd9xf2m1k",
@@ -82,7 +82,7 @@ Create a new jumping account for a user.
 
 An email verification procedure should be done by the server. Only `email` and `password` fields are required. The response should be in the same format as for `POST /login/{provider}`.
 
-+ Request (application/json)
++ Request (application/json;charset=UTF-8)
 
         {
             "email": "test@example.com",
@@ -94,14 +94,14 @@ An email verification procedure should be done by the server. Only `email` and `
             "units": "metric"
         }
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         {
             "token": "bpnjxsrb1ivyd9xf2m1k",
             "expiresAt": 1455638078520107
         }
 
-+ Response 400 (application/json)
++ Response 400 (application/json;charset=UTF-8)
 
         [
             {
@@ -137,7 +137,7 @@ Following response fields deserves closer explanation:
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         {
             "id": 1234,
@@ -168,7 +168,7 @@ Update details for a current user.
 
 Fields not specified in the request should remain unchanged. The fields `id` and `verified` cannot be updated using this endpoint.
 
-+ Request (application/json)
++ Request (application/json;charset=UTF-8)
     + Headers
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
@@ -189,7 +189,7 @@ Fields not specified in the request should remain unchanged. The fields `id` and
 
 + Response 204
 
-+ Response 400 (application/json)
++ Response 400 (application/json;charset=UTF-8)
 
         [
             {
@@ -211,7 +211,7 @@ Send an email with a password reset link to a user.
 
 The rest of the password reset procedure should be processed via the website.
 
-+ Request (application/json)
++ Request (application/json;charset=UTF-8)
 
         {
             "email": "test@example.com"
@@ -243,7 +243,7 @@ Return lessons stored on a server for a current user.
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         [
             {
@@ -297,7 +297,7 @@ Return lessons stored on a server for a current user.
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         [
             {
@@ -319,7 +319,7 @@ Return lessons stored on a server for a current user.
 
 Upload an array of new lessons for a current user.
 
-+ Request (application/json)
++ Request (application/json;charset=UTF-8)
     + Headers
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
@@ -351,7 +351,7 @@ Delete a lesson including all its score records.
 + Parameters
     + start: `1453944138998` (required, int) - Start time of the lesson, which is its unique ID for a current user.
 
-+ Request (application/json)
++ Request (application/json;charset=UTF-8)
     + Headers
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
@@ -384,7 +384,7 @@ Return a filtered list of events.
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         [
             {
@@ -417,7 +417,7 @@ Get a specific event by its ID.
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         {
             "id": 666,
@@ -456,7 +456,7 @@ This request can be repeated very often, therefore server-side caching is recomm
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         [
             {
@@ -486,7 +486,7 @@ This request can be repeated very often, therefore server-side caching is recomm
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
 
-+ Response 200 (application/json)
++ Response 200 (application/json;charset=UTF-8)
 
         [
             {
