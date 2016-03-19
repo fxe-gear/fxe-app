@@ -10,7 +10,7 @@ angular.module('experience.services.user', [
 
 .constant('friendsUpdateInterval', 1e3 * 60 * 60 * 24 * 7) // = one week in miliseconds
 
-.service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, $q, friendsUpdateInterval) {
+.service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, apiService, $q, friendsUpdateInterval) {
 
   var user = storeService.getUser();
 
@@ -19,16 +19,18 @@ angular.module('experience.services.user', [
   };
 
   var loginFacebook = function () {
+    $log.debug('logging in using facebook provider');
     return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
       .then(function (response) {
         user.provider = 'facebook';
         user.accessToken = response.authResponse.accessToken;
         user.expiresIn = response.authResponse.expiresIn;
-        $log.info('logged in using Facebook');
+        $log.info('logged in using facebook provider');
       });
   };
 
   var loginGoogle = function () {
+    $log.debug('logging in using google provider');
     var q = $q.defer();
 
     window.plugins.googleplus.login({
@@ -44,11 +46,22 @@ angular.module('experience.services.user', [
       if (response.gender) user.gender = response.gender; // Android only
       if (response.birthday) user.age = getAge(response.birthday); // Android only
 
-      $log.info('logged in using Google');
+      $log.info('logged in using google provider');
       q.resolve(response);
     }, q.reject);
 
     return q.promise;
+  };
+
+  var loginJumping = function (email, password) {
+    $log.debug('logging in using jumping provider');
+    return apiService.loginJumping(email, password).then(function (response) {
+      user.provider = 'jumping';
+      user.accessToken = response.data.token;
+      user.expiresIn = response.data.expiresIn;
+      $log.info('logged in using jumping provier');
+      return response;
+    });
   };
 
   var loadFromFacebook = function () {
