@@ -57,7 +57,14 @@ angular.module('experience.services.user', [])
       user.accessToken = response.data.token;
       user.expiresIn = response.data.expiresIn;
       $log.info('logged in using jumping provier');
-      return response;
+    });
+  };
+
+  var loadDetails = function () {
+    $log.debug('loading user details');
+    return apiService.getUser().then(function (response) {
+      angular.merge(user, response.data);
+      $log.info('user details loaded');
     });
   };
 
@@ -136,6 +143,8 @@ angular.module('experience.services.user', [])
   // service public API
   this.loginFacebook = loginFacebook;
   this.loginGoogle = loginGoogle;
+  this.loginJumping = loginJumping;
+  this.loadDetails = loadDetails;
   this.loadFromFacebook = loadFromFacebook;
   this.loadFromGoogle = loadFromGoogle;
   this.loadFriendsFacebook = loadFriendsFacebook;

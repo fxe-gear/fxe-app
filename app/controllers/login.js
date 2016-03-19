@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.login', []);
 
-var LoginController = function ($scope, $ionicPopup, userService, storeService) {
+var LoginController = function ($scope, $state, $ionicPopup, userService, storeService) {
 
   $scope.user = storeService.getUser();
 
@@ -10,6 +10,8 @@ var LoginController = function ($scope, $ionicPopup, userService, storeService) 
     userService.loginJumping($scope.user.email, $scope.user.password)
       .then(function () {
         $state.go('scanning');
+      }).then(function () {
+        userService.loadDetails();
       }).catch(function (error) {
         $ionicPopup.alert({
           title: 'Jumping login failed.',
