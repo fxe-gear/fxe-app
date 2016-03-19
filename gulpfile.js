@@ -130,16 +130,15 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function (done) {
 
   gulp.src(destRoot + 'index.html')
     .pipe(inject(series(libStream, appStream), injectOptions))
-    .pipe(changed(destRoot))
     .pipe(gulp.dest(destRoot));
 
   done();
 });
 
 gulp.task('watch', ['default'], function () {
-  gulp.watch(appPaths.styles, ['styles', 'inject']);
-  gulp.watch(appPaths.scripts, ['scripts', 'inject']);
-  gulp.watch(appPaths.templates, ['templates', 'inject']);
+  gulp.watch(appPaths.styles, ['styles']);
+  gulp.watch(appPaths.scripts, ['scripts']);
+  gulp.watch(appPaths.templates, ['templates']);
 });
 
 gulp.task('default', ['styles', 'scripts', 'templates', 'inject']);
