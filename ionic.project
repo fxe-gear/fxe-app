@@ -7,7 +7,7 @@
   "watchPatterns": [
     "www/index.html",
     "www/css/*",
-    "www/js/*",
+    "www/js/**/*",
     "www/lib/*"
   ],
   "browsers": [
