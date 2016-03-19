@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.scanning', []);
 
-var ScanningController = function ($scope, $state, $ionicPlatform, $ionicPopup, experienceService) {
+var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
@@ -10,6 +10,13 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
   $scope.clearIgnored = function () {
     experienceService.clearIgnored();
     experienceService.stopScan().then(enter);
+  };
+
+  $scope.demo = function () {
+    $ionicHistory.nextViewOptions({
+      historyRoot: true,
+    });
+    $state.go('main.jumping');
   };
 
   var enter = function () {
