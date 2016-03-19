@@ -3,10 +3,7 @@
 // because of facebook "access_token":
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 
-angular.module('experience.services.user', [
-  'ngCordova',
-  'experience.services.store',
-])
+angular.module('experience.services.user', [])
 
 .constant('friendsUpdateInterval', 1e3 * 60 * 60 * 24 * 7) // = one week in miliseconds
 

@@ -1,9 +1,6 @@
 'use strict';
 
-angular.module('experience.services.store', [
-  'ngCordova',
-  'ngStorage',
-])
+angular.module('experience.services.store', [])
 
 .constant('scoreTypes', {
   amplitude: 1,

@@ -1,11 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.developer', [
-  'experience.services.store',
-  'experience.services.experience',
-  'ngCordova',
-  'ngStorage',
-]);
+var module = angular.module('experience.controllers.developer', []);
 
 var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, experienceService, storeService) {
 

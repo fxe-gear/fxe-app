@@ -3,9 +3,14 @@
 angular.module('experience', [
   'ionic',
   'talis.services.logging',
+  'ngCordova',
+  'ngStorage',
+  'ngWebSocket',
+  'chart.js',
 
   'experience.services.util',
   'experience.services.store',
+  'experience.services.user',
   'experience.services.api',
   'experience.services.experience',
 
@@ -37,10 +42,10 @@ angular.module('experience', [
       cordova.plugins.Keyboard.disableScroll(true);
     }
 
-    if (ionic.Platform.platform() == "ios") {
+    if (ionic.Platform.platform() == 'ios') {
       $ionicConfig.scrolling.jsScrolling(true);
 
-    } else if (ionic.Platform.platform() == "android") {
+    } else if (ionic.Platform.platform() == 'android') {
       $ionicConfig.scrolling.jsScrolling(false);
 
     }

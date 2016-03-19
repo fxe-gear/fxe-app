@@ -1,10 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.lesson', [
-  'experience.services.store',
-  'experience.services.util',
-  'chart.js',
-]);
+var module = angular.module('experience.controllers.lesson', []);
 
 // interval used in diff graph (in miliseconds)
 module.constant('diffGraphInterval', 120 * 1e3);

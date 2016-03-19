@@ -1,8 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.welcome', [
-  'experience.services.user',
-]);
+var module = angular.module('experience.controllers.welcome', []);
 
 var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
 

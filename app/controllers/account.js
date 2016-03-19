@@ -1,8 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.account', [
-  'experience.services.store',
-]);
+var module = angular.module('experience.controllers.account', []);
 
 var CreateAccountController = function ($scope, $state, $ionicPopup, storeService) {
   $scope.user = storeService.getUser();

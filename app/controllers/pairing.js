@@ -1,9 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.pairing', [
-  'experience.services.experience',
-  'experience.services.util',
-]);
+var module = angular.module('experience.controllers.pairing', []);
 
 var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, shuffleService) {
   var colors = {

@@ -1,8 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.scanning', [
-  'experience.services.experience',
-]);
+var module = angular.module('experience.controllers.scanning', []);
 
 var ScanningController = function ($scope, $state, $ionicPlatform, $ionicPopup, experienceService) {
 

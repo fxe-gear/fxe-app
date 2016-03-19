@@ -1,9 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.jumping', [
-  'experience.services.experience',
-  'experience.services.store',
-]);
+var module = angular.module('experience.controllers.jumping', []);
 
 module.filter('sumScore', function () {
   return function (score) {

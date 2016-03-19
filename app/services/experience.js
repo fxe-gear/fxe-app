@@ -1,10 +1,6 @@
 'use strict';
 
-angular.module('experience.services.experience', [
-  'ngCordova',
-  'ngWebSocket',
-  'experience.services.store',
-])
+angular.module('experience.services.experience', [])
 
 .constant('bleServices', {
   experience: {

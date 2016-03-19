@@ -1,8 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.settings', [
-  'experience.services.user',
-]);
+var module = angular.module('experience.controllers.settings', []);
 
 var SettingsController = function ($scope, storeService) {
   $scope.user = storeService.getUser();
