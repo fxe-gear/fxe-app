@@ -2,11 +2,13 @@
   "name": "experience",
   "app_id": "d4c682c6",
   "gulpStartupTasks": [
-    "default",
     "watch"
   ],
   "watchPatterns": [
-    "www/**/*"
+    "www/index.html",
+    "www/css/*",
+    "www/js/*",
+    "www/lib/*"
   ],
   "browsers": [
     {
