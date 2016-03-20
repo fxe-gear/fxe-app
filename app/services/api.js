@@ -98,15 +98,8 @@ angular.module('experience.services.api', [])
   };
 
   var createUser = function (user) {
-    return post('/user', {
-      email: user.email,
-      password: user.password,
-      name: user.name,
-      weight: user.weight,
-      age: user.age,
-      gender: user.gender,
-      units: user.units,
-    }, {
+    user = filterParams(user, ['email', 'password', 'name', 'weight', 'age', 'gender', 'units']);
+    return post('/user', user, {
       anonymous: true,
     });
   };

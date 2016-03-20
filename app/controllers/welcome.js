@@ -2,14 +2,18 @@
 
 var module = angular.module('experience.controllers.welcome', []);
 
-var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
+var WelcomeController = function ($scope, $state, $ionicHistory, $ionicPopup, userService) {
 
   $scope.loginFacebook = function () {
     userService.loginFacebook()
-      .then(userService.loadFromFacebook)
       .then(function () {
+        $ionicHistory.nextViewOptions({
+          historyRoot: true,
+        });
         $state.go('scanning');
-      }).catch(function (error) {
+      })
+      .then(userService.loadFromFacebook)
+      .catch(function (error) {
         $ionicPopup.alert({
           title: 'Facebook login failed.',
           template: 'Please try again.',
@@ -20,10 +24,14 @@ var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
 
   $scope.loginGoogle = function () {
     userService.loginGoogle()
-      .then(userService.loadFromGoogle)
       .then(function () {
+        $ionicHistory.nextViewOptions({
+          historyRoot: true,
+        });
         $state.go('scanning');
-      }).catch(function (error) {
+      })
+      .then(userService.loadFromGoogle)
+      .catch(function (error) {
         $ionicPopup.alert({
           title: 'Google login failed.',
           template: 'Please try again.',

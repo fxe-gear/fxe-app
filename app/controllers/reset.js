@@ -7,7 +7,7 @@ var PasswordResetController = function ($scope, $state, $ionicHistory, $ionicPop
   $scope.user = storeService.getUser();
 
   $scope.reset = function () {
-    userService.resetPassword($scope.user.email)
+    userService.resetPassword()
       .then(function () {
         $ionicPopup.alert({
           title: 'Password reset requested.',

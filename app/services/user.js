@@ -50,13 +50,23 @@ angular.module('experience.services.user', [])
     return q.promise;
   };
 
-  var loginJumping = function (email, password) {
+  var loginJumping = function () {
     $log.debug('logging in using jumping provider');
-    return apiService.loginJumping(email, password).then(function (response) {
+    return apiService.loginJumping(user.email, user.password).then(function (response) {
       user.provider = 'jumping';
       user.accessToken = response.data.token;
-      user.expiresIn = response.data.expiresIn;
+      user.expiresIn = response.data.expiresAt; // FIXME expiresIn != expiresAt
       $log.info('logged in using jumping provier');
+    });
+  };
+
+  var createAccount = function () {
+    $log.debug('creating user account');
+    return apiService.createUser(user).then(function (response) {
+      user.provider = 'jumping';
+      user.accessToken = response.data.token;
+      user.expiresIn = response.data.expiresAt; // FIXME expiresIn != expiresAt
+      $log.info('user account created');
     });
   };
 
@@ -68,9 +78,9 @@ angular.module('experience.services.user', [])
     });
   };
 
-  var resetPassword = function (email) {
+  var resetPassword = function () {
     $log.debug('requesting user password reset');
-    return apiService.resetPassword(email).then(function (response) {
+    return apiService.resetPassword(user.email).then(function (response) {
       $log.info('user password reset requested');
     });
   };
@@ -153,6 +163,7 @@ angular.module('experience.services.user', [])
   this.loginJumping = loginJumping;
   this.loadDetails = loadDetails;
   this.resetPassword = resetPassword;
+  this.createAccount = createAccount;
   this.loadFromFacebook = loadFromFacebook;
   this.loadFromGoogle = loadFromGoogle;
   this.loadFriendsFacebook = loadFriendsFacebook;

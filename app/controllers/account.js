@@ -2,12 +2,27 @@
 
 var module = angular.module('experience.controllers.account', []);
 
-var CreateAccountController = function ($scope, $state, $ionicPopup, storeService) {
+var CreateAccountController = function ($scope, $state, $ionicHistory, $ionicPopup, storeService, userService) {
+
   $scope.user = storeService.getUser();
 
   $scope.create = function () {
-    $scope.user.provider = 'jumping';
-    $state.go('scanning');
+    userService.createAccount()
+      .then(function () {
+        $ionicHistory.nextViewOptions({
+          historyRoot: true,
+        });
+        $state.go('scanning');
+      }).then(function () {
+        userService.loadDetails();
+      }).catch(function (error) {
+        // TODO handle server side validation errors
+        $ionicPopup.alert({
+          title: 'Creating account failed.',
+          template: 'Please try again.',
+          okType: 'button-assertive',
+        });
+      });
   };
 
 };
