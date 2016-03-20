@@ -68,6 +68,13 @@ angular.module('experience.services.user', [])
     });
   };
 
+  var resetPassword = function (email) {
+    $log.debug('requesting user password reset');
+    return apiService.resetPassword(email).then(function (response) {
+      $log.info('user password reset requested');
+    });
+  };
+
   var loadFromFacebook = function () {
     return $http.get('https://graph.facebook.com/v2.5/me', {
       params: {
@@ -145,6 +152,7 @@ angular.module('experience.services.user', [])
   this.loginGoogle = loginGoogle;
   this.loginJumping = loginJumping;
   this.loadDetails = loadDetails;
+  this.resetPassword = resetPassword;
   this.loadFromFacebook = loadFromFacebook;
   this.loadFromGoogle = loadFromGoogle;
   this.loadFriendsFacebook = loadFriendsFacebook;

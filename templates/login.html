@@ -1,22 +1,22 @@
 <ion-view title="Login">
-    <ion-content padding="true" class="has-header login">
+  <ion-content padding="true" class="has-header login">
 
-      <form name="f" class="list" novalidate ng-model-options="{ updateOn: 'default blur', debounce: { default: 500, blur: 0 } }">
-          <ion-list>
-              <label class="item item-input">
-                  <span class="input-label">Email:</span>
-                  <input name="email" type="email" required ng-model="user.email">
-              </label>
-              <label class="item item-input">
-                  <span class="input-label">Password:</span>
-                  <input name="password" type="password" required ng-model="user.password">
-              </label>
-          </ion-list>
+    <form name="f" class="list" novalidate ng-model-options="{ updateOn: 'default blur', debounce: { default: 500, blur: 0 } }">
+      <ion-list>
+        <label class="item item-input">
+          <span class="input-label">Email:</span>
+          <input name="email" type="email" required ng-model="user.email">
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Password:</span>
+          <input name="password" type="password" required ng-model="user.password">
+        </label>
+      </ion-list>
 
-          <button class="button button-balanced button-block" ng-disabled="f.$invalid" ng-click="login()">Log in</button>
-          <a ui-sref="password-reset" class="button button-light button-clear button-block ">I don't know my password</a>
+      <button class="button button-balanced button-block" ng-disabled="f.$invalid" ng-click="login()">Log in</button>
+      <a ui-sref="password-reset" class="button button-light button-clear button-block ">I don't know my password</a>
 
-      </form>
+    </form>
 
-    </ion-content>
+  </ion-content>
 </ion-view>

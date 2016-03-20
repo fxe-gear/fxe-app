@@ -26,6 +26,7 @@ angular.module('experience', [
   'experience.controllers.settings',
   'experience.controllers.developer',
   'experience.controllers.about',
+  'experience.controllers.reset',
 
   'experience.directives.account',
 

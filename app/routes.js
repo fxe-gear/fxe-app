@@ -22,6 +22,12 @@ angular.module('experience.routes', [])
     controller: 'LoginController',
   });
 
+  $stateProvider.state('password-reset', {
+    url: '/password-reset',
+    templateUrl: 'password-reset.html',
+    controller: 'PasswordResetController',
+  });
+
   $stateProvider.state('scanning', {
     url: '/scanning',
     templateUrl: 'scanning.html',
@@ -68,7 +74,10 @@ angular.module('experience.routes', [])
         controller: 'LessonController',
         resolve: {
           lesson: function ($stateParams, storeService) {
-            return $stateParams.startTime ? storeService.getLesson($stateParams.startTime) : storeService.getLastLesson();
+            if ($stateParams.startTime)
+              return storeService.getLesson($stateParams.startTime);
+            else
+              return storeService.getLastLesson();
           },
         },
       },
