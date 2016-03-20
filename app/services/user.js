@@ -85,6 +85,13 @@ angular.module('experience.services.user', [])
     });
   };
 
+  var updateAccount = function (diff) {
+    $log.debug('updating user account');
+    return apiService.updateUser(diff).then(function (response) {
+      $log.info('user account updated');
+    });
+  };
+
   var loadFromFacebook = function () {
     return $http.get('https://graph.facebook.com/v2.5/me', {
       params: {
@@ -164,6 +171,7 @@ angular.module('experience.services.user', [])
   this.loadDetails = loadDetails;
   this.resetPassword = resetPassword;
   this.createAccount = createAccount;
+  this.updateAccount = updateAccount;
   this.loadFromFacebook = loadFromFacebook;
   this.loadFromGoogle = loadFromGoogle;
   this.loadFriendsFacebook = loadFriendsFacebook;
