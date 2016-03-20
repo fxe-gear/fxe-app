@@ -61,6 +61,9 @@ form {
   }
   .validation {
     color: $assertive;
+    &.ng-inactive {
+      display: none;
+    }
   }
 }
 // custom views ------------------------------------------------------------------------------------

@@ -29,6 +29,7 @@ angular.module('experience', [
   'experience.controllers.reset',
 
   'experience.directives.account',
+  'experience.directives.error',
 
   'experience.routes',
   'experience.templates',

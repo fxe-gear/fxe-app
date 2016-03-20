@@ -1,9 +1,6 @@
 'use strict';
 
-angular.module('experience.directives.account', [
-  'ngCordova',
-  'ngMessages',
-])
+angular.module('experience.directives.account', [])
 
 .directive('jumpAccount', function () {
   return {
