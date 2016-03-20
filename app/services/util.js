@@ -1,20 +1,22 @@
 'use strict';
 
-angular.module('experience.services.util', [])
+// ------------------------------------------------------------------------------------------------
 
-.filter('msToDate', function () {
+var module = angular.module('experience.services.util', []);
+
+module.filter('msToDate', function () {
   return function (ms) {
     return new Date(1970, 0, 1).setSeconds(0, ms);
   };
-})
+});
 
-.filter('msToTimeSpan', function (msToDateFilter, dateFilter) {
+module.filter('msToTimeSpan', function (msToDateFilter, dateFilter) {
   return function (val) {
     return dateFilter(msToDateFilter(val), 'HH:mm:ss');
   };
-})
+});
 
-.filter('ordinal', function () {
+module.filter('ordinal', function () {
   return function (val) {
     if (val > 3 && val < 21) return 'th';
     switch (val % 10) {
@@ -28,12 +30,12 @@ angular.module('experience.services.util', [])
         return 'th';
     }
   };
-})
+});
 
 // ------------------------------------------------------------------------------------------------
 
 // Fisher–Yates shuffle
-.service('shuffleService', function () {
+module.service('shuffleService', function () {
   this.shuffle = function (array) {
     var counter = array.length;
     var temp;
@@ -48,5 +50,60 @@ angular.module('experience.services.util', [])
     }
 
     return array;
+  };
+});
+
+// ------------------------------------------------------------------------------------------------
+// inspired from: https://gist.github.com/amcdnl/df3344de6ae9ed400a56
+
+Array.prototype.union = function (a) {
+  var r = this.slice(0);
+  a.forEach(function (i) {
+    if (r.indexOf(i) < 0) r.push(i);
+  });
+
+  return r;
+};
+
+Array.prototype.diff = function (a) {
+  return this.filter(function (i) {
+    return a.indexOf(i) < 0;
+  });
+};
+
+module.factory('diffWatch', function () {
+  return function ($scope, variableName, callback) {
+
+    function diff(orig, updated) {
+      var newKeys = Object.keys(updated);
+      var oldKeys = Object.keys(orig);
+      var removed = oldKeys.diff(newKeys);
+      var added = newKeys.diff(oldKeys);
+      var union = newKeys.union(oldKeys);
+
+      var changes = {
+        count: removed.length + added.length,
+        added: added,
+        removed: removed,
+        updated: {},
+      };
+
+      union.forEach(function (k) {
+        if (!angular.equals(orig[k], updated[k])) {
+          changes.updated[k] = (updated[k] !== undefined ? updated[k] : null);
+          changes.count++;
+        }
+      });
+
+      return changes;
+    }
+
+    return $scope.$watch(variableName, function (updated, orig) {
+      updated = updated || {};
+      var changes = diff(orig, updated);
+      if (changes.count) {
+        callback(changes, updated, orig);
+      }
+    }, true);
   };
 });
