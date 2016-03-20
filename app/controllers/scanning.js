@@ -80,14 +80,14 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
     });
   };
 
-  var exit = function () {
+  var leave = function () {
     $scope.working = false;
     $scope.status = 'Ready';
     return experienceService.stopScan();
   };
 
   $scope.$on('$ionicView.beforeEnter', enter);
-  $scope.$on('$ionicView.afterExit', exit);
+  $scope.$on('$ionicView.afterLeave', leave);
 };
 
 module.controller('ScanningController', ScanningController);
