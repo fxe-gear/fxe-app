@@ -51,6 +51,7 @@ var bowerCssFilter = [
 
 var bowerJsFilter = [
   '*',
+  '!*.css',
   '!source-map.js',
   '!*.map.js',
 ];
