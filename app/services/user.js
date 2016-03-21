@@ -15,24 +15,22 @@ angular.module('experience.services.user', [])
     return Math.floor((Date.now() - Date.parse(ISOdate)) / (1000 * 60 * 60 * 24 * 365));
   };
 
-  var loginFacebook = function () {
-    $log.debug('logging in using facebook provider');
-    return $cordovaFacebook.login(['email', 'public_profile', 'user_birthday', 'user_friends'])
-      .then(function (response) {
-        user.provider = 'facebook';
-        user.accessToken = response.authResponse.accessToken;
-        user.expiresIn = response.authResponse.expiresIn;
-        $log.info('logged in using facebook provider');
-      });
+  var getFacebookToken = function () {
+    $log.debug('getting facebook token');
+    var fields = ['email', 'public_profile', 'user_birthday', 'user_friends'];
+    return $cordovaFacebook.login(fields).then(function (response) {
+      user.provider = 'facebook';
+      user.accessToken = response.authResponse.accessToken;
+      user.expiresIn = response.authResponse.expiresIn;
+      $log.info('got facebook token');
+    });
   };
 
-  var loginGoogle = function () {
-    $log.debug('logging in using google provider');
+  var getGoogleToken = function () {
+    $log.debug('getting google token');
     var q = $q.defer();
 
-    window.plugins.googleplus.login({
-      offline: true,
-    }, function (response) {
+    var callback = function (response) {
       user.provider = 'google';
       user.accessToken = response.oauthToken;
       user.expiresIn = 0;
@@ -43,30 +41,45 @@ angular.module('experience.services.user', [])
       if (response.gender) user.gender = response.gender; // Android only
       if (response.birthday) user.age = getAge(response.birthday); // Android only
 
-      $log.info('logged in using google provider');
+      $log.info('got google token');
       q.resolve(response);
-    }, q.reject);
+    };
+
+    // do the request
+    window.plugins.googleplus.login({
+      offline: true,
+    }, callback, q.reject);
 
     return q.promise;
   };
 
+  var loginCallback = function (response) {
+    user.provider = 'jumping';
+    user.accessToken = response.data.token;
+    user.expiresIn = response.data.expiresAt; // FIXME expiresIn != expiresAt
+    $log.info('logged in (got jumping token)');
+  };
+
+  var loginFacebook = function () {
+    $log.debug('logging in using facebook provider');
+    return apiService.loginFacebook(user.accessToken, user.expiresIn).then(loginCallback);
+  };
+
+  var loginGoogle = function () {
+    $log.debug('logging in using google provider');
+    return apiService.loginGoogle(user.accessToken, user.expiresIn).then(loginCallback);
+  };
+
   var loginJumping = function () {
     $log.debug('logging in using jumping provider');
-    return apiService.loginJumping(user.email, user.password).then(function (response) {
-      user.provider = 'jumping';
-      user.accessToken = response.data.token;
-      user.expiresIn = response.data.expiresAt; // FIXME expiresIn != expiresAt
-      $log.info('logged in using jumping provier');
-    });
+    return apiService.loginJumping(user.email, user.password).then(loginCallback);
   };
 
   var createAccount = function () {
     $log.debug('creating user account');
     return apiService.createUser(user).then(function (response) {
-      user.provider = 'jumping';
-      user.accessToken = response.data.token;
-      user.expiresIn = response.data.expiresAt; // FIXME expiresIn != expiresAt
       $log.info('user account created');
+      loginCallback(response);
     });
   };
 
@@ -165,6 +178,8 @@ angular.module('experience.services.user', [])
   };
 
   // service public API
+  this.getFacebookToken = getFacebookToken;
+  this.getGoogleToken = getGoogleToken;
   this.loginFacebook = loginFacebook;
   this.loginGoogle = loginGoogle;
   this.loginJumping = loginJumping;

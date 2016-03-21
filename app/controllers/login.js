@@ -7,8 +7,7 @@ var LoginController = function ($scope, $state, $ionicHistory, $ionicPopup, user
   $scope.user = storeService.getUser();
 
   $scope.login = function () {
-    userService.loginJumping()
-      .then(function () {
+    userService.loginJumping().then(function () {
         $ionicHistory.nextViewOptions({
           historyRoot: true,
         });
