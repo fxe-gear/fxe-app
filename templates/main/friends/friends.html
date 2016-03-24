@@ -2,12 +2,12 @@
   <ion-content class="friends has-header">
 
     <div class="list">
-      <div class="item item-avatar dark" ng-repeat="person in friends.facebook track by person.id">
+      <div class="item item-avatar dark" ng-repeat="person in friends track by person.id">
         <img ng-src="{{ ::person.picture }}" alt="avatar">
-        <h2 class="dark">{{ ::person.name | date:'short' }}</h2>
-        <p><strong>{{ ::person.score || 0 | number:0 }} points</strong> in this week</p>
+        <h2 class="dark">{{ ::person.name }}</h2>
+        <p><strong>{{ ::person.score.week || 0 | number:0 }} points</strong> in this week</p>
       </div>
-      <p class="item dark no-result" ng-hide="friends.facebook.length">None of your friends is using Experience.</p>
+      <p class="item dark no-result" ng-hide="friends.length">None of your friends is using Experience.</p>
     </div>
 
   </ion-content>

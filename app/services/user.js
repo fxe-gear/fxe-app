@@ -10,6 +10,7 @@ angular.module('experience.services.user', [])
 .service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, apiService, $q, friendsUpdateInterval) {
 
   var user = storeService.getUser();
+  var friends = storeService.getFriends();
 
   var getAge = function (ISOdate) {
     return Math.floor((Date.now() - Date.parse(ISOdate)) / (1000 * 60 * 60 * 24 * 365));
@@ -19,9 +20,13 @@ angular.module('experience.services.user', [])
     $log.debug('getting facebook token');
     var fields = ['email', 'public_profile', 'user_birthday', 'user_friends'];
     return $cordovaFacebook.login(fields).then(function (response) {
-      user.provider = 'facebook';
-      user.accessToken = response.authResponse.accessToken;
-      user.expiresIn = response.authResponse.expiresIn;
+      // convert expiresIn (relative seconds) to expiresAt (milliseconds timestamp)
+      expiresAt = new Date();
+      expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
+      expiresAt = expiresAt.getTime();
+
+      // store token
+      storeService.setToken('facebook', response.authResponse.accessToken, expiresAt);
       $log.info('got facebook token');
     });
   };
@@ -31,16 +36,7 @@ angular.module('experience.services.user', [])
     var q = $q.defer();
 
     var callback = function (response) {
-      user.provider = 'google';
-      user.accessToken = response.oauthToken;
-      user.expiresIn = 0;
-
-      user.email = response.email;
-      user.name = response.displayName;
-
-      if (response.gender) user.gender = response.gender; // Android only
-      if (response.birthday) user.age = getAge(response.birthday); // Android only
-
+      storeService.setToken('google', response.oauthToken, 0);
       $log.info('got google token');
       q.resolve(response);
     };
@@ -54,20 +50,20 @@ angular.module('experience.services.user', [])
   };
 
   var loginCallback = function (response) {
-    user.provider = 'jumping';
-    user.accessToken = response.data.token;
-    user.expiresIn = response.data.expiresAt; // FIXME expiresIn != expiresAt
+    storeService.setToken('jumping', response.data.token, response.data.expiresAt);
     $log.info('logged in (got jumping token)');
   };
 
   var loginFacebook = function () {
     $log.debug('logging in using facebook provider');
-    return apiService.loginFacebook(user.accessToken, user.expiresIn).then(loginCallback);
+    var provider = user.provider.facebook;
+    return apiService.loginFacebook(provider.token, provider.expiresAt).then(loginCallback);
   };
 
   var loginGoogle = function () {
     $log.debug('logging in using google provider');
-    return apiService.loginGoogle(user.accessToken, user.expiresIn).then(loginCallback);
+    var provider = user.provider.google;
+    return apiService.loginGoogle(provider.token, provider.expiresAt).then(loginCallback);
   };
 
   var loginJumping = function () {
@@ -105,38 +101,16 @@ angular.module('experience.services.user', [])
     });
   };
 
-  var makeFriendObject = function (provider, id, name, picture) {
-    return {
-      provider: provider,
-      id: id,
-      name: name,
-      picture: picture,
-    };
-  };
+  var reloadFriends = function () {
+    $log.debug('getting friends data');
+    return apiService.getFriends().then(function (response) {
+      // copy friends to storeService's friends object by its IDs
+      for (var i = 0; i < response.data.length; i++) {
+        person = response.data[i];
+        friends[person.id] = person;
+      }
 
-  var loadFriendsFacebook = function (force) {
-    if (!force && user.friends.loaded.facebook != null && (new Date() - user.friends.loaded.facebook) < friendsUpdateInterval) {
-      return;
-    }
-
-    $log.debug('loading friends from Facebook');
-
-    return $http.get('https://graph.facebook.com/v2.5/me/friends', {
-      params: {
-        access_token: user.accessToken,
-        fields: 'name,id,picture',
-      },
-    }).then(function (response) {
-      user.friends.facebook = [];
-      angular.forEach(response.data.data, function (person) {
-        user.friends.facebook.push(makeFriendObject('facebook', person.id, person.name, person.picture.data.url));
-      });
-
-      user.friends.loaded.facebook = Date.now();
-      $log.info('friends loaded from Facebook');
-    }).catch(function (error) {
-      $log.error('Facebook graph API error: ' + error);
-      throw error;
+      $log.info('friends data reloaded');
     });
   };
 
@@ -150,5 +124,5 @@ angular.module('experience.services.user', [])
   this.resetPassword = resetPassword;
   this.createAccount = createAccount;
   this.updateAccount = updateAccount;
-  this.loadFriendsFacebook = loadFriendsFacebook;
+  this.reloadFriends = reloadFriends;
 });

@@ -15,7 +15,7 @@ angular.module('experience.services.api', [])
     // add auth token if not explicitly requested to be anonymous
     config.headers = config.headers || {};
     if (config.anonymous !== true) {
-      config.headers.Authorization = 'Token ' + user.accessToken;
+      config.headers.Authorization = 'Token ' + user.provider.jumping.token;
     }
 
     // prefix with baseURL
@@ -152,7 +152,7 @@ angular.module('experience.services.api', [])
   // friends =============================================
 
   var getFriends = function (params) {
-    return get('/lessons', {
+    return get('/friends', {
       params: filterParams(params, ['fields', 'scores']),
     });
   };

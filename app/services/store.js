@@ -20,20 +20,16 @@ angular.module('experience.services.store', [])
   });
 
   $localStorage.$default({
+    // device related
     deviceID: null,
-  });
-  $localStorage.$default({
     pairedID: null,
-  });
-  $localStorage.$default({
     ignoredIDs: [],
-  });
-  $localStorage.$default({
-    user: {
-      provider: null,
-      accessToken: null,
-      expiresIn: null,
 
+    // lesson related
+    currentLesson: emptyLesson,
+
+    // user related
+    user: {
       email: null,
       password: null,
       name: null,
@@ -42,19 +38,22 @@ angular.module('experience.services.store', [])
       gender: null,
       units: null,
 
-      friends: {
-        loaded: {
-          // mktime
-          facebook: null,
-          google: null,
+      provider: {
+        jumping: {
+          token: null,
+          expiresAt: null,
         },
-        facebook: [],
-        google: [],
+        facebook: {
+          token: null,
+          expiresAt: null,
+        },
+        google: {
+          token: null,
+          expiresAt: null,
+        },
       },
     },
-  });
-  $localStorage.$default({
-    currentLesson: emptyLesson,
+    friends: {},
   });
 
   var db;
@@ -331,8 +330,17 @@ angular.module('experience.services.store', [])
     return $localStorage.user;
   };
 
+  var setToken = function (provider, token, expiresAt) {
+    getUser().provider[provider].token = token;
+    getUser().provider[provider].expiresAt = expiresAt;
+  };
+
   var isLoggedIn = function () {
-    return getUser().provider != null;
+    return getUser().provider.jumping.token != null;
+  };
+
+  var getFriends = function () {
+    return $localStorage.friends;
   };
 
   // sqlite related service API
@@ -359,6 +367,8 @@ angular.module('experience.services.store', [])
   this.isIgnored = isIgnored;
   this.clearIgnored = clearIgnored;
   this.getUser = getUser;
+  this.setToken = setToken;
   this.isLoggedIn = isLoggedIn;
+  this.getFriends = getFriends;
 
 });
