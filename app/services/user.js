@@ -5,9 +5,7 @@
 
 angular.module('experience.services.user', [])
 
-.constant('friendsUpdateInterval', 1e3 * 60 * 60 * 24 * 7) // = one week in miliseconds
-
-.service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, apiService, $q, friendsUpdateInterval) {
+.service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, apiService, $q) {
 
   var user = storeService.getUser();
   var friends = storeService.getFriends();
@@ -105,11 +103,8 @@ angular.module('experience.services.user', [])
     $log.debug('getting friends data');
     return apiService.getFriends().then(function (response) {
       // copy friends to storeService's friends object by its IDs
-      for (var i = 0; i < response.data.length; i++) {
-        person = response.data[i];
-        friends[person.id] = person;
-      }
-
+      friends.length = 0;
+      angular.merge(friends, response.data);
       $log.info('friends data reloaded');
     });
   };
