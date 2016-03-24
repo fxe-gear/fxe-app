@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.pairing', []);
 
-var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, shuffleService) {
+var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, shuffle) {
   var colors = {
     red: '#ff0000',
     green: '#00ff00',
@@ -11,7 +11,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
     white: '#ffffff',
     cyan: '#00ffff',
   };
-  var colorNamesShuffled = shuffleService.shuffle(Object.keys(colors));
+  var colorNamesShuffled;
 
   $scope.stepCount = 4;
   $scope.step = 0;
@@ -47,12 +47,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
   };
 
   $scope.no = function () {
-    $ionicPopup.alert({
-        title: 'Paring failed',
-        template: 'Sorry, we have unintentionally connected to another Experience. Please try it again.',
-        okType: 'button-energized',
-      })
-      .then(experienceService.clearColor)
+    experienceService.clearColor()
       .then(experienceService.ignore)
       .then(experienceService.disconnect)
       .then(function () {
@@ -69,7 +64,10 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
 
   $scope.$on('$ionicView.beforeEnter', function () {
     $scope.step = 0;
-    $ionicPlatform.ready().then(setRandomColor);
+    $ionicPlatform.ready().then(function () {
+        colorNamesShuffled = shuffle(Object.keys(colors));
+      })
+      .then(setRandomColor);
   });
 };
 

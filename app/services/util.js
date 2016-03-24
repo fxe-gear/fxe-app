@@ -35,8 +35,8 @@ module.filter('ordinal', function () {
 // ------------------------------------------------------------------------------------------------
 
 // Fisher–Yates shuffle
-module.service('shuffleService', function () {
-  this.shuffle = function (array) {
+module.factory('shuffle', function () {
+  return function (array) {
     var counter = array.length;
     var temp;
     var index;
