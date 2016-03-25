@@ -60,7 +60,7 @@ angular.module('experience', [
     // prepare DB
     storeService.prepareDB();
 
-    // save "android" / "ios" variable to scope
+    // save "android" / "ios" variable to rootScope
     $rootScope.platform = ionic.Platform.platform();
   });
 

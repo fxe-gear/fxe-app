@@ -2,13 +2,15 @@
 
 var module = angular.module('experience.controllers.account', []);
 
-var CreateAccountController = function ($scope, $state, $ionicHistory, $ionicPopup, storeService, userService) {
+var CreateAccountController = function ($scope, $state, $cordovaToast, $ionicHistory, $ionicPopup, storeService, userService) {
 
   $scope.user = storeService.getUser();
 
   $scope.create = function () {
     userService.createAccount()
       .then(function () {
+        return $cordovaToast.showShortBottom('Account created.');
+      }).then(function () {
         $ionicHistory.nextViewOptions({
           historyRoot: true,
         });

@@ -2,14 +2,11 @@
 
 var module = angular.module('experience.controllers.welcome', []);
 
-var WelcomeController = function ($scope, $state, $ionicHistory, $ionicPopup, userService) {
+var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
 
   $scope.loginFacebook = function () {
     userService.getFacebookToken()
       .then(function () {
-        $ionicHistory.nextViewOptions({
-          historyRoot: true,
-        });
         $state.go('scanning');
       })
       .then(userService.loginFacebook)
@@ -26,9 +23,6 @@ var WelcomeController = function ($scope, $state, $ionicHistory, $ionicPopup, us
   $scope.loginGoogle = function () {
     userService.getGoogleToken()
       .then(function () {
-        $ionicHistory.nextViewOptions({
-          historyRoot: true,
-        });
         $state.go('scanning');
       })
       .then(userService.loginGoogle)

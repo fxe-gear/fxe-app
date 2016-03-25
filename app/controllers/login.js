@@ -2,12 +2,15 @@
 
 var module = angular.module('experience.controllers.login', []);
 
-var LoginController = function ($scope, $state, $ionicHistory, $ionicPopup, userService, storeService) {
+var LoginController = function ($scope, $state, $cordovaToast, $ionicHistory, $ionicPopup, userService, storeService) {
 
   $scope.user = storeService.getUser();
 
   $scope.login = function () {
-    userService.loginJumping().then(function () {
+    userService.loginJumping()
+      .then(function () {
+        return $cordovaToast.showShortBottom('Logged in.');
+      }).then(function () {
         $ionicHistory.nextViewOptions({
           historyRoot: true,
         });
