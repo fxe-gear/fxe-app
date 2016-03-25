@@ -2,17 +2,18 @@
 
 var module = angular.module('experience.controllers.scanning', []);
 
-var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService) {
+var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, storeService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
+  $scope.ignoredDevices = 0;
 
   $scope.clearIgnored = function () {
     experienceService.clearIgnored();
     experienceService.stopScan().then(enter);
   };
 
-  $scope.demo = function () {
+  $scope.gotoJumping = function () {
     $ionicHistory.nextViewOptions({
       historyRoot: true,
     });
@@ -20,6 +21,8 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   };
 
   var enter = function () {
+    if (storeService.isPaired()) $scope.gotoJumping();
+
     $scope.ignoredDevices = 0;
     $ionicPlatform.ready()
       .then(enableBluetooth)
@@ -28,7 +31,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
       .then(connect)
       .then(function () {
         // prevent changing state when the process has aleready been canceled
-        // if ($state.current.controller != 'ScanningController') return;
+        if ($state.current.controller != 'ScanningController') return disconnect();
         $state.go('pairing');
       }, null, function (device) {
         // ignored device found
