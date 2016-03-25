@@ -12,5 +12,10 @@ angular.module('experience.directives.account', [])
       title: '@',
       user: '=',
     },
+    link: function (scope, elem, attr, ctrl, $transclude) {
+      $transclude(function (clone) {
+        scope.hasTranscluded = clone.length;
+      });
+    },
   };
 });
