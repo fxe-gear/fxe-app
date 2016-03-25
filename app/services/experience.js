@@ -179,15 +179,18 @@ angular.module('experience.services.experience', [])
   var disconnect = function () {
     return isConnected().then(function (connected) {
       if (!connected) throw 'experience not connected';
-      $log.debug('disconnecting from ' + storeService.getDeviceID());
+
+      var deviceID = storeService.getDeviceID();
+      $log.debug('disconnecting from ' + deviceID);
 
       return disableConnectionHolding()
         .then(disableBatteryWarning)
         .then(function () {
-          return $cordovaBLE.disconnect(storeService.getDeviceID());
+          return $cordovaBLE.disconnect(deviceID);
         }).then(function (result) {
+          storeService.setDeviceID(null);
           $rootScope.$broadcast('experienceDisconnected');
-          $log.info('disconnected from ' + storeService.getDeviceID());
+          $log.info('disconnected from ' + deviceID);
           return result;
         }).catch(function (error) {
           $log.error('disconnecting from ' + deviceID + ' failed');
@@ -232,7 +235,7 @@ angular.module('experience.services.experience', [])
   };
 
   var ignore = function () {
-    if (!storeService.getDeviceID()) return $q.reject('unable to ignore, no device is paired');
+    if (!storeService.getDeviceID()) return $q.reject('unable to ignore, no device is connected');
     storeService.ignore(storeService.getDeviceID());
     $log.info(storeService.getDeviceID() + ' added to ignore list');
     return $q.resolve();
