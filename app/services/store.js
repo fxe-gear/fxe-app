@@ -53,7 +53,7 @@ angular.module('experience.services.store', [])
         },
       },
     },
-    friends: [],
+    friends: {},
   });
 
   var db;

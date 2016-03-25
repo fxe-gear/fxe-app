@@ -103,8 +103,16 @@ angular.module('experience.services.user', [])
     $log.debug('getting friends data');
     return apiService.getFriends().then(function (response) {
       // copy friends to storeService's friends object by its IDs
-      friends.length = 0;
-      angular.merge(friends, response.data);
+      angular.forEach(response.data, function (person) {
+        if (friends.hasOwnProperty(person.id)) {
+          // we already know this person, just update its data and score
+          angular.merge(friends[person.id], person);
+        } else {
+          // new friend
+          friends[person.id] = person;
+        }
+      });
+
       $log.info('friends data reloaded');
     });
   };
