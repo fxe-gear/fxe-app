@@ -2,15 +2,15 @@
 
 var module = angular.module('experience.controllers.scanning', []);
 
-var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, storeService) {
+var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, bleDeviceService, experienceService, storeService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
   $scope.ignoredDevices = 0;
 
   $scope.clearIgnored = function () {
-    experienceService.clearIgnored();
-    experienceService.stopScan().then(enter);
+    bleDeviceService.clearIgnored();
+    bleDeviceService.stopScan().then(enter);
   };
 
   $scope.gotoJumping = function () {
@@ -44,7 +44,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var enableBluetooth = function () {
     $scope.working = true;
     $scope.status = 'Enabling bluetooth...';
-    return experienceService.enable().catch(function (error) {
+    return bleDeviceService.enable().catch(function (error) {
       $scope.working = false;
       $scope.status = 'Cannot enable bluetooth. Please enable it manually.';
       throw error;
@@ -54,7 +54,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var disconnect = function () {
     $scope.working = true;
     $scope.status = 'Disconnecting previously connected devices...';
-    return experienceService.isConnected().then(function (connected) {
+    return bleDeviceService.isConnected().then(function (connected) {
       if (connected) experienceService.disconnect();
     }).catch(function (error) {
       $scope.working = false;
@@ -86,7 +86,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var leave = function () {
     $scope.working = false;
     $scope.status = 'Ready';
-    return experienceService.stopScan();
+    return bleDeviceService.stopScan();
   };
 
   $scope.$on('$ionicView.beforeEnter', enter);

@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.pairing', []);
 
-var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, shuffle) {
+var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, bleDeviceService, shuffle) {
   var colors = {
     red: '#ff0000',
     green: '#00ff00',
@@ -25,7 +25,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
   $scope.yes = function () {
     if ($scope.step + 1 >= $scope.stepCount) {
       // on the end of pairing process
-      experienceService.pair();
+      bleDeviceService.pair();
       return experienceService.clearColor().then(function () {
         $ionicHistory.nextViewOptions({
           historyRoot: true,
@@ -48,8 +48,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
 
   $scope.no = function () {
     experienceService.clearColor()
-      .then(experienceService.ignore)
-      .then(experienceService.disconnect)
+      .then(bleDeviceService.ignore)
       .then(function () {
         return $state.go('scanning');
       }).catch(function (error) {

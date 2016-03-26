@@ -35,7 +35,7 @@ angular.module('experience', [
   'experience.templates',
 ])
 
-.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, experienceService) {
+.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDeviceService, experienceService) {
 
   $ionicPlatform.ready(function () {
     // keyboard setup
@@ -72,7 +72,7 @@ angular.module('experience', [
 
     } else {
       // this is the history root: disconnect and exit
-      experienceService.isConnected().then(function (connected) {
+      bleDeviceService.isConnected().then(function (connected) {
         if (connected) experienceService.disconnect();
       });
 
@@ -94,7 +94,7 @@ angular.module('experience', [
 
   // related to live reload
   window.onbeforeunload = function (e) {
-    experienceService.isConnected().then(function (connected) {
+    bleDeviceService.isConnected().then(function (connected) {
       if (connected) experienceService.disconnect();
     });
 
