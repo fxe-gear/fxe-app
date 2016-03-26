@@ -267,7 +267,7 @@ angular.module('experience.services.experience', [])
       if (!connected) throw 'experience not connected';
 
       $log.debug('writing data ' + data + ' to ' + service + '-' + chrcs);
-      return $cordovaBLE.write(storeService.getDeviceID(), chrcs, data);
+      return $cordovaBLE.write(storeService.getDeviceID(), service, chrcs, data.buffer);
     });
   };
 
@@ -346,14 +346,6 @@ angular.module('experience.services.experience', [])
     return bleDeviceService.scan([bls.experience.uuid]);
   };
 
-  var connect = function (deviceID) {
-    return bleDeviceService.connect(deviceID).then(enableBatteryWarning);
-  };
-
-  var disconnect = function () {
-    return disableBatteryWarning().then(bleDeviceService.disconnect);
-  };
-
   var setColor = function (color) {
     $log.debug('setting color to ' + color);
 
@@ -363,7 +355,7 @@ angular.module('experience.services.experience', [])
     data[1] = parseInt(color.substring(3, 5), 16); // green
     data[2] = parseInt(color.substring(5, 7), 16); // blue
 
-    return bleDeviceService.write(bls.led.uuid, bls.led.chrcs.led.uuid, data.buffer).then(function () {
+    return bleDeviceService.write(bls.led.uuid, bls.led.chrcs.led.uuid, data).then(function () {
       $log.info('color set to ' + color);
     }).catch(function (error) {
       $log.error('setting color failed');
@@ -417,7 +409,7 @@ angular.module('experience.services.experience', [])
         // delete previous scores
         storeService.startLesson();
         angular.forEach(scoreUUIDs, function (uuid) {
-          bleDeviceService.write(bls.experience.uuid, uuid, zeroScore.buffer);
+          bleDeviceService.write(bls.experience.uuid, uuid, zeroScore);
         });
       }
     });
@@ -430,10 +422,10 @@ angular.module('experience.services.experience', [])
     });
 
     // write timeout
-    bleDeviceService.write(bls.experience.uuid, bls.experience.chrcs.sleep.uuid, timeoutLength.buffer);
+    bleDeviceService.write(bls.experience.uuid, bls.experience.chrcs.sleep.uuid, timeoutLength);
 
     // start measurement
-    return bleDeviceService.write(bls.experience.uuid, bls.experience.chrcs.control.uuid, startCommand.buffer).then(function () {
+    return bleDeviceService.write(bls.experience.uuid, bls.experience.chrcs.control.uuid, startCommand).then(function () {
       $log.info('measurement started');
     }).catch(function (error) {
       $log.error('starting measurement failed');
@@ -453,7 +445,7 @@ angular.module('experience.services.experience', [])
     });
 
     // stop measurement
-    return bleDeviceService.write(bls.experience.uuid, bls.experience.chrcs.control.uuid, stopMeasurementCommand.buffer)
+    return bleDeviceService.write(bls.experience.uuid, bls.experience.chrcs.control.uuid, stopMeasurementCommand)
       .then(storeService.endLesson)
       .then(function () {
         $log.info('measurement stopped');
@@ -507,9 +499,6 @@ angular.module('experience.services.experience', [])
 
     // start notification
     return bleDeviceService.startNotification(bls.battery.uuid, bls.battery.chrcs.level.uuid, onBatteryLevelChange).then(function () {
-      // read current level
-      bleDeviceService.read(bls.battery.uuid, bls.battery.chrcs.level.uuid).then(onBatteryLevelChange);
-    }).then(function () {
       $log.info('battery warning enabled');
     }).catch(function (error) {
       $log.error('enabling battery warning failed');
@@ -583,8 +572,6 @@ angular.module('experience.services.experience', [])
   };
 
   this.scan = scan;
-  this.connect = connect;
-  this.disconnect = disconnect;
 
   this.setColor = setColor;
   this.clearColor = clearColor;

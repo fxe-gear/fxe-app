@@ -55,7 +55,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
     $scope.working = true;
     $scope.status = 'Disconnecting previously connected devices...';
     return bleDeviceService.isConnected().then(function (connected) {
-      if (connected) experienceService.disconnect();
+      if (connected) bleDeviceService.disconnect();
     }).catch(function (error) {
       $scope.working = false;
       $scope.status = 'Disconnecting failed';
@@ -76,7 +76,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var connect = function (device) {
     $scope.working = true;
     $scope.status = 'Connecting...';
-    return experienceService.connect(device).catch(function (error) {
+    return bleDeviceService.connect(device).catch(function (error) {
       $scope.working = false;
       $scope.status = 'Connecting failed';
       throw error;

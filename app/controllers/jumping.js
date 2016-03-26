@@ -47,7 +47,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     return experienceService.startMeasurement().then(function () {
       $scope.lesson = storeService.getCurrentLesson();
       $scope.running = true;
-      timer = $interval($scope.apply, 1000);
+      timer = $interval(angular.noop, 1000);  // just to update duration
     });
   };
 
@@ -71,7 +71,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     }).then(function () {
       // delay setting of $scope.connected due to GUI overlay after start
       $scope.connected = true;
-    });
+    }).then(experienceService.enableBatteryWarning);
   };
 
   var onExperienceDisconnected = function () {

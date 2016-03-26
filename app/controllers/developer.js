@@ -44,7 +44,7 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
     bleDeviceService.unpair()
       .then(bleDeviceService.isConnected)
       .then(function (connected) {
-        if (connected) return experienceService.disconnect();
+        if (connected) return bleDeviceService.disconnect();
       }).then(function () {
         $state.go('scanning');
       });
@@ -52,7 +52,7 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
 
   $scope.clearAll = function () {
     bleDeviceService.isConnected().then(function (connected) {
-      if (connected) return experienceService.disconnect();
+      if (connected) return bleDeviceService.disconnect();
     }).then(function () {
       $localStorage.$reset();
       $cordovaSQLite.deleteDB({

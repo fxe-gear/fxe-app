@@ -64,6 +64,15 @@ angular.module('experience', [
     $rootScope.platform = ionic.Platform.platform();
   });
 
+  // disconnect device if needed
+  var disconnect = function () {
+    return bleDeviceService.isConnected().then(function (connected) {
+      if (connected) {
+        return experienceService.disableBatteryWarning().then(bleDeviceService.disconnect);
+      }
+    });
+  };
+
   $ionicPlatform.registerBackButtonAction(function (e) {
     e.preventDefault();
 
@@ -72,10 +81,7 @@ angular.module('experience', [
 
     } else {
       // this is the history root: disconnect and exit
-      bleDeviceService.isConnected().then(function (connected) {
-        if (connected) experienceService.disconnect();
-      });
-
+      disconnect();
       $rootScope.$broadcast('exit');
       ionic.Platform.exitApp();
     }
@@ -94,10 +100,7 @@ angular.module('experience', [
 
   // related to live reload
   window.onbeforeunload = function (e) {
-    bleDeviceService.isConnected().then(function (connected) {
-      if (connected) experienceService.disconnect();
-    });
-
+    disconnect();
     $rootScope.$broadcast('liveunload');
     return; // must explicitly return
   };
