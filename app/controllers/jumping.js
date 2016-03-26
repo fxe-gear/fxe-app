@@ -29,7 +29,7 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, $timeout, experienceService, bleDeviceService, storeService) {
+var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, $timeout, experienceService, bleDevice, storeService) {
   var timer = null;
   var batteryPopup = null;
 
@@ -94,7 +94,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   $scope.$on('$ionicView.beforeEnter', function () {
     // get current state
     $ionicPlatform.ready()
-      .then(bleDeviceService.isConnected)
+      .then(bleDevice.isConnected)
       .then(function (connected) {
         if (connected) onExperienceConnected();
         else onExperienceDisconnected();
@@ -120,7 +120,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   });
 
   // and ensure experience is connected for both, now and future
-  $ionicPlatform.ready(bleDeviceService.holdConnection);
+  $ionicPlatform.ready(bleDevice.holdConnection);
 };
 
 module.controller('JumpingController', JumpingController);

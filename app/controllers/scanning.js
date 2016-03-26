@@ -2,15 +2,15 @@
 
 var module = angular.module('experience.controllers.scanning', []);
 
-var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, bleDeviceService, experienceService, storeService) {
+var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, bleDevice, experienceService, storeService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
   $scope.ignoredDevices = 0;
 
   $scope.clearIgnored = function () {
-    bleDeviceService.clearIgnored();
-    bleDeviceService.stopScan().then(enter);
+    bleDevice.clearIgnored();
+    bleDevice.stopScan().then(enter);
   };
 
   $scope.gotoJumping = function () {
@@ -44,7 +44,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var enableBluetooth = function () {
     $scope.working = true;
     $scope.status = 'Enabling bluetooth...';
-    return bleDeviceService.enable().catch(function (error) {
+    return bleDevice.enable().catch(function (error) {
       $scope.working = false;
       $scope.status = 'Cannot enable bluetooth. Please enable it manually.';
       throw error;
@@ -54,8 +54,8 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var disconnect = function () {
     $scope.working = true;
     $scope.status = 'Disconnecting previously connected devices...';
-    return bleDeviceService.isConnected().then(function (connected) {
-      if (connected) bleDeviceService.disconnect();
+    return bleDevice.isConnected().then(function (connected) {
+      if (connected) bleDevice.disconnect();
     }).catch(function (error) {
       $scope.working = false;
       $scope.status = 'Disconnecting failed';
@@ -76,7 +76,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var connect = function (device) {
     $scope.working = true;
     $scope.status = 'Connecting...';
-    return bleDeviceService.connect(device).catch(function (error) {
+    return bleDevice.connect(device).catch(function (error) {
       $scope.working = false;
       $scope.status = 'Connecting failed';
       throw error;
@@ -86,7 +86,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var leave = function () {
     $scope.working = false;
     $scope.status = 'Ready';
-    return bleDeviceService.stopScan();
+    return bleDevice.stopScan();
   };
 
   $scope.$on('$ionicView.beforeEnter', enter);

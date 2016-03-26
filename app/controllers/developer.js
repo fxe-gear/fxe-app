@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.developer', []);
 
-var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, experienceService, bleDeviceService, storeService) {
+var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, experienceService, bleDevice, storeService) {
 
   $localStorage.$default({
     websocket: {
@@ -41,18 +41,18 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
   };
 
   $scope.unpair = function () {
-    bleDeviceService.unpair()
-      .then(bleDeviceService.isConnected)
+    bleDevice.unpair()
+      .then(bleDevice.isConnected)
       .then(function (connected) {
-        if (connected) return bleDeviceService.disconnect();
+        if (connected) return bleDevice.disconnect();
       }).then(function () {
         $state.go('scanning');
       });
   };
 
   $scope.clearAll = function () {
-    bleDeviceService.isConnected().then(function (connected) {
-      if (connected) return bleDeviceService.disconnect();
+    bleDevice.isConnected().then(function (connected) {
+      if (connected) return bleDevice.disconnect();
     }).then(function () {
       $localStorage.$reset();
       $cordovaSQLite.deleteDB({

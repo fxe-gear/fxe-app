@@ -12,6 +12,7 @@ angular.module('experience', [
   'experience.services.store',
   'experience.services.user',
   'experience.services.api',
+  'experience.services.ble',
   'experience.services.experience',
 
   'experience.controllers.welcome',
@@ -35,7 +36,7 @@ angular.module('experience', [
   'experience.templates',
 ])
 
-.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDeviceService, experienceService) {
+.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, experienceService) {
 
   $ionicPlatform.ready(function () {
     // keyboard setup
@@ -66,9 +67,9 @@ angular.module('experience', [
 
   // disconnect device if needed
   var disconnect = function () {
-    return bleDeviceService.isConnected().then(function (connected) {
+    return bleDevice.isConnected().then(function (connected) {
       if (connected) {
-        return experienceService.disableBatteryWarning().then(bleDeviceService.disconnect);
+        return experienceService.disableBatteryWarning().then(bleDevice.disconnect);
       }
     });
   };
