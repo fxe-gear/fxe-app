@@ -27,6 +27,8 @@ angular.module('experience.services.store', [])
 
     // lesson related
     currentLesson: emptyLesson,
+    deletedLessons: [],
+    lessonLastSync: null,
 
     // user related
     user: {
@@ -53,6 +55,8 @@ angular.module('experience.services.store', [])
         },
       },
     },
+    userChanges: {},
+
     friends: {},
   });
 
@@ -135,6 +139,32 @@ angular.module('experience.services.store', [])
     return $cordovaSQLite.execute(getDB(), query, [endTime, startTime]).then(function () {
       angular.copy(emptyLesson, $localStorage.currentLesson);
     });
+  };
+
+  var addLesson = function (lesson) {
+    var query = [];
+    var bindings = [];
+
+    // insert lesson
+    query.push('INSERT INTO lesson (start_time, end_time) VALUES (?, ?);');
+    bindings.push(lesson.start, lesson.end);
+
+    // insert score records
+    query.push('INSERT INTO score (start_time, time, score, type) VALUES ');
+    for (var i = 0; i < lesson.score.length; i++) {
+      var s = lesson.score[i];
+      if (i != 0) query.push(','); // multiple VALUES separator
+      query.push('(?,?,?,?)'); // data placeholders
+      bindings.push(lesson.start, s.time, s.score, s.type); // data
+    }
+
+    return $cordovaSQLite.execute(getDB(), query.join(' '), bindings);
+  };
+
+  var deleteLesson = function (startTime) {
+    var query = 'DELETE lesson WHERE start_time = ?; DELETE score WHERE start_time = ?;';
+    var bindings = [startTime, startTime];
+    return $cordovaSQLite.execute(getDB(), query, bindings);
   };
 
   var getCurrentLesson = function () {
@@ -343,12 +373,30 @@ angular.module('experience.services.store', [])
     return $localStorage.friends;
   };
 
+  var getUserChanges = function () {
+    return $localStorage.userChanges;
+  };
+
+  var getDeletedLessons = function () {
+    return $localStorage.lessonChanges;
+  };
+
+  var getLessonLastSync = function () {
+    return $localStorage.lessonLastSync;
+  };
+
+  var touchLessonLastSync = function () {
+    $localStorage.lessonLastSync = Date.now();
+  };
+
   // sqlite related service API
   this.prepareDB = prepareDB;
   this._dumpDB = _dumpDB;
   this.startLesson = startLesson;
   this.addScore = addScore;
   this.endLesson = endLesson;
+  this.addLesson = addLesson;
+  this.deleteLesson = deleteLesson;
   this.getLessonCount = getLessonCount;
   this.getCurrentLesson = getCurrentLesson;
   this.getLastLesson = getLastLesson;
@@ -370,5 +418,8 @@ angular.module('experience.services.store', [])
   this.setToken = setToken;
   this.isLoggedIn = isLoggedIn;
   this.getFriends = getFriends;
-
+  this.getUserChanges = getUserChanges;
+  this.getDeletedLessons = getDeletedLessons;
+  this.getLessonLastSync = getLessonLastSync;
+  this.touchLessonLastSync = touchLessonLastSync;
 });

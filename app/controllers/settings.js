@@ -2,35 +2,53 @@
 
 var module = angular.module('experience.controllers.settings', []);
 
-var SettingsController = function ($scope, $state, $ionicPlatform, $ionicHistory, storeService, userService, diffWatch) {
+var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, $ionicHistory, storeService, syncService, diffWatch) {
 
-  $scope.user = storeService.getUser();
-  var userWatcher;
+  // copy store user to $scope.user
+  $scope.user = {};
+  angular.merge($scope.user, storeService.getUser());
+
+  var disableUserWatcher = angular.noop;
 
   var enter = function () {
+    // add $scope.user watcher
+    disableUserWatcher = diffWatch($scope, 'user', onUserChange);
+
     // load loggedIn and paired
     $scope.loggedIn = storeService.isLoggedIn();
     $scope.paired = storeService.isPaired();
 
-    // add user watcher
-    userWatcher = diffWatch($scope, 'user', onUserChange);
+    sync();
   };
 
   var leave = function () {
-    // clear user watcher
-    userWatcher();
+    disableUserWatcher();
+  };
+
+  // TODO show progress
+  var sync = function () {
+    // console.log(storeService.getUserChanges());
+    if (!$scope.loggedIn) return;
+
+    return syncService.syncUser()
+      .then(function () {
+        disableUserWatcher(); // disable
+        angular.merge($scope.user, storeService.getUser()); // copy changes
+        disableUserWatcher = diffWatch($scope, 'user', onUserChange); // enable
+      })
+      .catch(function (error) {
+        // TODO handle server side validation errors
+        $ionicPopup.alert({
+          title: 'Account synchronization failed.',
+          okType: 'button-assertive',
+        });
+      });
   };
 
   var onUserChange = function (changes) {
-    // pass the changes to userService
-    // TODO show progress
-    userService.updateAccount(changes.updated).catch(function (error) {
-      // TODO handle server side validation errors
-      $ionicPopup.alert({
-        title: 'Updating account failed.',
-        okType: 'button-assertive',
-      });
-    });
+    // pass the changes to storeService
+    angular.merge(storeService.getUserChanges(), changes.updated);
+    sync();
   };
 
   $scope.goto = function (target) {

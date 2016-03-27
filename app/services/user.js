@@ -8,7 +8,6 @@ angular.module('experience.services.user', [])
 .service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, apiService, $q) {
 
   var user = storeService.getUser();
-  var friends = storeService.getFriends();
 
   var getAge = function (ISOdate) {
     return Math.floor((Date.now() - Date.parse(ISOdate)) / (1000 * 60 * 60 * 24 * 365));
@@ -92,31 +91,6 @@ angular.module('experience.services.user', [])
     });
   };
 
-  var updateAccount = function (diff) {
-    $log.debug('updating user account');
-    return apiService.updateUser(diff).then(function (response) {
-      $log.info('user account updated');
-    });
-  };
-
-  var reloadFriends = function () {
-    $log.debug('getting friends data');
-    return apiService.getFriends().then(function (response) {
-      // copy friends to storeService's friends object by its IDs
-      angular.forEach(response.data, function (person) {
-        if (friends.hasOwnProperty(person.id)) {
-          // we already know this person, just update its data and score
-          angular.merge(friends[person.id], person);
-        } else {
-          // new friend
-          friends[person.id] = person;
-        }
-      });
-
-      $log.info('friends data reloaded');
-    });
-  };
-
   // service public API
   this.getFacebookToken = getFacebookToken;
   this.getGoogleToken = getGoogleToken;
@@ -126,6 +100,4 @@ angular.module('experience.services.user', [])
   this.loadDetails = loadDetails;
   this.resetPassword = resetPassword;
   this.createAccount = createAccount;
-  this.updateAccount = updateAccount;
-  this.reloadFriends = reloadFriends;
 });

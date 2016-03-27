@@ -1,13 +1,14 @@
 <ion-view title="Friends">
   <ion-content padding="true" class="friends">
 
-    <div class="row button-bar range-bar">
+    <div class="row button-bar range-bar" ng-show="loggedIn">
       <button ng-click="changeRange('last')" ng-class="{'button-outline': range != 'last'}" class="col button button-small button-light">last lesson</button>
       <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-small button-light">week</button>
       <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-small button-light">month</button>
     </div>
 
-    <p class="no-result" ng-show="!loggedIn">Please login to start competiting with friends.</p>
+    <p class="login-request" ng-show="!loggedIn">Please login to start competiting with friends.</p>
+    <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-show="!loggedIn">Login</a>
 
     <div class="card list" ng-show="loggedIn">
       <div class="item item-divider">

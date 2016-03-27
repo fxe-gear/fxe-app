@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.friends', []);
 
-var FriendsController = function ($scope, storeService, userService) {
+var FriendsController = function ($scope, storeService, syncService) {
 
   $scope.friends = storeService.getFriends();
   $scope.range = null;
@@ -12,7 +12,7 @@ var FriendsController = function ($scope, storeService, userService) {
     $scope.loggedIn = storeService.isLoggedIn();
     $scope.range = 'last';
     if ($scope.loggedIn) {
-      userService.reloadFriends();
+      syncService.syncFriends();
     }
   };
 

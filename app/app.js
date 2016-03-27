@@ -9,9 +9,10 @@ angular.module('experience', [
   'chart.js',
 
   'experience.services.util',
-  'experience.services.store',
   'experience.services.user',
+  'experience.services.store',
   'experience.services.api',
+  'experience.services.sync',
   'experience.services.ble',
   'experience.services.experience',
 
