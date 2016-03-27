@@ -4,114 +4,130 @@ angular.module('experience.services.ble', [])
 
 .constant('reconnectTimeout', 3000) // in milliseconds
 
-.service('bleDevice', function ($rootScope, $cordovaBLE, $q, $log, $timeout, storeService, reconnectTimeout) {
+.service('bleDevice', function ($rootScope, $ionicPlatform, $cordovaBLE, $q, $log, $timeout, storeService, reconnectTimeout) {
 
   var scanning = false;
   var _disableConnectionHolding = null;
 
-  var enable = function () {
-    var q = $q.defer();
-
+  $ionicPlatform.ready().then(function () {
     try {
       ble.isEnabled;
     } catch (e) {
       $log.error('no ble, no fun');
-      q.reject(e);
-      return q.promise;
     }
+  });
 
-    $cordovaBLE.isEnabled().then(function () { // already enabled
-      q.resolve();
-    }).catch(function (error) { // not enabled
-      if (typeof ble.enable === 'undefined') {
-        // iOS doesn't have ble.enable
-        q.reject('cannot enable bluetooth, probably on iOS');
-      } else {
-        // Android
-        $log.debug('enabling bluetooth');
-        $rootScope.$broadcast('experienceEnablingStarted');
+  var enable = function () {
+    var q = $q.defer();
+    $log.debug('enabling bluetooth');
 
-        $cordovaBLE.enable().then(function () {
-          $log.info('bluetooth enabled');
-          q.resolve();
-        }).catch(function (error) {
-          $log.warn('bluetooth not enabled');
-          q.reject(error);
-        });
-      }
-    });
+    $ionicPlatform.ready()
+      .then($cordovaBLE.isEnabled)
+      .then(q.resolve) // already enabled
+      .catch(function (error) { // not enabled
+        if (typeof ble.enable === 'undefined') {
+          // iOS doesn't have ble.enable
+          q.reject('cannot enable bluetooth, probably on iOS');
+        } else {
+          // Android
+          $rootScope.$broadcast('experienceEnablingStarted');
+
+          $cordovaBLE.enable()
+            .then(function () {
+              $log.info('bluetooth enabled');
+              q.resolve();
+            })
+            .catch(function (error) {
+              $log.warn('bluetooth not enabled');
+              q.reject(error);
+            });
+        }
+      });
 
     return q.promise;
   };
 
   var scan = function (services) {
-    var q = $q.defer();
-    $log.debug('starting ble scan for ' + services);
-    scanning = true;
+    return $ionicPlatform.ready().then(function () {
+      var q = $q.defer();
+      $log.debug('starting ble scan for ' + services);
 
-    $cordovaBLE.startScan(services, function (device) {
-      var deviceID = device.id;
-      if (storeService.isPaired()) { // paired
-        if (storeService.getPairedID() == deviceID) { // found paired device
-          $log.info('found paired ' + deviceID);
-          stopScan().then(function () {
-            q.resolve(deviceID);
-          });
-        } else { // found another (not paired) device
-          $log.info('found not paired ' + deviceID);
+      var onDeviceFound = function (device) {
+        var deviceID = device.id;
+        if (storeService.isPaired()) { // paired
+          if (storeService.getPairedID() == deviceID) { // found paired device
+            $log.info('found paired ' + deviceID);
+            stopScan().then(function () {
+              q.resolve(deviceID);
+            });
+          } else { // found another (not paired) device
+            $log.info('found not paired ' + deviceID);
+          }
+
+        } else { // not paired yet
+          if (!storeService.isIgnored(deviceID)) { // found new (not ignored) device
+            $log.info('found ' + deviceID);
+            stopScan().then(function () {
+              q.resolve(deviceID);
+            });
+          } else { // found ignored
+            $log.info('found ignored ' + deviceID);
+            q.notify(deviceID);
+          }
         }
+      };
 
-      } else { // not paired yet
-        if (!storeService.isIgnored(deviceID)) { // found new (not ignored) device
-          $log.info('found ' + deviceID);
-          stopScan().then(function () {
-            q.resolve(deviceID);
-          });
-        } else { // found ignored
-          $log.info('found ignored ' + deviceID);
-          q.notify(deviceID);
-        }
-      }
-    }, q.reject);
+      $ionicPlatform.ready().then(function () {
+        scanning = true;
+        $cordovaBLE.startScan(services, onDeviceFound, q.reject);
+        $rootScope.$broadcast('experienceScanningStarted');
+        $log.info('scanning started');
+      });
 
-    $rootScope.$broadcast('experienceScanningStarted');
-    $log.info('scanning started');
-    return q.promise;
+      return q.promise;
+    });
   };
 
   var stopScan = function () {
     if (!scanning) return $q.resolve();
     $log.debug('stopping ble scan');
-    return $cordovaBLE.stopScan().then(function (result) {
-      scanning = false;
-      $log.info('scanning stopped');
-      return result;
-    }).catch(function (error) {
-      $log.error('scanning stop failed');
-      throw error;
-    });
+
+    return $ionicPlatform.ready()
+      .then($cordovaBLE.stopScan)
+      .then(function (result) {
+        scanning = false;
+        $log.info('scanning stopped');
+        return result;
+      })
+      .catch(function (error) {
+        $log.error('scanning stop failed');
+        throw error;
+      });
   };
 
   var connect = function (deviceID) {
-    var q = $q.defer();
-    $log.debug('connecting to ' + deviceID);
-    $rootScope.$broadcast('experienceConnectingStarted');
+    return $ionicPlatform.ready().then(function () {
+      var q = $q.defer();
+      $log.debug('connecting to ' + deviceID);
+      $rootScope.$broadcast('experienceConnectingStarted');
 
-    ble.connect(deviceID,
-      function (device) {
-        $log.info('connected to ' + deviceID);
-        storeService.setDeviceID(deviceID);
-        $rootScope.$broadcast('experienceConnected');
-        q.resolve(deviceID);
-      },
+      ble.connect(deviceID,
+        function (device) {
+          $log.info('connected to ' + deviceID);
+          storeService.setDeviceID(deviceID);
+          $rootScope.$broadcast('experienceConnected');
+          q.resolve(deviceID);
+        },
 
-      function (error) {
-        $log.error('connecting to ' + deviceID + ' failed / device disconnected later');
-        $rootScope.$broadcast('experienceDisconnected');
-        q.reject(error);
-      });
+        function (error) {
+          $log.error('connecting to ' + deviceID + ' failed / device disconnected later');
+          $rootScope.$broadcast('experienceDisconnected');
+          q.reject(error);
+        });
 
-    return q.promise;
+      return q.promise;
+    });
+
   };
 
   var reconnect = function () {
@@ -246,25 +262,27 @@ angular.module('experience.services.ble', [])
   };
 
   var isConnected = function () {
-    var q = $q.defer();
-    var deviceID = storeService.getDeviceID();
+    return $ionicPlatform.ready().then(function () {
+      var q = $q.defer();
+      var deviceID = storeService.getDeviceID();
 
-    // no deviceID = not connected
-    if (!deviceID) {
-      q.resolve(false);
+      // no deviceID = not connected
+      if (!deviceID) {
+        q.resolve(false);
+        return q.promise;
+      }
+
+      $log.debug('checking connection status for ' + deviceID);
+      $cordovaBLE.isConnected(deviceID).then(function () {
+        $log.debug(deviceID + ' is connected');
+        q.resolve(true);
+      }).catch(function () {
+        $log.debug(deviceID + ' is not connected');
+        q.resolve(false);
+      });
+
       return q.promise;
-    }
-
-    $log.debug('checking connection status for ' + deviceID);
-    $cordovaBLE.isConnected(deviceID).then(function () {
-      $log.debug(deviceID + ' is connected');
-      q.resolve(true);
-    }).catch(function () {
-      $log.debug(deviceID + ' is not connected');
-      q.resolve(false);
     });
-
-    return q.promise;
   };
 
   // service public API
