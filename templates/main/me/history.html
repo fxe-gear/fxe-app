@@ -57,8 +57,8 @@
       <div class="item item-divider">
         History
       </div>
-      <a class="item dark" ui-sref="main.lesson({startTime: lesson.startTime})" ng-repeat="lesson in lessons track by lesson.startTime" ng-class="{'last': $first}">
-        <h2 class="dark">Lesson {{ ::lesson.startTime | date:'short' }}</h2>
+      <a class="item dark" ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start" ng-class="{'last': $first}">
+        <h2 class="dark">Lesson {{ ::lesson.start | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
       </a>
       <p class="item dark no-result" ng-hide="lessons.length">No lesson found, go jumping!</p>

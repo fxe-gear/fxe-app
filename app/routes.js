@@ -67,15 +67,15 @@ angular.module('experience.routes', [])
   });
 
   $stateProvider.state('main.lesson', {
-    url: '/lesson?startTime',
+    url: '/lesson?start',
     views: {
       me: {
         templateUrl: 'main/me/lesson.html',
         controller: 'LessonController',
         resolve: {
           lesson: function ($stateParams, storeService) {
-            if ($stateParams.startTime)
-              return storeService.getLesson($stateParams.startTime);
+            if ($stateParams.start)
+              return storeService.getLesson($stateParams.start);
             else
               return storeService.getLastLesson();
           },

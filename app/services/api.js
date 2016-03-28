@@ -130,8 +130,8 @@ angular.module('experience.services.api', [])
     return post('/lessons', lessons);
   };
 
-  var deleteLesson = function (startTime) {
-    return del('/lesson/' + startTime);
+  var deleteLesson = function (start) {
+    return del('/lesson/' + start);
   };
 
   // events =============================================

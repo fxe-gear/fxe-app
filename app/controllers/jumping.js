@@ -40,7 +40,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
 
   $scope.getDuration = function () {
     // return elapsed time from start of measurement (in milliseconds)
-    return $scope.lesson ? $scope.lesson.startTime != null ? Date.now() - $scope.lesson.startTime : 0 : 0;
+    return $scope.lesson ? $scope.lesson.start != null ? Date.now() - $scope.lesson.start : 0 : 0;
   };
 
   $scope.start = function () {

@@ -62,7 +62,6 @@ angular.module('experience.services.sync', [])
   var syncLessons = function () {
     $log.debug('syncing lessons');
 
-    // TODO change lesson.startTime => lesson.start etc. (app-global)
     var lastSync = storeService.getLessonLastSync();
 
     // handle new lessons ------------------------------------------------
@@ -114,8 +113,8 @@ angular.module('experience.services.sync', [])
         // delete local lessons which are not in API lesson set
         storeService.getAllLessons().then(function (lessons) {
           angular.forEach(lessons, function (l) {
-            if (!(l.startTime in allLessons)) {
-              storeService.deleteLesson(l.startTime);
+            if (!(l.start in allLessons)) {
+              storeService.deleteLesson(l.start);
             }
           });
         });

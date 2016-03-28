@@ -12,7 +12,7 @@ angular.module('experience.services.store', [])
 
   // prepare default (empty) lesson object
   var emptyLesson = {
-    startTime: null,
+    start: null,
     score: {},
   };
   angular.forEach(scoreTypes, function (value, key) {
@@ -116,27 +116,27 @@ angular.module('experience.services.store', [])
   };
 
   var startLesson = function () {
-    var startTime = Date.now();
+    var start = Date.now();
     var query = 'INSERT INTO lesson (start_time) VALUES (?)';
-    return $cordovaSQLite.execute(getDB(), query, [startTime]).then(function () {
-      $localStorage.currentLesson.startTime = startTime;
+    return $cordovaSQLite.execute(getDB(), query, [start]).then(function () {
+      $localStorage.currentLesson.start = start;
     });
   };
 
   var addScore = function (score, type) {
-    var startTime = $localStorage.currentLesson.startTime;
+    var start = $localStorage.currentLesson.start;
     var time = Date.now();
     var query = 'INSERT INTO score (start_time, time, score, type) VALUES (?, ?, ?, ?)';
-    return $cordovaSQLite.execute(getDB(), query, [startTime, time, score, type]).then(function () {
+    return $cordovaSQLite.execute(getDB(), query, [start, time, score, type]).then(function () {
       $localStorage.currentLesson.score[type] = score;
     });
   };
 
   var endLesson = function () {
-    var endTime = Date.now();
-    var startTime = $localStorage.currentLesson.startTime;
+    var end = Date.now();
+    var start = $localStorage.currentLesson.start;
     var query = 'UPDATE lesson SET end_time = ? WHERE start_time = ?';
-    return $cordovaSQLite.execute(getDB(), query, [endTime, startTime]).then(function () {
+    return $cordovaSQLite.execute(getDB(), query, [end, start]).then(function () {
       angular.copy(emptyLesson, $localStorage.currentLesson);
     });
   };
@@ -161,9 +161,9 @@ angular.module('experience.services.store', [])
     return $cordovaSQLite.execute(getDB(), query.join(' '), bindings);
   };
 
-  var deleteLesson = function (startTime) {
+  var deleteLesson = function (start) {
     var query = 'DELETE lesson WHERE start_time = ?; DELETE score WHERE start_time = ?;';
-    var bindings = [startTime, startTime];
+    var bindings = [start, start];
     return $cordovaSQLite.execute(getDB(), query, bindings);
   };
 
@@ -173,7 +173,7 @@ angular.module('experience.services.store', [])
 
   var _getLessonsQuery = function () {
     var query = [];
-    query.push('SELECT start_time AS startTime, end_time AS endTime, duration, COALESCE(SUM(score), 0) AS score FROM');
+    query.push('SELECT start_time AS start, end_time AS end, duration, COALESCE(SUM(score), 0) AS score FROM');
     query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, s.type)');
     query.push('GROUP BY start_time');
     return query;
@@ -222,14 +222,14 @@ angular.module('experience.services.store', [])
     return q.promise;
   };
 
-  var getLesson = function (startTime) {
+  var getLesson = function (start) {
     var q = $q.defer();
 
     var query = _getLessonsQuery();
     var callback;
     var inject = [];
 
-    if (startTime == -1) { // last lesson
+    if (start == -1) { // last lesson
       query.push('ORDER BY start_time DESC LIMIT 1');
       callback = function (res) {
         if (res.rows.length > 0) {
@@ -239,7 +239,7 @@ angular.module('experience.services.store', [])
         }
       };
 
-    } else if (startTime == Infinity) { // all lessons
+    } else if (start == Infinity) { // all lessons
       query.splice(-1, 0, 'WHERE end_time IS NOT NULL');
       query.push('ORDER BY start_time DESC');
       callback = function (res) {
@@ -251,12 +251,12 @@ angular.module('experience.services.store', [])
     } else { // one lesson
       query.splice(-1, 0, 'WHERE start_time = ?');
       query.push('LIMIT 1');
-      inject.push(startTime);
+      inject.push(start);
       callback = function (res) {
         if (res.rows.length > 0) {
           q.resolve(res.rows.item(0));
         } else {
-          q.reject('no lesson with start time ' + startTime + ' found');
+          q.reject('no lesson with start time ' + start + ' found');
         }
       };
     }
@@ -269,21 +269,21 @@ angular.module('experience.services.store', [])
     return q.promise;
   };
 
-  var getLessonDiffData = function (startTime, interval) {
+  var getLessonDiffData = function (start, interval) {
     var q = $q.defer();
     interval = Math.round(interval);
 
     // sum all score types together (select lesson data grouped to N-seconds intervals)
     var query = [];
-    query.push('SELECT end_time AS endTime, start_time AS startTime, -1 as diffGroup, 0 as type, 0 as score FROM lesson WHERE start_time = ?'); // select lesson start + end time
+    query.push('SELECT end_time AS end, start_time AS start, -1 as diffGroup, 0 as type, 0 as score FROM lesson WHERE start_time = ?'); // select lesson start + end time
     query.push('UNION');
     query.push('SELECT 0, start_time, ((time - start_time) / ' + interval + ') AS diff_group, type, MAX(score)'); // do NOT bind interval using "?" - problem with data types
     query.push('FROM score WHERE start_time = ? GROUP BY type, diff_group ORDER BY diff_group ASC');
 
-    $cordovaSQLite.execute(getDB(), query.join(' '), [startTime, startTime]).then(function (res) {
+    $cordovaSQLite.execute(getDB(), query.join(' '), [start, start]).then(function (res) {
       // lesson times are in the first row
-      var startTime = res.rows.item(0).startTime;
-      var endTime = res.rows.item(0).endTime;
+      var start = res.rows.item(0).start;
+      var end = res.rows.item(0).end;
 
       // TODO use `scoreTypes`
       var lastScore = {
@@ -297,8 +297,8 @@ angular.module('experience.services.store', [])
       var diffScore = 0;
 
       // generate diff groups (for all intervals between start and end time)
-      for (var relativeTime = startTime; relativeTime <= endTime; relativeTime += interval) {
-        var currentDiffGroup = (relativeTime - startTime) / interval;
+      for (var relativeTime = start; relativeTime <= end; relativeTime += interval) {
+        var currentDiffGroup = (relativeTime - start) / interval;
 
         // while we have next rows and currently iterated row belongs to same diff group
         while (rowNum < res.rows.length && currentDiffGroup == res.rows.item(rowNum).diffGroup) {
@@ -378,7 +378,7 @@ angular.module('experience.services.store', [])
   };
 
   var getDeletedLessons = function () {
-    return $localStorage.lessonChanges;
+    return $localStorage.deletedLessons;
   };
 
   var getLessonLastSync = function () {

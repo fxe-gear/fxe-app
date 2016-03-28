@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.history', []);
 
-var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, storeService, dateFilter, ordinalFilter) {
+var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, storeService, syncService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();
   $scope.lessons = [];
   $scope.summary = {
@@ -76,7 +76,7 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
 
       // take all lessons for this group and sum their score
       var sum = 0;
-      for (; currentLesson >= 0 && groupingFn[$scope.range](date, new Date($scope.lessons[currentLesson].startTime)); currentLesson--) {
+      for (; currentLesson >= 0 && groupingFn[$scope.range](date, new Date($scope.lessons[currentLesson].start)); currentLesson--) {
         sum += $scope.lessons[currentLesson].score;
       }
 
@@ -113,10 +113,10 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
   };
 
   var reloadLessons = function () {
-    $scope.lessons.length = 0;
-
     // load lessons for current date interval
-    storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime()).then(function (lessons) {
+    syncService.syncLessons();
+    return storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime()).then(function (lessons) {
+      $scope.lessons.length = 0;
       for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
       fillChart();
       fillSummary();

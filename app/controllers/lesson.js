@@ -27,7 +27,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
     var limitLessonLength = 3600 * 1e3;
     var interval = (lesson.duration < limitLessonLength) ? diffGraphInterval : (diffGraphInterval * lesson.duration / limitLessonLength);
 
-    storeService.getLessonDiffData(lesson.startTime, interval).then(function (data) {
+    storeService.getLessonDiffData(lesson.start, interval).then(function (data) {
 
       var makeLabel = function (val) {
         return dateFilter(msToDateFilter(val), (lesson.duration > 3600 * 1e3) ? 'HH:mm:ss' : 'mm:ss');
