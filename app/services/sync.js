@@ -63,16 +63,21 @@ angular.module('experience.services.sync', [])
     $log.debug('syncing lessons');
 
     // TODO change lesson.startTime => lesson.start etc. (app-global)
+    var lastSync = storeService.getLessonLastSync();
 
     // handle new lessons ------------------------------------------------
     var newLessons;
     var newPromise = apiService.getLessons({
-        from: storeService.getLessonLastSync(),
+        from: lastSync,
       })
       .then(function (response) { // wait for lesson download
         // store new API lessons for later and push new local lessons to API
         newLessons = response.data;
-        return storeService.getLessonsBetween(lastSync, Date.now()).then(apiService.uploadLessons);
+        return storeService.getLessonsBetween(lastSync, Date.now());
+      })
+      .then(function (lessons) { // wait for storeService to return lessons
+        // avoid empty request
+        if (lessons.length) return apiService.uploadLessons(lessons);
       })
       .then(function () { // wait for lesson upload
         // copy new API lessons to storeService
@@ -94,11 +99,9 @@ angular.module('experience.services.sync', [])
         // push locally deleted lessons to API
         var apiRequests = [];
         var deletedLessons = storeService.getDeletedLessons();
-        while (l = deletedLessons.pop()) {
-          if (!(l in allLessons)) {
-            // avoid request if lesson has been already deleted from another device
-            continue;
-          }
+        for (var l; l = deletedLessons.pop();) {
+          // avoid request if lesson has been already deleted from another device
+          if (!(l in allLessons)) continue;
           apiRequests.push(apiService.deleteLesson(l).catch(function () {
             // push back on error
             deletedLessons.push(l);
