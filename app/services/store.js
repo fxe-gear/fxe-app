@@ -145,20 +145,34 @@ angular.module('experience.services.store', [])
     var query = [];
     var bindings = [];
 
+    // Sqlite BUG: cannot bind multiple statements per query => run 2 queries
+
     // insert lesson
     query.push('INSERT INTO lesson (start_time, end_time) VALUES (?, ?);');
     bindings.push(lesson.start, lesson.end);
 
-    // insert score records
-    query.push('INSERT INTO score (start_time, time, score, type) VALUES ');
-    for (var i = 0; i < lesson.score.length; i++) {
-      var s = lesson.score[i];
-      if (i != 0) query.push(','); // multiple VALUES separator
-      query.push('(?,?,?,?)'); // data placeholders
-      bindings.push(lesson.start, s.time, s.score, s.type); // data
-    }
+    return $cordovaSQLite.execute(getDB(), query.join(' '), bindings)
+      .then(function () {
+        query.length = 0;
+        bindings.length = 0;
 
-    return $cordovaSQLite.execute(getDB(), query.join(' '), bindings);
+        if (!lesson.score.length) return;
+
+        // insert score records
+        query.push('INSERT INTO score (start_time, time, score, type) VALUES ');
+        for (var i = 0; i < lesson.score.length; i++) {
+          var s = lesson.score[i];
+          if (i != 0) query.push(','); // multiple VALUES separator
+          query.push('(?,?,?,?)'); // data placeholders
+          bindings.push(lesson.start, s.time, s.score, s.type); // data
+        }
+
+        return $cordovaSQLite.execute(getDB(), query.join(' '), bindings);
+      })
+      .catch(function (err) {
+        $log.error('adding lesson failed:', err.message, 'in query', query.join(' '));
+        throw err;
+      });
   };
 
   var deleteLesson = function (start) {
