@@ -175,10 +175,22 @@ angular.module('experience.services.store', [])
       });
   };
 
-  var deleteLesson = function (start) {
-    var query = 'DELETE lesson WHERE start_time = ?; DELETE score WHERE start_time = ?;';
-    var bindings = [start, start];
-    return $cordovaSQLite.execute(getDB(), query, bindings);
+  var deleteLesson = function (start, dbOnly) {
+    // Sqlite BUG: cannot bind multiple statements per query => run 2 queries
+    var query = 'DELETE FROM lesson WHERE start_time = ?;';
+    return $cordovaSQLite.execute(getDB(), query, [start])
+      .then(function () {
+        query = 'DELETE FROM score WHERE start_time = ?;';
+        return $cordovaSQLite.execute(getDB(), query, [start]);
+      })
+      .then(function () {
+        // if not dbOnly, then also add to deletedLessons array
+        if (dbOnly !== true) getDeletedLessons().push(start);
+      })
+      .catch(function (err) {
+        $log.error('deleting lesson failed:', err.message, 'in query', query);
+        throw err;
+      });
   };
 
   var getCurrentLesson = function () {

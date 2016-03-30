@@ -22,7 +22,7 @@
       }
     "></canvas>
 
-    <div class="card list dark data">
+    <ion-list type="card" class="dark data" can-swipe="true">
 
       <div class="item item-divider">
         Average
@@ -57,13 +57,16 @@
       <div class="item item-divider">
         History
       </div>
-      <a class="item dark" ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start" ng-class="{'last': $first}">
-        <h2 class="dark">Lesson {{ ::lesson.start | date:'short' }}</h2>
+      <ion-item class="dark" ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start" ng-class="{'last': $first}">
+        <h2 class="dark">Jumping {{ ::lesson.start | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
-      </a>
-      <p class="item dark no-result" ng-hide="lessons.length">No lesson found, go jumping!</p>
+        <ion-option-button class="button-assertive" ng-click="delete($index, lesson.start)">Delete</ion-option-button>
+      </ion-item>
+      <ion-item ng-hide="lessons.length" class="dark no-result">
+        No lesson found, go jumping!
+      </ion-item>
 
-    </div>
+    </ion-list>
 
   </ion-content>
 </ion-view>

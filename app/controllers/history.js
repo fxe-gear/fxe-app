@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.history', []);
 
-var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, storeService, syncService, dateFilter, ordinalFilter) {
+var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $cordovaDatePicker, storeService, syncService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();
   $scope.lessons = [];
   $scope.summary = {
@@ -112,9 +112,17 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
     }
   };
 
+  var enter = function () {
+    syncService.syncLessons();
+    $ionicPlatform.ready().then(reloadLessons);
+  };
+
+  var leave = function () {
+    $ionicListDelegate.closeOptionButtons();
+  };
+
   var reloadLessons = function () {
     // load lessons for current date interval
-    syncService.syncLessons();
     return storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime()).then(function (lessons) {
       $scope.lessons.length = 0;
       for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
@@ -162,14 +170,18 @@ var HistoryController = function ($scope, $ionicPlatform, $cordovaDatePicker, st
     reloadLessons();
   };
 
+  $scope.delete = function (index, start) {
+    $scope.lessons.splice(index, 1);
+    storeService.deleteLesson(start);
+  };
+
   $ionicPlatform.ready(function () {
     $scope.range = 'week';
     computeDateRange(new Date());
   });
 
-  $scope.$on('$ionicView.beforeEnter', function () {
-    $ionicPlatform.ready().then(reloadLessons);
-  });
+  $scope.$on('$ionicView.beforeEnter', enter);
+  $scope.$on('$ionicView.afterLeave', leave);
 };
 
 module.controller('HistoryController', HistoryController);

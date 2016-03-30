@@ -114,7 +114,7 @@ angular.module('experience.services.sync', [])
         storeService.getAllLessons().then(function (lessons) {
           angular.forEach(lessons, function (l) {
             if (!(l.start in allLessons)) {
-              storeService.deleteLesson(l.start);
+              storeService.deleteLesson(l.start, true);
             }
           });
         });
