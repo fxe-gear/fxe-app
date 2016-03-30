@@ -228,6 +228,58 @@ angular.module('experience.services.store', [])
     return getLesson(Infinity);
   };
 
+  var getVerboseLessonsBetween = function (date1, date2) {
+
+    // select lessons data
+    var query = [];
+    query.push('SELECT start_time AS start, end_time AS end FROM lesson');
+    query.push('WHERE end_time IS NOT NULL');
+    query.push('AND start_time BETWEEN ? AND ?');
+    query.push('ORDER BY start_time DESC');
+
+    var res = {};
+
+    return $cordovaSQLite.execute(getDB(), query.join(' '), [date1, date2])
+      .then(function (lessons) {
+        // fill result
+        for (var i = 0; i < lessons.rows.length; i++) {
+          var l = lessons.rows.item(i);
+          res[l.start] = {
+            start: l.start,
+            end: l.end,
+            score: [],
+          };
+        }
+
+        // select score for ALL lessons
+        query.length = 0;
+        query.push('SELECT start_time AS start, time, type, score FROM score');
+        query.push('WHERE start_time BETWEEN ? AND ?');
+        return $cordovaSQLite.execute(getDB(), query.join(' '), [date1, date2]);
+      })
+      .then(function (scores) {
+        // fill result scores for ALL selected lessons
+        for (var i = 0; i < scores.rows.length; i++) {
+          var s = scores.rows.item(i);
+          res[s.start].score.push({
+            time: s.time,
+            score: s.score,
+            type: s.type,
+          });
+        }
+
+        // return result without lesson keys (only lesson objects)
+        console.log(res);
+        return Object.keys(res).map(function (key) {
+          return res[key];
+        });
+      })
+      .catch(function (err) {
+        $log.error('getting verbose lesson between two dates failed:', err.message, 'in query', query.join(' '));
+        throw err;
+      });
+  };
+
   var getLessonsBetween = function (date1, date2) {
     var q = $q.defer();
 
@@ -428,6 +480,7 @@ angular.module('experience.services.store', [])
   this.getLastLesson = getLastLesson;
   this.getAllLessons = getAllLessons;
   this.getLessonsBetween = getLessonsBetween;
+  this.getVerboseLessonsBetween = getVerboseLessonsBetween;
   this.getLesson = getLesson;
   this.getLessonDiffData = getLessonDiffData;
 

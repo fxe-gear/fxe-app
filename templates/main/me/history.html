@@ -57,7 +57,7 @@
       <div class="item item-divider">
         History
       </div>
-      <ion-item class="dark" ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start" ng-class="{'last': $first}">
+      <ion-item class="dark" ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start">
         <h2 class="dark">Jumping {{ ::lesson.start | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
         <ion-option-button class="button-assertive" ng-click="delete($index, lesson.start)">Delete</ion-option-button>

@@ -72,7 +72,7 @@ angular.module('experience.services.sync', [])
       .then(function (response) { // wait for lesson download
         // store new API lessons for later and push new local lessons to API
         newLessons = response.data;
-        return storeService.getLessonsBetween(lastSync, Date.now());
+        return storeService.getVerboseLessonsBetween(lastSync, Date.now());
       })
       .then(function (lessons) { // wait for storeService to return lessons
         // avoid empty request
