@@ -52,6 +52,8 @@ angular.module('fxe.services.sync', [])
           // otherwise add a new friend
           friends[person.id] = person;
         }
+        // fake average
+        friends[person.id].score.average = friends[person.id].score.last - (Math.random() * 25) - 5;
       });
 
       $log.info('friends data synced');

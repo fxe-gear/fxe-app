@@ -28,6 +28,13 @@
           <span ng-switch-when="month">this month</span>
           </span>
         </p>
+        <p>
+          <strong>
+            {{ person.score['average'] || 0 | number:0 }}
+          <ng-pluralize count="person.score[range] / 4" when="{1: 'point', 'other': 'points'}"></ng-pluralize>
+          </strong>
+          average
+        </p>
       </div>
       <p class="item no-result" ng-show="loggedIn && friends.length == 0">None of your friends is using FXE.</p>
     </div>
