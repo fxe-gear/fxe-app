@@ -35,14 +35,14 @@ The successfully authenticated user should get a jumping token which is used for
 + Request login by jumping account (application/json;charset=UTF-8)
 
         {
-            "email": "test@example.com",
-            "password": "pass"
+            "email": "mark_goldmanescu@tfbnw.net",
+            "password": "verystrongpassword"
         }
 
 + Request login by facebook token (application/json;charset=UTF-8)
 
         {
-            "token": "vud65egq1bzvligub813",
+            "token": "EAAJZB30XByqMBABDpjvD68muYZCenMEsxUxEScF6ZBqDGkaByCvZBYHeRrvW1MtDXGG3zJEnIkowBVfuh7yi7I8LgOWjv8kbOFzQ0K07xJNCaQ832ALSiXdo9HkjOQX7pJpkSG6oZAxDIJlSU0LWUfgboG4jaz1CmgRQCF6KMdZAVwZCKoDMqmI",
             "expiresAt": 1455638078520107
         }
 
@@ -85,11 +85,11 @@ An email verification procedure should be done by the server. Only `email` and `
 + Request (application/json;charset=UTF-8)
 
         {
-            "email": "test@example.com",
-            "password": "pass",
-            "name": "Tester",
-            "weight": 123,
-            "age": 321,
+            "email": "mark_goldmanescu@tfbnw.net",
+            "password": "verystrongpassword",
+            "name": "Mark Goldmanescu",
+            "weight": 80,
+            "age": 36,
             "gender": "male",
             "units": "metric"
         }
@@ -99,6 +99,14 @@ An email verification procedure should be done by the server. Only `email` and `
         {
             "token": "bpnjxsrb1ivyd9xf2m1k",
             "expiresAt": 1455638078520107
+        }
+
++ Request (application/json;charset=UTF-8)
+
+        {
+            "password": "pass",
+            "name": "Mark Goldmanescu",
+            "gender": "male"
         }
 
 + Response 400 (application/json;charset=UTF-8)
@@ -141,17 +149,17 @@ Following response fields deserves closer explanation:
 
         {
             "id": 1234,
-            "email": "test@example.com",
+            "email": "mark_goldmanescu@tfbnw.net",
             "verified": false,
-            "name": "Tester",
-            "weight": 123,
-            "age": 321,
+            "name": "Mark Goldmanescu",
+            "weight": 80,
+            "age": 36,
             "gender": "male",
             "units": "metric",
-            "picture": "https://scontent.xx.fbcdn.net/hprofile-xtf1/v/t1.0-1/p50x50/11742902_10206238865187722_6561986711368507868_n.jpg?oh=5910af96fa640187a4854963b59dd08f&oe=574CAFF0",
+            "picture": "http://graph.facebook.com/100011709695718/picture?type=square",
             "provider": {
                 "facebook": {
-                    "token": "vud65egq1bzvligub813",
+                    "token": "EAAJZB30XByqMBABDpjvD68muYZCenMEsxUxEScF6ZBqDGkaByCvZBYHeRrvW1MtDXGG3zJEnIkowBVfuh7yi7I8LgOWjv8kbOFzQ0K07xJNCaQ832ALSiXdo9HkjOQX7pJpkSG6oZAxDIJlSU0LWUfgboG4jaz1CmgRQCF6KMdZAVwZCKoDMqmI",
                     "expiresAt": 1455638078520107
                 },
                 "google": {
@@ -176,18 +184,30 @@ Fields not specified in the request should remain unchanged. The fields `id` and
     + Body
 
             {
-                "age": 222,
+                "age": 22,
                 "gender": "male",
                 "units": "imperial",
                 "provider": {
                     "facebook": {
-                        "token": "vud65egq1bzvligub813",
+                        "token": "EAAJZB30XByqMBABDpjvD68muYZCenMEsxUxEScF6ZBqDGkaByCvZBYHeRrvW1MtDXGG3zJEnIkowBVfuh7yi7I8LgOWjv8kbOFzQ0K07xJNCaQ832ALSiXdo9HkjOQX7pJpkSG6oZAxDIJlSU0LWUfgboG4jaz1CmgRQCF6KMdZAVwZCKoDMqmI",
                         "expiresAt": 1455638078520107
                     }
                 }
             }
 
 + Response 204
+
++ Request (application/json;charset=UTF-8)
+    + Headers
+
+            Authorization: Token bpnjxsrb1ivyd9xf2m1k
+
+    + Body
+
+            {
+                "age": -10,
+                "units": "something",
+            }
 
 + Response 400 (application/json;charset=UTF-8)
 
@@ -228,15 +248,13 @@ A lesson is a time range started and ended by a user by clicking a button in the
 A scoring record is created when the score changes during a lesson (between its start time and end time). It contains a timestamp, score type and absolute score value for that type. In other words: one lesson has multiple score types and the total lesson score is a sum of maximum scores of every type.
 
 
-## /lessons{?from,fields}
+### GET /lessons{?from,fields}
+
+Return lessons stored on a server for a current user.
 
 + Parameters
     + from: `1253886827805` (optional, int) - Limit result set to lessons whose start time is newer than this value.
     + fields: `start,end` (optional, string) - Coma-separated list of fields, which should be included in a lesson object in a response. If omitted, all available fields should be returned.
-
-### GET
-
-Return lessons stored on a server for a current user.
 
 + Request all lessons with all data
     + Headers
@@ -248,46 +266,77 @@ Return lessons stored on a server for a current user.
         [
             {
                 "event": 1234,
-                "start": 1453940353233,
-                "end": 1453940633196,
-                "score": [
-                    {
-                        "time": 1453886545769,
-                        "score": 1,
-                        "type": 1
-                    }, {
-                        "time": 1453886819723,
-                        "score": 5,
-                        "type": 1
-                    }, {
-                        "time": 1453886820397,
-                        "score": 3,
-                        "type": 3
-                    }, {
-                        "time": 1453886826682,
-                        "score": 6,
-                        "type": 1
-                    }, {
-                        "time": 1453886827805,
-                        "score": 4,
-                        "type": 3
-                    }
-                ]
-            },
-            {
-                "start": 1453944138998,
-                "end": 1453944142224,
-                "score": [
-                    {
-                        "time": 1453886545769,
-                        "score": 1,
-                        "type": 1
-                    }
-                ]
-            },
-            {
                 "start": 1453944230279,
                 "end": 1453944249447,
+                "score": [
+                    {
+                        "type": 3,
+                        "time": 1453944244617,
+                        "score": 1
+                    }, {
+                        "type": 1,
+                        "time": 1453944244915,
+                        "score": 1
+                    }
+                ]
+            }, {
+                "event": 1235,
+                "start": 1453944262887,
+                "end": 1453944693408,
+                "score": [
+                    {
+                        "type": 1,
+                        "time": 1453944269545,
+                        "score": 1
+                    }, {
+                        "type": 1,
+                        "time": 1453944278095,
+                        "score": 2
+                    }, {
+                        "type": 3,
+                        "time": 1453944282055,
+                        "score": 1
+                    }, {
+                        "type": 1,
+                        "time": 1453944285385,
+                        "score": 3
+                    }, {
+                        "type": 3,
+                        "time": 1453944289465,
+                        "score": 2
+                    }, {
+                        "type": 1,
+                        "time": 1453944292675,
+                        "score": 4
+                    }, {
+                        "type": 3,
+                        "time": 1453944296455,
+                        "score": 3
+                    }, {
+                        "type": 1,
+                        "time": 1453944298225,
+                        "score": 5
+                    }, {
+                        "type": 3,
+                        "time": 1453944302455,
+                        "score": 4
+                    }, {
+                        "type": 1,
+                        "time": 1453944303655,
+                        "score": 6
+                    }, {
+                        "type": 1,
+                        "time": 1453944686359,
+                        "score": 7
+                    }, {
+                        "type": 2,
+                        "time": 1453944686361,
+                        "score": 1
+                    }
+                ]
+            }, {
+                "start": 1453959072292,
+                "end": 1453959126095,
                 "score": []
             }
         ]
@@ -301,21 +350,19 @@ Return lessons stored on a server for a current user.
 
         [
             {
-                "start": 1453940353233,
-                "end": 1453940633196
-            },
-            {
-                "start": 1453944138998,
-                "end": 1453944142224
-            },
-            {
                 "start": 1453944230279,
                 "end": 1453944249447
+            }, {
+                "start": 1453944262887,
+                "end": 1453944693408
+            }, {
+                "start": 1453959072292,
+                "end": 1453959126095
             }
         ]
 
 
-### POST
+### POST /lessons
 
 Upload an array of new lessons for a current user.
 
@@ -329,15 +376,23 @@ Upload an array of new lessons for a current user.
             [
                 {
                     "event": 1234,
-                    "start": 1453944138998,
-                    "end": 1453944142224,
+                    "start": 1453944230279,
+                    "end": 1453944249447,
                     "score": [
                         {
-                            "time": 1453886545769,
-                            "score": 1,
-                            "type": 1
+                            "type": 3,
+                            "time": 1453944244617,
+                            "score": 1
+                        }, {
+                            "type": 1,
+                            "time": 1453944244915,
+                            "score": 1
                         }
                     ]
+                }, {
+                    "start": 1453959072292,
+                    "end": 1453959126095,
+                    "score": []
                 }
             ]
 
@@ -349,9 +404,9 @@ Upload an array of new lessons for a current user.
 Delete a lesson including all its score records.
 
 + Parameters
-    + start: `1453944138998` (required, int) - Start time of the lesson, which is its unique ID for a current user.
+    + start: `1453959072292` (required, int) - Start time of the lesson, which is its unique ID for a current user.
 
-+ Request (application/json;charset=UTF-8)
++ Request
     + Headers
 
             Authorization: Token bpnjxsrb1ivyd9xf2m1k
@@ -390,15 +445,14 @@ Return a filtered list of events.
             {
                 "id": 1234,
                 "name": "Jumping party summer edition 2015",
-                "start": 1453886827805,
+                "start": 1453944220279,
                 "lat": 49.2192133,
                 "lon": -13.2192133
-            },
-            {
-                "id": 666,
+            }, {
+                "id": 1235,
                 "name": "Jumping party summer edition 2014",
-                "start": 1353886826682,
-                "end": 1353886827805,
+                "start": 1453944261887,
+                "end": 1453944691408,
                 "lat": 49.2192133,
                 "lon": -13.2192133
             }
@@ -410,7 +464,7 @@ Return a filtered list of events.
 Get a specific event by its ID.
 
 + Parameters
-    + id: `666` (required, int) - An event ID.
+    + id: `1235` (required, int) - An event ID.
 
 + Request
     + Headers
@@ -420,10 +474,10 @@ Get a specific event by its ID.
 + Response 200 (application/json;charset=UTF-8)
 
         {
-            "id": 666,
+            "id": 1235,
             "name": "Jumping party summer edition 2014",
-            "start": 1353886826682,
-            "end": 1353886827805,
+            "start": 1453944261887,
+            "end": 1453944691408,
             "lat": 49.2192133,
             "lon": -13.2192133
         }
@@ -461,22 +515,30 @@ This request can be repeated very often, therefore server-side caching is recomm
         [
             {
                 "id": 1234,
-                "name": "Tester",
-                "picture": "https://scontent.xx.fbcdn.net/hprofile-xtf1/v/t1.0-1/p50x50/11742902_10206238865187722_6561986711368507868_n.jpg?oh=5910af96fa640187a4854963b59dd08f&oe=574CAFF0",
+                "name": "Mark Goldmanescu",
+                "picture": "http://graph.facebook.com/100011709695718/picture?type=square",
                 "score": {
                     "last": 123,
                     "week": 453,
                     "month": 3223
                 }
-            },
-            {
+            }, {
                 "id": 4321,
-                "name": "Another tester",
-                "picture": "https://scontent.xx.fbcdn.net/hprofile-xtf1/v/t1.0-1/p50x50/11742902_10206238865187722_6561986711368507868_n.jpg?oh=5910af96fa640187a4854963b59dd08f&oe=574CAFF0",
+                "name": "Filip Richter",
+                "picture": "http://graph.facebook.com/1147964772/picture?type=square",
                 "score": {
-                    "last": 123,
-                    "week": 453,
-                    "month": 3223
+                    "last": 180,
+                    "week": 322,
+                    "month": 4223
+                }
+            }, {
+                "id": 2341,
+                "name": "Helen Moiduson",
+                "picture": "http://graph.facebook.com/100011743744048/picture?type=square",
+                "score": {
+                    "last": 246,
+                    "week": 246,
+                    "month": 1289
                 }
             }
         ]
@@ -495,12 +557,17 @@ This request can be repeated very often, therefore server-side caching is recomm
                     "last": 123,
                     "week": 453
                 }
-            },
-            {
+            }, {
                 "id": 4321,
                 "score": {
-                    "last": 123,
-                    "week": 453
+                    "last": 180,
+                    "week": 322
+                }
+            }, {
+                "id": 2341,
+                "score": {
+                    "last": 246,
+                    "week": 246
                 }
             }
         ]
