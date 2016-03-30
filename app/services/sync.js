@@ -126,8 +126,13 @@ angular.module('experience.services.sync', [])
     });
   };
 
+  var syncAll = function () {
+    return $q.all([syncUser(), syncFriends(), syncLessons()]);
+  };
+
   // service public API
   this.syncUser = syncUser;
   this.syncFriends = syncFriends;
   this.syncLessons = syncLessons;
+  this.syncAll = syncAll;
 });

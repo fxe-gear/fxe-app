@@ -269,7 +269,6 @@ angular.module('experience.services.store', [])
         }
 
         // return result without lesson keys (only lesson objects)
-        console.log(res);
         return Object.keys(res).map(function (key) {
           return res[key];
         });

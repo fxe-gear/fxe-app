@@ -29,7 +29,7 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, $timeout, experienceService, bleDevice, storeService) {
+var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, experienceService, bleDevice, storeService, syncService) {
   var timer = null;
   var batteryPopup = null;
 
@@ -47,20 +47,20 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     return experienceService.startMeasurement().then(function () {
       $scope.lesson = storeService.getCurrentLesson();
       $scope.running = true;
-      timer = $interval(angular.noop, 1000);  // just to update duration
+      timer = $interval(angular.noop, 1000); // just to update duration
     });
   };
 
   $scope.stop = function () {
     experienceService.stopMeasurement().then(function () {
-      $interval.cancel(timer);
-
       // TODO go to nested state
       // https://gist.github.com/Deminetix/f7e0d9b91b685df5fc0d
       // http://codepen.io/TimothyKrell/pen/bnukj?editors=101
-      $state.go('main.history').then(function () {
-        $scope.running = false;
-      });
+      return $state.go('main.history');
+    }).then(function () {
+      $interval.cancel(timer);
+      $scope.running = false;
+      return syncService.syncLessons();
     });
   };
 
@@ -93,8 +93,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
 
   $scope.$on('$ionicView.beforeEnter', function () {
     // get current state
-    $ionicPlatform.ready()
-      .then(bleDevice.isConnected)
+    bleDevice.isConnected()
       .then(function (connected) {
         if (connected) onExperienceConnected();
         else onExperienceDisconnected();

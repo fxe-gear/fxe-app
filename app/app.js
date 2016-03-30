@@ -37,7 +37,7 @@ angular.module('experience', [
   'experience.templates',
 ])
 
-.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, experienceService) {
+.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, syncService, bleDevice, experienceService) {
 
   $ionicPlatform.ready(function () {
     // keyboard setup
@@ -51,7 +51,6 @@ angular.module('experience', [
 
     } else if (ionic.Platform.platform() == 'android') {
       $ionicConfig.scrolling.jsScrolling(false);
-
     }
 
     // statusbar setup
@@ -61,6 +60,11 @@ angular.module('experience', [
 
     // prepare DB
     storeService.prepareDB();
+
+    // sync on app start
+    if (storeService.isLoggedIn()) {
+      syncService.syncAll();
+    }
 
     // save "android" / "ios" variable to rootScope
     $rootScope.platform = ionic.Platform.platform();

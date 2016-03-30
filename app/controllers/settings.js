@@ -17,8 +17,6 @@ var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
     // load loggedIn and paired
     $scope.loggedIn = storeService.isLoggedIn();
     $scope.paired = storeService.isPaired();
-
-    sync();
   };
 
   var leave = function () {

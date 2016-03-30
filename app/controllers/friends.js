@@ -2,18 +2,15 @@
 
 var module = angular.module('experience.controllers.friends', []);
 
-var FriendsController = function ($scope, storeService, syncService) {
+var FriendsController = function ($scope, storeService) {
 
   $scope.friends = storeService.getFriends();
   $scope.range = null;
   $scope.loggedIn = null;
 
   var enter = function () {
-    $scope.loggedIn = storeService.isLoggedIn();
     $scope.range = 'last';
-    if ($scope.loggedIn) {
-      syncService.syncFriends();
-    }
+    $scope.loggedIn = storeService.isLoggedIn();
   };
 
   $scope.changeRange = function (range) {

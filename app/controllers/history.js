@@ -2,7 +2,7 @@
 
 var module = angular.module('experience.controllers.history', []);
 
-var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $cordovaDatePicker, storeService, syncService, dateFilter, ordinalFilter) {
+var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $cordovaDatePicker, storeService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();
   $scope.lessons = [];
   $scope.summary = {
@@ -113,7 +113,6 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   };
 
   var enter = function () {
-    syncService.syncLessons();
     $ionicPlatform.ready().then(reloadLessons);
   };
 
