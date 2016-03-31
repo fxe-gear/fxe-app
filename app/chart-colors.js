@@ -1,15 +1,15 @@
 'use strict';
 
 // Chart.js colors
-Chart.defaults.global.scaleFontColor = 'rgba(255, 255, 255, 0.8)';
+Chart.defaults.global.scaleFontColor = 'rgba(0, 0, 0, 0.8)';
 // Chart.defaults.global.scaleLineColor = 'rgba(255, 255, 255, .1)';
 Chart.defaults.global.colours = [{
-  fillColor: 'rgba(156, 207, 40, 0.2)',
-  strokeColor: 'rgba(156, 207, 40, 1)',
-  pointColor: 'rgba(156, 207, 40, 1)',
+  fillColor: 'rgba(125, 167, 31, 0.2)',
+  strokeColor: 'rgba(125, 167, 30, 1)',
+  pointColor: 'rgba(125, 167, 30, 1)',
   pointStrokeColor: 'rgba(255, 255, 255, 0.8)',
   pointHighlightFill: 'rgba(255, 255, 255, 1)',
-  pointHighlightStroke: 'rgba(156, 207, 40, 0.8)',
+  pointHighlightStroke: 'rgba(125, 167, 30, 0.8)',
 }, {
   fillColor: 'rgba(8, 72, 135, 0.2)',
   strokeColor: 'rgba(8, 72, 135, 1)',

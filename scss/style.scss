@@ -17,10 +17,8 @@ other selectors that are more specific or come later and might alter display.
 // tabs
 .tabs-background-balanced>.tabs {
   background-color: rgba($balanced, $bar-transparency) !important;
-  // remove borders on iOS
-  .platform-ios & {
-    border-bottom: 0 !important;
-  }
+  // remove borders
+  border-bottom: 0 !important;
 }
 .platform-android .tab-title {
   padding-left: 0.3em;
