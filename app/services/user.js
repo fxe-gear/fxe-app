@@ -22,7 +22,7 @@ angular.module('experience.services.user', [])
       })
       .then(function (response) {
         // convert expiresIn (relative seconds) to expiresAt (milliseconds timestamp)
-        expiresAt = new Date();
+        var expiresAt = new Date();
         expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
         expiresAt = expiresAt.getTime();
 
