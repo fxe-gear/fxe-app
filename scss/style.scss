@@ -17,8 +17,8 @@ other selectors that are more specific or come later and might alter display.
 // tabs
 .tabs-background-balanced>.tabs {
   background-color: rgba($balanced, $bar-transparency) !important;
-  // remove borders
   border-bottom: 0 !important;
+  box-shadow: 0 0 10px rgba($dark, .8);
 }
 .platform-android .tab-title {
   padding-left: 0.3em;
