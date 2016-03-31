@@ -5,7 +5,7 @@
 
 angular.module('experience.services.user', [])
 
-.service('userService', function ($rootScope, $http, $log, $cordovaFacebook, storeService, apiService, $q) {
+.service('userService', function ($rootScope, $http, $log, $ionicPlatform, $cordovaFacebook, storeService, apiService, $q) {
 
   var user = storeService.getUser();
 
@@ -14,23 +14,25 @@ angular.module('experience.services.user', [])
   };
 
   var getFacebookToken = function () {
-    $log.debug('getting facebook token');
-    var fields = ['email', 'public_profile', 'user_birthday', 'user_friends'];
-    return $cordovaFacebook.login(fields).then(function (response) {
-      // convert expiresIn (relative seconds) to expiresAt (milliseconds timestamp)
-      expiresAt = new Date();
-      expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
-      expiresAt = expiresAt.getTime();
+    return $ionicPlatform.ready()
+      .then(function () {
+        $log.debug('getting facebook token');
+        var fields = ['email', 'public_profile', 'user_birthday', 'user_friends'];
+        return $cordovaFacebook.login(fields);
+      })
+      .then(function (response) {
+        // convert expiresIn (relative seconds) to expiresAt (milliseconds timestamp)
+        expiresAt = new Date();
+        expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
+        expiresAt = expiresAt.getTime();
 
-      // store token
-      storeService.setToken('facebook', response.authResponse.accessToken, expiresAt);
-      $log.info('got facebook token');
-    });
+        // store token
+        storeService.setToken('facebook', response.authResponse.accessToken, expiresAt);
+        $log.info('got facebook token');
+      });
   };
 
   var getGoogleToken = function () {
-    $log.debug('getting google token');
-    var q = $q.defer();
 
     var callback = function (response) {
       storeService.setToken('google', response.oauthToken, 0);
@@ -38,12 +40,17 @@ angular.module('experience.services.user', [])
       q.resolve(response);
     };
 
-    // do the request
-    window.plugins.googleplus.login({
-      offline: true,
-    }, callback, q.reject);
+    return $ionicPlatform.ready()
+      .then(function () {
+        $log.debug('getting google token');
+        var q = $q.defer();
 
-    return q.promise;
+        // do the request
+        window.plugins.googleplus.login({
+          offline: true,
+        }, callback, q.reject);
+        return q.promise;
+      });
   };
 
   var loginCallback = function (response) {
