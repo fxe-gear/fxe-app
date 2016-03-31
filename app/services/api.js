@@ -6,6 +6,8 @@ angular.module('fxe.services.api', [])
 
 .constant('useMockApiService', true)
 
+.constant('mockLessonOffset', 3623000000)
+
 /**
  * Wrap apiService in a factory to be able to mock it by changing the useMockApiService constant.
  */
@@ -185,7 +187,7 @@ angular.module('fxe.services.api', [])
 
 })
 
-.service('mockApiService', function ($q, $http) {
+.service('mockApiService', function ($q, $http, mockLessonOffset) {
 
   var user = null;
   var lessons = null;
@@ -239,25 +241,39 @@ angular.module('fxe.services.api', [])
   var resetPassword = $q.resolve;
 
   var getLessons = function (params) {
+    // 'data' envelope is needed
+
     if (!lessonsPromise) {
-      lessonsPromise = $http.get('mock_resources/lessons.json').then(function (response) {
-        lessons = response.data;
-        return response;
-      });
+      lessonsPromise = $http.get('mock_resources/lessons.json')
+        .then(function (response) {
+          // offset lessons if needed
+          lessons = response.data.map(function (l) {
+            l.start += mockLessonOffset;
+            l.end += mockLessonOffset;
+
+            l.score = l.score.map(function (s) {
+              s.time += mockLessonOffset;
+              return s;
+            });
+
+            return l;
+          }).filter(function (l) {
+            // remove lessons from future
+            return l.start <= Date.now();
+          });
+        });
     }
 
-    return lessonsPromise.then(function () {
-      // 'data' envelope is needed
-      if (params && params.from && params.from > 0) return {
-        data: lessons.filter(function (lesson) {
-          return lesson.start > params.from;
-        }),
-      };
-      else return {
-        data: lessons,
-      };
-
-    });
+    return lessonsPromise
+      .then(function () {
+        return {
+          data: lessons.filter(function (lesson) {
+            // filter lessons if needed
+            if (params &&  params.from && params.from > 0) return lesson.start > params.from;
+            else return true;
+          }),
+        };
+      });
   };
 
   var uploadLessons = function (data) {
