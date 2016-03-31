@@ -59,7 +59,7 @@
       </div>
       <ion-item ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start">
         <h2>Jumping {{ ::lesson.start | date:'short' }}</h2>
-        <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
+        <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToDate | date:'HH:mm' }}
         <ion-option-button class="button-assertive" ng-click="delete($index, lesson.start)">Delete</ion-option-button>
       </ion-item>
       <ion-item ng-hide="lessons.length" class="no-result">
