@@ -77,7 +77,7 @@ form {
     $height: 400px;
     text-align: center;
     position: relative;
-    top: 60%;
+    top: 40%;
     height: $height;
     max-width: 400px;
     margin: -$height/2 auto 0;
@@ -140,9 +140,6 @@ form {
 .jumping,
 .lesson {
   text-align: center;
-  .logo {
-    margin: 4em auto;
-  }
   .reconnecting {
     position: absolute;
     display: block;
@@ -224,4 +221,10 @@ form {
   font-size: 1.1em;
   line-height: 1.4em;
   margin: 1em 0;
+}
+.logo {
+  margin: 3em auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 150px;
 }
