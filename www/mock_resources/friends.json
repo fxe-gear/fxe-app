@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1234,
+        "name": "Mark Goldmanescu",
+        "picture": "http://graph.facebook.com/100011709695718/picture?type=square",
+        "score": {
+            "last": 123,
+            "week": 453,
+            "month": 3223
+        }
+    }, {
+        "id": 4321,
+        "name": "Filip Richter",
+        "picture": "http://graph.facebook.com/1147964772/picture?type=square",
+        "score": {
+            "last": 180,
+            "week": 322,
+            "month": 4223
+        }
+    }, {
+        "id": 2341,
+        "name": "Helen Moiduson",
+        "picture": "http://graph.facebook.com/100011743744048/picture?type=square",
+        "score": {
+            "last": 246,
+            "week": 246,
+            "month": 1289
+        }
+    }
+]

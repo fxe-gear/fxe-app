@@ -4,10 +4,19 @@ angular.module('fxe.services.api', [])
 
 .constant('baseURL', 'http://private-855a4-fxe.apiary-mock.com')
 
+.constant('useMockApiService', true)
+
+/**
+ * Wrap apiService in a factory to be able to mock it by changing the useMockApiService constant.
+ */
+.factory('apiService', function (useMockApiService, realApiService, mockApiService) {
+  return useMockApiService ? mockApiService : realApiService;
+})
+
 /**
  * Thin wrapper around the FXE API: https://app.apiary.io/fxe
  */
-.service('apiService', function ($http, $log, storeService, baseURL) {
+.service('realApiService', function ($http, storeService, baseURL) {
 
   var user = storeService.getUser();
 
@@ -35,7 +44,7 @@ angular.module('fxe.services.api', [])
     config = config || {};
     config.method = 'POST';
     config.url = path;
-    config.data = data;
+    config = data;
     return request(config);
   };
 
@@ -43,7 +52,7 @@ angular.module('fxe.services.api', [])
     config = config || {};
     config.method = 'PUT';
     config.url = path;
-    config.data = data;
+    config = data;
     return request(config);
   };
 
@@ -155,6 +164,152 @@ angular.module('fxe.services.api', [])
     return get('/friends', {
       params: filterParams(params, ['fields', 'scores']),
     });
+  };
+
+  // service public API =============================================
+
+  this.loginJumping = loginJumping;
+  this.loginFacebook = loginFacebook;
+  this.loginGoogle = loginGoogle;
+  this.logout = logout;
+  this.createUser = createUser;
+  this.getUser = getUser;
+  this.updateUser = updateUser;
+  this.resetPassword = resetPassword;
+  this.getLessons = getLessons;
+  this.uploadLessons = uploadLessons;
+  this.deleteLesson = deleteLesson;
+  this.getEvents = getEvents;
+  this.getEvent = getEvent;
+  this.getFriends = getFriends;
+
+})
+
+.service('mockApiService', function ($q, $http) {
+
+  var user = null;
+  var lessons = null;
+  var events = null;
+
+  var userPromise = null;
+  var lessonsPromise = null;
+  var eventsPromise = null;
+
+  var loginJumping = function () {
+    return $http.get('mock_resources/token.json');
+  };
+
+  var loginFacebook = loginJumping;
+
+  var loginGoogle = loginJumping;
+
+  var logout = $q.resolve;
+
+  var createUser = function (userData) {
+    return getUser()
+      .then(function () {
+        angular.merge(user, partialUserObj);
+        return loginJumping();
+      });
+  };
+
+  var getUser = function () {
+    if (!userPromise) {
+      userPromise = $http.get('mock_resources/user.json').then(function (response) {
+          user = response.data;
+          return response;
+        });
+    }
+
+    return userPromise.then(function () {
+        // 'data' envelope is needed
+        return {
+          data: user,
+        };
+      });
+  };
+
+  var updateUser = function (partialUserObj) {
+    return getUser()
+      .then(function () {
+        angular.merge(user, partialUserObj);
+      });
+  };
+
+  var resetPassword = $q.resolve;
+
+  var getLessons = function (from, fields) {
+    if (!lessonsPromise) {
+      lessonsPromise = $http.get('mock_resources/lessons.json').then(function (response) {
+          lessons = response.data;
+          return response;
+        });
+    }
+
+    return lessonsPromise.then(function () {
+        // 'data' envelope is needed
+        return {
+          data: lessons,
+        };
+      });
+  };
+
+  var uploadLessons = function (data) {
+    // ensure lessons are prepared
+    return getLessons()
+      .then(function () {
+        angular.forEach(data, function (l) {
+          lessons.push(l);
+        });
+      });
+  };
+
+  var deleteLesson = function (start) {
+    // ensure lessons are prepared
+    return getLessons()
+      .then(function () {
+        for (var i = 0; i < lessons.length; i++) {
+          var l = lessons[i];
+          if (l.start == start) {
+            delete lessons[i];
+            return $q.resolve();
+          }
+        }
+
+        return $q.reject();
+      });
+  };
+
+  var getEvents = function (limit, params) {
+    if (!eventsPromise) {
+      eventsPromise = $http.get('mock_resources/events.json').then(function (response) {
+          events = response.data;
+          return response;
+        });
+    }
+
+    return eventsPromise.then(function () {
+        // 'data' envelope is needed
+        return {
+          data: events,
+        };
+      });
+  };
+
+  var getEvent = function (id) {
+    return getEvents()
+      .then(function () {
+        for (var i = 0; i < events.length; i++) {
+          var e = events[i];
+          if (e.id == id) return $q.resolve(e);
+        }
+
+        return $q.reject();
+      });
+  };
+
+  var getFriends = function () {
+    return $http.get('mock_resources/friends.json');
   };
 
   // service public API =============================================

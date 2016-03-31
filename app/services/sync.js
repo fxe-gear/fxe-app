@@ -64,6 +64,8 @@ angular.module('fxe.services.sync', [])
 
     var lastSync = storeService.getLessonLastSync();
 
+    // FIXME newly created lessons can be deleted by this attitude
+
     // handle new lessons ------------------------------------------------
     var newLessons;
     var newPromise = apiService.getLessons({
