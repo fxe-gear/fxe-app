@@ -1,0 +1,21 @@
+{
+    "id": 1234,
+    "email": "mark_goldmanescu@tfbnw.net",
+    "verified": false,
+    "name": "Mark Goldmanescu",
+    "weight": 80,
+    "age": 36,
+    "gender": "male",
+    "units": "metric",
+    "picture": "http://graph.facebook.com/100011709695718/picture?type=square",
+    "provider": {
+        "facebook": {
+            "token": "EAAJZB30XByqMBABDpjvD68muYZCenMEsxUxEScF6ZBqDGkaByCvZBYHeRrvW1MtDXGG3zJEnIkowBVfuh7yi7I8LgOWjv8kbOFzQ0K07xJNCaQ832ALSiXdo9HkjOQX7pJpkSG6oZAxDIJlSU0LWUfgboG4jaz1CmgRQCF6KMdZAVwZCKoDMqmI",
+            "expiresAt": 1455638078520107
+        },
+        "google": {
+            "token": "plfkwvffgv67u0zteyvf",
+            "expiresAt": 1455638078520107
+        }
+    }
+}
