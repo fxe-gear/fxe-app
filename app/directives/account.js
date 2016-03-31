@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience.directives.account', [])
+angular.module('fxe.directives.account', [])
 
 .directive('jumpAccount', function () {
   return {

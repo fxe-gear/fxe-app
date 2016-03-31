@@ -23,7 +23,7 @@ loggingModule.factory('exceptionLoggingService', function ($log, $window, stackT
       try {
         // do NOT use angular service
         var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open('POST', 'http://experience.tbedrich.cz/api/v1/log');
+        xmlhttp.open('POST', 'http://fxe.tbedrich.cz/api/v1/log');
         xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
         xmlhttp.send(angular.toJson({
           url: $window.location.href,

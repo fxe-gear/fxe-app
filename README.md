@@ -1,4 +1,4 @@
-# Experience app
+# FXE app
 
 ## Developement setup
 
@@ -10,8 +10,8 @@
 #### Installation
 
 ```bash
-git clone https://github.com/tomasbedrich/experience-app
-cd experience-app
+git clone https://github.com/tomasbedrich/fxe-app
+cd fxe-app
 npm install
 bower install
 gulp; gulp # really twice, don't know why

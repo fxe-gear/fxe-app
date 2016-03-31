@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience.services.ble', [])
+angular.module('fxe.services.ble', [])
 
 .constant('reconnectTimeout', 3000) // in milliseconds
 
@@ -30,7 +30,7 @@ angular.module('experience.services.ble', [])
           q.reject('cannot enable bluetooth, probably on iOS');
         } else {
           // Android
-          $rootScope.$broadcast('experienceEnablingStarted');
+          $rootScope.$broadcast('fxeEnablingStarted');
 
           $cordovaBLE.enable()
             .then(function () {
@@ -80,7 +80,7 @@ angular.module('experience.services.ble', [])
       $ionicPlatform.ready().then(function () {
         scanning = true;
         $cordovaBLE.startScan(services, onDeviceFound, q.reject);
-        $rootScope.$broadcast('experienceScanningStarted');
+        $rootScope.$broadcast('fxeScanningStarted');
         $log.info('scanning started');
       });
 
@@ -109,19 +109,19 @@ angular.module('experience.services.ble', [])
     return $ionicPlatform.ready().then(function () {
       var q = $q.defer();
       $log.debug('connecting to ' + deviceID);
-      $rootScope.$broadcast('experienceConnectingStarted');
+      $rootScope.$broadcast('fxeConnectingStarted');
 
       ble.connect(deviceID,
         function (device) {
           $log.info('connected to ' + deviceID);
           storeService.setDeviceID(deviceID);
-          $rootScope.$broadcast('experienceConnected');
+          $rootScope.$broadcast('fxeConnected');
           q.resolve(deviceID);
         },
 
         function (error) {
           $log.error('connecting to ' + deviceID + ' failed / device disconnected later');
-          $rootScope.$broadcast('experienceDisconnected');
+          $rootScope.$broadcast('fxeDisconnected');
           q.reject(error);
         });
 
@@ -144,7 +144,7 @@ angular.module('experience.services.ble', [])
 
   var disconnect = function () {
     return isConnected().then(function (connected) {
-      if (!connected) throw 'experience not connected';
+      if (!connected) throw 'fxe not connected';
 
       var deviceID = storeService.getDeviceID();
       $log.debug('disconnecting from ' + deviceID);
@@ -154,7 +154,7 @@ angular.module('experience.services.ble', [])
           return $cordovaBLE.disconnect(deviceID);
         }).then(function (result) {
           storeService.setDeviceID(null);
-          $rootScope.$broadcast('experienceDisconnected');
+          $rootScope.$broadcast('fxeDisconnected');
           $log.info('disconnected from ' + deviceID);
           return result;
         }).catch(function (error) {
@@ -205,7 +205,7 @@ angular.module('experience.services.ble', [])
     };
 
     // permanent callback and first time trigger
-    _disableConnectionHolding = $rootScope.$on('experienceDisconnected', onDisconnect);
+    _disableConnectionHolding = $rootScope.$on('fxeDisconnected', onDisconnect);
     isConnected().then(function (connected) {
       if (!connected) onDisconnect();
     });
@@ -227,7 +227,7 @@ angular.module('experience.services.ble', [])
 
   var read = function (service, chrcs) {
     return isConnected().then(function (connected) {
-      if (!connected) throw 'experience not connected';
+      if (!connected) throw 'fxe not connected';
 
       $log.debug('reading ' + service + '-' + chrcs);
       return $cordovaBLE.read(storeService.getDeviceID(), service, chrcs);
@@ -236,7 +236,7 @@ angular.module('experience.services.ble', [])
 
   var write = function (service, chrcs, data) {
     return isConnected().then(function (connected) {
-      if (!connected) throw 'experience not connected';
+      if (!connected) throw 'fxe not connected';
 
       $log.debug('writing data ' + data + ' to ' + service + '-' + chrcs);
       return $cordovaBLE.write(storeService.getDeviceID(), service, chrcs, data.buffer);
@@ -245,7 +245,7 @@ angular.module('experience.services.ble', [])
 
   var startNotification = function (service, chrcs, handler) {
     return isConnected().then(function (connected) {
-      if (!connected) throw 'experience not connected';
+      if (!connected) throw 'fxe not connected';
 
       $log.debug('starting notifications for ' + service + '-' + chrcs);
       return $cordovaBLE.startNotification(storeService.getDeviceID(), service, chrcs, handler);
@@ -254,7 +254,7 @@ angular.module('experience.services.ble', [])
 
   var stopNotification = function (service, chrcs) {
     return isConnected().then(function (connected) {
-      if (!connected) throw 'experience not connected';
+      if (!connected) throw 'fxe not connected';
 
       $log.debug('stopping notifications for ' + service + '-' + chrcs);
       return $cordovaBLE.stopNotification(storeService.getDeviceID(), service, chrcs);

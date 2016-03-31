@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.welcome', []);
+var module = angular.module('fxe.controllers.welcome', []);
 
 var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
 

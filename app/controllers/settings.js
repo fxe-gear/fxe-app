@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.settings', []);
+var module = angular.module('fxe.controllers.settings', []);
 
 var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, $ionicHistory, storeService, syncService, diffWatch) {
 
@@ -50,7 +50,7 @@ var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
   };
 
   $scope.goto = function (target) {
-    // handle "Login" and "Connect my Experience" buttons
+    // handle "Login" and "Connect my FXE" buttons
     $ionicHistory.nextViewOptions({
       historyRoot: true,
     });

@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.reset', []);
+var module = angular.module('fxe.controllers.reset', []);
 
 var PasswordResetController = function ($scope, $state, $ionicHistory, $ionicPopup, userService, storeService) {
 

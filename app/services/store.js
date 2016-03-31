@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience.services.store', [])
+angular.module('fxe.services.store', [])
 
 .constant('scoreTypes', {
   amplitude: 1,
@@ -107,7 +107,7 @@ angular.module('experience.services.store', [])
         for (var i = 0; i < score.rows.length; i++) res.score.push(score.rows.item(i));
 
         var xmlhttp = new XMLHttpRequest();
-        xmlhttp.open('POST', 'http://experience.tbedrich.cz/api/v1/log');
+        xmlhttp.open('POST', 'http://fxe.tbedrich.cz/api/v1/log');
         xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
         xmlhttp.send(angular.toJson(res));
         $log.info('Database dumped to remote server.');

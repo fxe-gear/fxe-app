@@ -1,9 +1,9 @@
 {
-  "name": "experience",
+  "name": "fxe",
   "version": "0.7.0",
   "repository": {
     "type": "git",
-    "url": "git@github.com:tomasbedrich/experience-app.git"
+    "url": "git@github.com:tomasbedrich/fxe-app.git"
   },
   "description": "",
   "dependencies": {},
@@ -52,7 +52,7 @@
       "locator": "../phonegap-facebook-plugin",
       "variables": {
         "APP_ID": "702447366556323",
-        "APP_NAME": "Experience"
+        "APP_NAME": "FXE"
       }
     },
     {

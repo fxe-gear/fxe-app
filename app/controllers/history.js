@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.history', []);
+var module = angular.module('fxe.controllers.history', []);
 
 var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $cordovaDatePicker, storeService, dateFilter, ordinalFilter) {
   $scope.user = storeService.getUser();

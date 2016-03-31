@@ -1,8 +1,8 @@
 'use strict';
 
-var module = angular.module('experience.controllers.scanning', []);
+var module = angular.module('fxe.controllers.scanning', []);
 
-var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, bleDevice, experienceService, storeService) {
+var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, bleDevice, fxeService, storeService) {
 
   $scope.status = 'Starting...';
   $scope.working = true;
@@ -66,7 +66,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
   var scan = function () {
     $scope.working = true;
     $scope.status = 'Scanning...';
-    return experienceService.scan().catch(function (error) {
+    return fxeService.scan().catch(function (error) {
       $scope.working = false;
       $scope.status = 'Scanning failed';
       throw error;

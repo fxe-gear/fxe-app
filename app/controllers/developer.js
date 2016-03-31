@@ -1,8 +1,8 @@
 'use strict';
 
-var module = angular.module('experience.controllers.developer', []);
+var module = angular.module('fxe.controllers.developer', []);
 
-var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, experienceService, bleDevice, storeService) {
+var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, fxeService, bleDevice, storeService) {
 
   $localStorage.$default({
     websocket: {
@@ -17,9 +17,9 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
     var action;
 
     if (!$scope.extremesSubscribed) {
-      action = experienceService.subscribeExtremes($scope.websocket.ip, $scope.websocket.port);
+      action = fxeService.subscribeExtremes($scope.websocket.ip, $scope.websocket.port);
     } else {
-      action = experienceService.unsubscribeExtremes();
+      action = fxeService.unsubscribeExtremes();
     }
 
     action.then(function () {
@@ -28,7 +28,7 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
   };
 
   $scope.getBatteryLevel = function () {
-    experienceService.getBatteryLevel().then(function (level) {
+    fxeService.getBatteryLevel().then(function (level) {
       $ionicPopup.alert({
         title: 'Battery level',
         template: (level * 100).toFixed(0) + '%',

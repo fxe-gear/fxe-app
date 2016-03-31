@@ -1,11 +1,11 @@
 'use strict';
 
-angular.module('experience.services.api', [])
+angular.module('fxe.services.api', [])
 
-.constant('baseURL', 'https://private-855a4-experience4.apiary-mock.com')
+.constant('baseURL', 'http://private-855a4-fxe.apiary-mock.com')
 
 /**
- * Thin wrapper around the Experience API: https://app.apiary.io/experience4/editor
+ * Thin wrapper around the FXE API: https://app.apiary.io/fxe
  */
 .service('apiService', function ($http, $log, storeService, baseURL) {
 

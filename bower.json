@@ -1,5 +1,5 @@
 {
-  "name": "experience",
+  "name": "fxe",
   "private": "true",
   "dependencies": {
     "ionic": "git://github.com/tomasbedrich/ionic#7d8a83e58796b29a5b4f52183ad7d821ba9cb30e",

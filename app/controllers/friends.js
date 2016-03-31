@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.friends', []);
+var module = angular.module('fxe.controllers.friends', []);
 
 var FriendsController = function ($scope, storeService) {
 

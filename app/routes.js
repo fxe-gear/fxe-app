@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience.routes', [])
+angular.module('fxe.routes', [])
 
 .config(function ($stateProvider, $urlRouterProvider) {
 

@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.about', []);
+var module = angular.module('fxe.controllers.about', []);
 
 var AboutController = function ($scope) {};
 

@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.login', []);
+var module = angular.module('fxe.controllers.login', []);
 
 var LoginController = function ($scope, $state, $cordovaToast, $ionicHistory, $ionicPopup, userService, storeService) {
 

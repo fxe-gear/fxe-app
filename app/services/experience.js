@@ -1,10 +1,10 @@
 'use strict';
 
-angular.module('experience.services.experience', [])
+angular.module('fxe.services.fxe', [])
 
 // naming note: "chrcs" stands for "characteristics"
 .constant('bleServices', {
-  experience: {
+  fxe: {
     uuid: '6b00',
     chrcs: {
       extreme: {
@@ -47,18 +47,18 @@ angular.module('experience.services.experience', [])
 
 .constant('lowBatteryLevel', 0.1) // in percent
 
-.service('experienceService', function ($rootScope, $websocket, $q, $log, bleDevice, storeService, bleServices, scoreTypes, lowBatteryLevel) {
+.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevice, storeService, bleServices, scoreTypes, lowBatteryLevel) {
 
   // some shortcuts
   var bls = bleServices;
   var scoreUUIDs = [
-    bls.experience.chrcs.amplitude.uuid,
-    bls.experience.chrcs.rhythm.uuid,
-    bls.experience.chrcs.frequency.uuid,
+    bls.fxe.chrcs.amplitude.uuid,
+    bls.fxe.chrcs.rhythm.uuid,
+    bls.fxe.chrcs.frequency.uuid,
   ];
 
   var scan = function () {
-    return bleDevice.scan([bls.experience.uuid]);
+    return bleDevice.scan([bls.fxe.uuid]);
   };
 
   var setColor = function (color) {
@@ -89,13 +89,13 @@ angular.module('experience.services.experience', [])
     // mapping of BLE chrcs to SQLite score types
     var type;
     switch (uuid) {
-      case bls.experience.chrcs.amplitude.uuid:
+      case bls.fxe.chrcs.amplitude.uuid:
         type = scoreTypes.amplitude;
         break;
-      case bls.experience.chrcs.frequency.uuid:
+      case bls.fxe.chrcs.frequency.uuid:
         type = scoreTypes.frequency;
         break;
-      case bls.experience.chrcs.rhythm.uuid:
+      case bls.fxe.chrcs.rhythm.uuid:
         type = scoreTypes.rhythm;
         break;
     }
@@ -115,7 +115,7 @@ angular.module('experience.services.experience', [])
       if (measuring) {
         // read previous scores
         angular.forEach(scoreUUIDs, function (uuid) {
-          bleDevice.read(bls.experience.uuid, uuid).then(function (data) {
+          bleDevice.read(bls.fxe.uuid, uuid).then(function (data) {
             scoreChangedCallback(uuid, data);
           });
         });
@@ -124,23 +124,23 @@ angular.module('experience.services.experience', [])
         // delete previous scores
         storeService.startLesson();
         angular.forEach(scoreUUIDs, function (uuid) {
-          bleDevice.write(bls.experience.uuid, uuid, zeroScore);
+          bleDevice.write(bls.fxe.uuid, uuid, zeroScore);
         });
       }
     });
 
     // for each score type
     angular.forEach(scoreUUIDs, function (uuid) {
-      bleDevice.startNotification(bls.experience.uuid, uuid, function (data) {
+      bleDevice.startNotification(bls.fxe.uuid, uuid, function (data) {
         scoreChangedCallback(uuid, data);
       });
     });
 
     // write timeout
-    bleDevice.write(bls.experience.uuid, bls.experience.chrcs.sleep.uuid, timeoutLength);
+    bleDevice.write(bls.fxe.uuid, bls.fxe.chrcs.sleep.uuid, timeoutLength);
 
     // start measurement
-    return bleDevice.write(bls.experience.uuid, bls.experience.chrcs.control.uuid, startCommand).then(function () {
+    return bleDevice.write(bls.fxe.uuid, bls.fxe.chrcs.control.uuid, startCommand).then(function () {
       $log.info('measurement started');
     }).catch(function (error) {
       $log.error('starting measurement failed');
@@ -156,11 +156,11 @@ angular.module('experience.services.experience', [])
 
     // unregister callbacks
     angular.forEach(scoreUUIDs, function (uuid) {
-      bleDevice.startNotification(bls.experience.uuid, uuid);
+      bleDevice.startNotification(bls.fxe.uuid, uuid);
     });
 
     // stop measurement
-    return bleDevice.write(bls.experience.uuid, bls.experience.chrcs.control.uuid, stopMeasurementCommand)
+    return bleDevice.write(bls.fxe.uuid, bls.fxe.chrcs.control.uuid, stopMeasurementCommand)
       .then(storeService.endLesson)
       .then(function () {
         $log.info('measurement stopped');
@@ -173,7 +173,7 @@ angular.module('experience.services.experience', [])
   var isMeasuring = function () {
     $log.debug('checking if measurement is running');
 
-    return bleDevice.read(bls.experience.uuid, bls.experience.chrcs.control.uuid).then(function (data) {
+    return bleDevice.read(bls.fxe.uuid, bls.fxe.chrcs.control.uuid).then(function (data) {
       var dataView = new DataView(data);
       var controlValue = dataView.getUint8(0, true);
       var res = controlValue == 0x01;
@@ -195,7 +195,7 @@ angular.module('experience.services.experience', [])
   var onBatteryLevelChange = function (raw) {
     var level = parseBatteryLevel(raw);
     if (level <= lowBatteryLevel) {
-      $rootScope.$broadcast('experienceBatteryLow', level);
+      $rootScope.$broadcast('fxeBatteryLow', level);
     }
   };
 
@@ -261,7 +261,7 @@ angular.module('experience.services.experience', [])
       $log.info('websocket opened');
       $log.debug('subscribing extremes');
 
-      bleDevice.startNotification(bls.experience.uuid, bls.experience.chrcs.extreme.uuid, onExtremeReceived).then(function () {
+      bleDevice.startNotification(bls.fxe.uuid, bls.fxe.chrcs.extreme.uuid, onExtremeReceived).then(function () {
         $log.info('extremes subscribed');
         q.resolve();
       }).catch(function (error) {
@@ -276,7 +276,7 @@ angular.module('experience.services.experience', [])
   var unsubscribeExtremes = function () {
     $log.debug('unsubscribing extremes');
 
-    return bleDevice.stopNotification(bls.experience.uuid, bls.experience.chrcs.extreme.uuid).then(function () {
+    return bleDevice.stopNotification(bls.fxe.uuid, bls.fxe.chrcs.extreme.uuid).then(function () {
       $log.info('extremes unsubscribed');
       websocket.close();
       $log.info('websocket closed');
