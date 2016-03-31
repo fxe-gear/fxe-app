@@ -142,37 +142,49 @@ angular.module('fxe.services.store', [])
   };
 
   var addLesson = function (lesson) {
-    var query = [];
+    var queries = [];
     var bindings = [];
 
-    // Sqlite BUG: cannot bind multiple statements per query => run 2 queries
-
     // insert lesson
-    query.push('INSERT INTO lesson (start_time, end_time) VALUES (?, ?);');
-    bindings.push(lesson.start, lesson.end);
+    queries.push('INSERT INTO lesson (start_time, end_time) VALUES (?, ?);');
+    bindings.push([lesson.start, lesson.end]);
 
-    return $cordovaSQLite.execute(getDB(), query.join(' '), bindings)
-      .then(function () {
-        query.length = 0;
-        bindings.length = 0;
+    var j = 0;
+    var INSERT_AT_ONCE = 100;
 
-        if (!lesson.score.length) return;
+    // for all score records
+    while (j < lesson.score.length) {
 
-        // insert score records
-        query.push('INSERT INTO score (start_time, time, score, type) VALUES ');
-        for (var i = 0; i < lesson.score.length; i++) {
-          var s = lesson.score[i];
-          if (i != 0) query.push(','); // multiple VALUES separator
-          query.push('(?,?,?,?)'); // data placeholders
-          bindings.push(lesson.start, s.time, s.score, s.type); // data
-        }
+      var q = ['INSERT INTO score (start_time, time, score, type) VALUES ']; // one query
+      var b = []; // binding for this query
 
-        return $cordovaSQLite.execute(getDB(), query.join(' '), bindings);
-      })
-      .catch(function (err) {
-        $log.error('adding lesson failed:', err.message, 'in query', query.join(' '));
-        throw err;
-      });
+      // add score records and break each INSERT_AT_ONCE records
+      for (var i = 0; i < INSERT_AT_ONCE && j < lesson.score.length; i++) {
+        if (i != 0) q.push(','); // multiple VALUES separator
+        q.push('(?,?,?,?)'); // data placeholders
+        var s = lesson.score[j]; // index is J (outer index variable!)
+        b.push(lesson.start, s.time, s.score, s.type); // bindings
+        j++;
+      }
+
+      q.push(';');
+
+      // add to ma in query queue
+      queries.push(q.join(' '));
+      bindings.push(b);
+    }
+
+    // run all queries parallely
+    queries = queries.map(function (query, i) {
+      return $cordovaSQLite.execute(getDB(), query, bindings[i])
+        .catch(function (err) {
+          $log.error('adding lesson failed: ' + err.message + ' in query ' + query);
+          throw err;
+        });
+    });
+
+    // wait for all queries to finish
+    return $q.all(queries);
   };
 
   var deleteLesson = function (start, dbOnly) {
@@ -188,7 +200,7 @@ angular.module('fxe.services.store', [])
         if (dbOnly !== true) getDeletedLessons().push(start);
       })
       .catch(function (err) {
-        $log.error('deleting lesson failed:', err.message, 'in query', query);
+        $log.error('deleting lesson failed: ' + err.message + ' in query ' + query);
         throw err;
       });
   };
@@ -213,7 +225,7 @@ angular.module('fxe.services.store', [])
     $cordovaSQLite.execute(getDB(), query, []).then(function (res) {
       q.resolve(res.rows.item(0).count);
     }).catch(function (err) {
-      $log.error('getting lesson count failed:', err.message, 'in query', query);
+      $log.error('getting lesson count failed: ' + err.message + ' in query ' + query);
       q.reject(err);
     });
 
@@ -274,7 +286,7 @@ angular.module('fxe.services.store', [])
         });
       })
       .catch(function (err) {
-        $log.error('getting verbose lesson between two dates failed:', err.message, 'in query', query.join(' '));
+        $log.error('getting verbose lesson between two dates failed: ' + err.message + ' in query ' + query.join(' '));
         throw err;
       });
   };
@@ -292,7 +304,7 @@ angular.module('fxe.services.store', [])
       for (var i = 0; i < res.rows.length; i++) ret.push(res.rows.item(i));
       q.resolve(ret);
     }).catch(function (err) {
-      $log.error('getting lesson failed:', err.message, 'in query', query.join(' '));
+      $log.error('getting lesson failed: ' + err.message + ' in query ' + query.join(' '));
       q.reject(err);
     });
 
@@ -339,7 +351,7 @@ angular.module('fxe.services.store', [])
     }
 
     $cordovaSQLite.execute(getDB(), query.join(' '), inject).then(callback).catch(function (err) {
-      $log.error('getting lesson failed:', err.message, 'in query', query.join(' '));
+      $log.error('getting lesson failed: ' + err.message + ' in query ' + query.join(' '));
       q.reject(err);
     });
 
@@ -392,7 +404,7 @@ angular.module('fxe.services.store', [])
       q.resolve(ret);
 
     }).catch(function (err) {
-      $log.error('getting lesson diff data failed:', err.message, ', query', query.join(' '));
+      $log.error('getting lesson diff data failed: ' + err.message + ', query ' + query.join(' '));
       q.reject(err);
     });
 
