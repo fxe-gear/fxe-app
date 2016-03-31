@@ -216,17 +216,17 @@ angular.module('fxe.services.api', [])
   var getUser = function () {
     if (!userPromise) {
       userPromise = $http.get('mock_resources/user.json').then(function (response) {
-          user = response.data;
-          return response;
-        });
+        user = response.data;
+        return response;
+      });
     }
 
     return userPromise.then(function () {
-        // 'data' envelope is needed
-        return {
-          data: user,
-        };
-      });
+      // 'data' envelope is needed
+      return {
+        data: user,
+      };
+    });
   };
 
   var updateUser = function (partialUserObj) {
@@ -238,20 +238,26 @@ angular.module('fxe.services.api', [])
 
   var resetPassword = $q.resolve;
 
-  var getLessons = function (from, fields) {
+  var getLessons = function (params) {
     if (!lessonsPromise) {
       lessonsPromise = $http.get('mock_resources/lessons.json').then(function (response) {
-          lessons = response.data;
-          return response;
-        });
+        lessons = response.data;
+        return response;
+      });
     }
 
     return lessonsPromise.then(function () {
-        // 'data' envelope is needed
-        return {
-          data: lessons,
-        };
-      });
+      // 'data' envelope is needed
+      if (params && params.from && params.from > 0) return {
+        data: lessons.filter(function (lesson) {
+          return lesson.start > params.from;
+        }),
+      };
+      else return {
+        data: lessons,
+      };
+
+    });
   };
 
   var uploadLessons = function (data) {
@@ -283,17 +289,17 @@ angular.module('fxe.services.api', [])
   var getEvents = function (limit, params) {
     if (!eventsPromise) {
       eventsPromise = $http.get('mock_resources/events.json').then(function (response) {
-          events = response.data;
-          return response;
-        });
+        events = response.data;
+        return response;
+      });
     }
 
     return eventsPromise.then(function () {
-        // 'data' envelope is needed
-        return {
-          data: events,
-        };
-      });
+      // 'data' envelope is needed
+      return {
+        data: events,
+      };
+    });
   };
 
   var getEvent = function (id) {
@@ -308,7 +314,7 @@ angular.module('fxe.services.api', [])
       });
   };
 
-  var getFriends = function () {
+  var getFriends = function (params) {
     return $http.get('mock_resources/friends.json');
   };
 
