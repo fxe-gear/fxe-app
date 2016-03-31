@@ -2,7 +2,7 @@
 
 var module = angular.module('fxe.controllers.friends', []);
 
-var FriendsController = function ($scope, storeService) {
+var FriendsController = function ($scope, $state, $ionicHistory, storeService) {
 
   $scope.friends = storeService.getFriends();
   $scope.range = null;
@@ -15,6 +15,14 @@ var FriendsController = function ($scope, storeService) {
 
   $scope.changeRange = function (range) {
     $scope.range = range;
+  };
+
+  $scope.goto = function (target) {
+    // handle "Login" button
+    $ionicHistory.nextViewOptions({
+      historyRoot: true,
+    });
+    $state.go(target);
   };
 
   $scope.$on('$ionicView.beforeEnter', enter);

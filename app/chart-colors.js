@@ -4,12 +4,12 @@
 Chart.defaults.global.scaleFontColor = 'rgba(0, 0, 0, 0.8)';
 // Chart.defaults.global.scaleLineColor = 'rgba(255, 255, 255, .1)';
 Chart.defaults.global.colours = [{
-  fillColor: 'rgba(125, 167, 31, 0.2)',
-  strokeColor: 'rgba(125, 167, 30, 1)',
-  pointColor: 'rgba(125, 167, 30, 1)',
+  fillColor: 'rgba(70, 169, 60, 0.8)',
+  strokeColor: 'rgb(70, 169, 60)',
+  pointColor: 'rgb(70, 169, 60)',
   pointStrokeColor: 'rgba(255, 255, 255, 0.8)',
   pointHighlightFill: 'rgba(255, 255, 255, 1)',
-  pointHighlightStroke: 'rgba(125, 167, 30, 0.8)',
+  pointHighlightStroke: 'rgba(70, 169, 60, 0.8)',
 }, {
   fillColor: 'rgba(8, 72, 135, 0.2)',
   strokeColor: 'rgba(8, 72, 135, 1)',
