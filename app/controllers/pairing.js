@@ -1,8 +1,8 @@
 'use strict';
 
-var module = angular.module('experience.controllers.pairing', []);
+var module = angular.module('fxe.controllers.pairing', []);
 
-var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, experienceService, bleDevice, shuffle) {
+var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, fxeService, bleDevice, shuffle) {
   var colors = {
     red: '#ff0000',
     green: '#00ff00',
@@ -19,14 +19,14 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
   var setRandomColor = function () {
     $scope.colorName = colorNamesShuffled[$scope.step];
     $scope.color = colors[$scope.colorName];
-    return experienceService.setColor($scope.color);
+    return fxeService.setColor($scope.color);
   };
 
   $scope.yes = function () {
     if ($scope.step + 1 >= $scope.stepCount) {
       // on the end of pairing process
       bleDevice.pair();
-      return experienceService.clearColor().then(function () {
+      return fxeService.clearColor().then(function () {
         $ionicHistory.nextViewOptions({
           historyRoot: true,
         });
@@ -38,7 +38,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
     setRandomColor().catch(function (error) {
       $ionicPopup.alert({
         title: 'Pairing process failed.',
-        template: 'Cannot communicate with Experience, please try it again.',
+        template: 'Cannot communicate with FXE, please try it again.',
         okType: 'button-assertive',
       }).then(function () {
         return $state.go('scanning');
@@ -47,7 +47,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
   };
 
   $scope.no = function () {
-    experienceService.clearColor()
+    fxeService.clearColor()
       .then(bleDevice.ignore)
       .then(function () {
         return $state.go('scanning');

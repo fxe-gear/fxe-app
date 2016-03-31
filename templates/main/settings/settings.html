@@ -1,7 +1,7 @@
 <ion-view title="Settings">
   <ion-content padding="true" scroll="true" class="has-header settings">
 
-    <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-show="!paired">Connect your Experience</a>
+    <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-show="!paired">Connect your FXE</a>
     <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-show="!loggedIn">Login</a>
 
     <div class="card" ng-show="loggedIn">
@@ -9,10 +9,10 @@
     </div>
 
     <div class="card list">
-      <a class="item dark" onclick="window.open('http://www.jumpingshop.cz/?lang=en', '_system')">E-shop</a>
-      <a class="item dark" onclick="window.open('http://www.jumping-fitness.com/contacts', '_system')">Support</a>
-      <a class="item dark" ui-sref="main.about">About</a>
-      <a class="item dark" ui-sref="main.developer">Developer tools</a>
+      <a class="item" onclick="window.open('http://www.jumpingshop.cz/?lang=en', '_system')">E-shop</a>
+      <a class="item" onclick="window.open('http://www.jumping-fitness.com/contacts', '_system')">Support</a>
+      <a class="item" ui-sref="main.about">About</a>
+      <a class="item" ui-sref="main.developer">Developer tools</a>
     </div>
 
   </ion-content>

@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.account', []);
+var module = angular.module('fxe.controllers.account', []);
 
 var CreateAccountController = function ($scope, $state, $cordovaToast, $ionicHistory, $ionicPopup, storeService, userService) {
 

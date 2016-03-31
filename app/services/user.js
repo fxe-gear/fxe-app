@@ -3,7 +3,7 @@
 // because of facebook "access_token":
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 
-angular.module('experience.services.user', [])
+angular.module('fxe.services.user', [])
 
 .service('userService', function ($rootScope, $http, $log, $ionicPlatform, $cordovaFacebook, storeService, apiService, $q) {
 

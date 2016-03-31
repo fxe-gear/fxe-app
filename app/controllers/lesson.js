@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.lesson', []);
+var module = angular.module('fxe.controllers.lesson', []);
 
 // interval used in diff graph (in miliseconds)
 module.constant('diffGraphInterval', 120 * 1e3);

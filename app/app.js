@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience', [
+angular.module('fxe', [
   'ionic',
   'talis.services.logging',
   'ngCordova',
@@ -8,36 +8,36 @@ angular.module('experience', [
   'ngWebSocket',
   'chart.js',
 
-  'experience.services.util',
-  'experience.services.user',
-  'experience.services.store',
-  'experience.services.api',
-  'experience.services.sync',
-  'experience.services.ble',
-  'experience.services.experience',
+  'fxe.services.util',
+  'fxe.services.user',
+  'fxe.services.store',
+  'fxe.services.api',
+  'fxe.services.sync',
+  'fxe.services.ble',
+  'fxe.services.fxe',
 
-  'experience.controllers.welcome',
-  'experience.controllers.account',
-  'experience.controllers.history',
-  'experience.controllers.friends',
-  'experience.controllers.jumping',
-  'experience.controllers.lesson',
-  'experience.controllers.login',
-  'experience.controllers.pairing',
-  'experience.controllers.scanning',
-  'experience.controllers.settings',
-  'experience.controllers.developer',
-  'experience.controllers.about',
-  'experience.controllers.reset',
+  'fxe.controllers.welcome',
+  'fxe.controllers.account',
+  'fxe.controllers.history',
+  'fxe.controllers.friends',
+  'fxe.controllers.jumping',
+  'fxe.controllers.lesson',
+  'fxe.controllers.login',
+  'fxe.controllers.pairing',
+  'fxe.controllers.scanning',
+  'fxe.controllers.settings',
+  'fxe.controllers.developer',
+  'fxe.controllers.about',
+  'fxe.controllers.reset',
 
-  'experience.directives.account',
-  'experience.directives.error',
+  'fxe.directives.account',
+  'fxe.directives.error',
 
-  'experience.routes',
-  'experience.templates',
+  'fxe.routes',
+  'fxe.templates',
 ])
 
-.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, experienceService) {
+.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, fxeService) {
 
   $ionicPlatform.ready(function () {
     // keyboard setup
@@ -69,7 +69,7 @@ angular.module('experience', [
   var disconnect = function () {
     return bleDevice.isConnected().then(function (connected) {
       if (connected) {
-        return experienceService.disableBatteryWarning().then(bleDevice.disconnect);
+        return fxeService.disableBatteryWarning().then(bleDevice.disconnect);
       }
     });
   };

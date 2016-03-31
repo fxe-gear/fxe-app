@@ -17,14 +17,21 @@ other selectors that are more specific or come later and might alter display.
 // tabs
 .tabs-background-balanced>.tabs {
   background-color: rgba($balanced, $bar-transparency) !important;
-  // remove borders on iOS
-  .platform-ios & {
-    border-bottom: 0 !important;
-  }
+  border-bottom: 0 !important;
+  box-shadow: 0 0 10px rgba($dark, .8);
 }
-.platform-android .tab-title {
-  padding-left: 0.3em;
-  font-size: 0.8rem;
+.tab-item {
+  text-transform: uppercase;
+  flex-basis: 100%;
+}
+.platform-android {
+  .tab-item.me {
+    flex-basis: 70%;
+  }
+  .tab-title {
+    padding-left: 0.3em;
+    font-size: 0.7rem;
+  }
 }
 // popup
 .popup,
@@ -79,7 +86,7 @@ form {
     $height: 400px;
     text-align: center;
     position: relative;
-    top: 60%;
+    top: 40%;
     height: $height;
     max-width: 400px;
     margin: -$height/2 auto 0;
@@ -93,7 +100,6 @@ form {
   .status {
     margin-top: 2rem;
     .text {
-      text-shadow: 0 0 4px rgba(0, 0, 0, 1);
       font-size: 2rem;
       line-height: 1.4em;
       margin: 1em 0;
@@ -132,7 +138,6 @@ form {
       animation: infinite pulse 2s;
     }
     .question {
-      text-shadow: 0 0 4px rgba(0, 0, 0, 1);
       font-size: 2rem;
       line-height: 1.4em;
       margin: 1em 0;
@@ -150,7 +155,8 @@ form {
     top: 30%;
     left: 50%;
     margin-left: -100px;
-    background-color: rgba(0, 0, 0, .8);
+    color: $light;
+    background-color: rgba(darken($dark, 50%), .8);
     border-radius: $border-radius-large;
   }
   .start-stop {
@@ -165,13 +171,10 @@ form {
     }
   }
   .label {
-    text-shadow: 0 0 4px rgba(0, 0, 0, 1);
     font-size: 1.2rem;
   }
   .score,
   .time {
-    color: white;
-    text-shadow: 0 0 4px rgba(0, 0, 0, 1);
     font-size: 3rem;
     line-height: 1.4em;
     margin-bottom: 1rem;
@@ -223,4 +226,10 @@ form {
   font-size: 1.1em;
   line-height: 1.4em;
   margin: 1em 0;
+}
+.logo {
+  margin: 3em auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 150px;
 }

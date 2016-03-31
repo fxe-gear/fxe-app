@@ -2,7 +2,7 @@
 
 // ------------------------------------------------------------------------------------------------
 
-var module = angular.module('experience.services.util', []);
+var module = angular.module('fxe.services.util', []);
 
 module.filter('msToDate', function () {
   return function (ms) {

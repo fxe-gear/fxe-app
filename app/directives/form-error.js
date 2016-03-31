@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience.directives.error', [
+angular.module('fxe.directives.error', [
   'ngCordova',
   'ngMessages',
 ])

@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('experience.controllers.jumping', []);
+var module = angular.module('fxe.controllers.jumping', []);
 
 module.filter('sumScore', function () {
   return function (score) {
@@ -29,7 +29,7 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, experienceService, bleDevice, storeService, syncService) {
+var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, fxeService, bleDevice, storeService, syncService) {
   var timer = null;
   var batteryPopup = null;
 
@@ -44,7 +44,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   };
 
   $scope.start = function () {
-    return experienceService.startMeasurement().then(function () {
+    return fxeService.startMeasurement().then(function () {
       $scope.lesson = storeService.getCurrentLesson();
       $scope.running = true;
       timer = $interval(angular.noop, 1000); // just to update duration
@@ -52,7 +52,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   };
 
   $scope.stop = function () {
-    experienceService.stopMeasurement().then(function () {
+    fxeService.stopMeasurement().then(function () {
       // TODO go to nested state
       // https://gist.github.com/Deminetix/f7e0d9b91b685df5fc0d
       // http://codepen.io/TimothyKrell/pen/bnukj?editors=101
@@ -65,16 +65,16 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   };
 
   // hide GUI overlay and display measuring screen
-  var onExperienceConnected = function () {
-    experienceService.isMeasuring().then(function (measuring) {
+  var onFxeConnected = function () {
+    fxeService.isMeasuring().then(function (measuring) {
       if (measuring) return $scope.start();
     }).then(function () {
       // delay setting of $scope.connected due to GUI overlay after start
       $scope.connected = true;
-    }).then(experienceService.enableBatteryWarning);
+    }).then(fxeService.enableBatteryWarning);
   };
 
-  var onExperienceDisconnected = function () {
+  var onFxeDisconnected = function () {
     $scope.status = 'reconnecting';
     $scope.connected = false;
   };
@@ -86,7 +86,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
 
     batteryPopup = $ionicPopup.alert({
       title: (level * 100).toFixed(0) + '% of battery remains',
-      template: 'Please charge your Experience soon.',
+      template: 'Please charge your FXE soon.',
       okType: 'button-energized',
     });
   };
@@ -95,26 +95,26 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     // get current state
     bleDevice.isConnected()
       .then(function (connected) {
-        if (connected) onExperienceConnected();
-        else onExperienceDisconnected();
+        if (connected) onFxeConnected();
+        else onFxeDisconnected();
       });
   });
 
   // listen for future state changes
-  $rootScope.$on('experienceConnected', onExperienceConnected);
-  $rootScope.$on('experienceDisconnected', onExperienceDisconnected);
-  $rootScope.$on('experienceBatteryLow', onBatteryLow);
+  $rootScope.$on('fxeConnected', onFxeConnected);
+  $rootScope.$on('fxeDisconnected', onFxeDisconnected);
+  $rootScope.$on('fxeBatteryLow', onBatteryLow);
 
   // update text in overlay
-  $rootScope.$on('experienceEnablingStarted', function () {
+  $rootScope.$on('fxeEnablingStarted', function () {
     $scope.status = 'enabling';
   });
 
-  $rootScope.$on('experienceScanningStarted', function () {
+  $rootScope.$on('fxeScanningStarted', function () {
     $scope.status = 'scanning';
   });
 
-  $rootScope.$on('experienceConnectingStarted', function () {
+  $rootScope.$on('fxeConnectingStarted', function () {
     $scope.status = 'connecting';
   });
 

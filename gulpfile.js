@@ -40,7 +40,7 @@ var injectOptions = {
 
 templateCacheOptions = {
   standalone: true,
-  module: 'experience.templates',
+  module: 'fxe.templates',
 };
 
 var bowerCssFilter = [

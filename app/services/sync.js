@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('experience.services.sync', [])
+angular.module('fxe.services.sync', [])
 
 .service('syncService', function ($log, $q, storeService, apiService) {
 

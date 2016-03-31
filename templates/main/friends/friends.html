@@ -2,9 +2,9 @@
   <ion-content padding="true" class="friends">
 
     <div class="row button-bar range-bar" ng-show="loggedIn">
-      <button ng-click="changeRange('last')" ng-class="{'button-outline': range != 'last'}" class="col button button-small button-light">last lesson</button>
-      <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-small button-light">week</button>
-      <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-small button-light">month</button>
+      <button ng-click="changeRange('last')" ng-class="{'button-outline': range != 'last'}" class="col button button-small button-dark">last lesson</button>
+      <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-small button-dark">week</button>
+      <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-small button-dark">month</button>
     </div>
 
     <p class="login-request" ng-show="!loggedIn">Please login to start competiting with friends.</p>
@@ -14,9 +14,9 @@
       <div class="item item-divider">
         Scoreboard
       </div>
-      <div class="item item-avatar dark" ng-repeat="(id, person) in friends | orderByScoreDesc:range">
+      <div class="item item-avatar" ng-repeat="(id, person) in friends | orderByScoreDesc:range">
         <img ng-src="{{ ::person.picture }}" alt="avatar">
-        <h2 class="dark">{{ ::person.name }}</h2>
+        <h2>{{ ::person.name }}</h2>
         <p>
           <strong>
             {{ person.score[range] || 0 | number:0 }}
@@ -29,7 +29,7 @@
           </span>
         </p>
       </div>
-      <p class="item dark no-result" ng-show="loggedIn && friends.length == 0">None of your friends is using Experience.</p>
+      <p class="item no-result" ng-show="loggedIn && friends.length == 0">None of your friends is using FXE.</p>
     </div>
 
 

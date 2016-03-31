@@ -1,9 +1,9 @@
 <ion-view>
   <ion-tabs class="tabs-striped tabs-background-balanced tabs-color-light" ng-class="platform == 'android' ? 'tabs-icon-left' : 'tabs-icon-top'">
-    <ion-tab title="Jump!" icon="ion-ios-pulse-strong" ui-sref="main.jumping">
+    <ion-tab title="Start" icon="ion-ios-pulse-strong" ui-sref="main.jumping">
       <ion-nav-view name="jump"></ion-nav-view>
     </ion-tab>
-    <ion-tab title="Me" icon="ion-person" ui-sref="main.history">
+    <ion-tab title="Me" icon="ion-person" ui-sref="main.history" class="me">
       <ion-nav-view name="me"></ion-nav-view>
     </ion-tab>
     <ion-tab title="Friends" icon="ion-podium" href="#/main/friends">
