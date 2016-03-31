@@ -33,6 +33,7 @@ angular.module('fxe.services.user', [])
   };
 
   var getGoogleToken = function () {
+    var q = $q.defer();
 
     var callback = function (response) {
       storeService.setToken('google', response.oauthToken, 0);
@@ -43,12 +44,18 @@ angular.module('fxe.services.user', [])
     return $ionicPlatform.ready()
       .then(function () {
         $log.debug('getting google token');
-        var q = $q.defer();
+
+        // see https://developers.google.com/android/reference/com/google/android/gms/common/Scopes
+        var scopes = ['profile', 'email'];
+        scopes.push('https://www.googleapis.com/auth/fitness.activity.write');
+        scopes.push('https://www.googleapis.com/auth/fitness.body.read');
+        scopes.push('https://www.googleapis.com/auth/plus.login');
 
         // do the request
         window.plugins.googleplus.login({
-          offline: true,
+          scopes: scopes.join(' '),
         }, callback, q.reject);
+
         return q.promise;
       });
   };

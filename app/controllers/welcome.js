@@ -7,7 +7,7 @@ var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
   $scope.loginFacebook = function () {
     userService.getFacebookToken()
       .then(function () {
-        $state.go('scanning');
+        return $state.go('scanning');
       })
       .then(userService.loginFacebook)
       .then(userService.loadDetails)
@@ -23,7 +23,7 @@ var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
   $scope.loginGoogle = function () {
     userService.getGoogleToken()
       .then(function () {
-        $state.go('scanning');
+        return $state.go('scanning');
       })
       .then(userService.loginGoogle)
       .then(userService.loadDetails)
