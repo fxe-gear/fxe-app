@@ -28,6 +28,7 @@ angular.module('fxe.services.store', [])
     // lesson related
     currentLesson: emptyLesson,
     deletedLessons: [],
+    newLessons: [],
     lessonLastSync: null,
 
     // user related
@@ -137,6 +138,7 @@ angular.module('fxe.services.store', [])
     var start = $localStorage.currentLesson.start;
     var query = 'UPDATE lesson SET end_time = ? WHERE start_time = ?';
     return $cordovaSQLite.execute(getDB(), query, [end, start]).then(function () {
+      getNewLessons().push(start);
       angular.copy(emptyLesson, $localStorage.currentLesson);
     });
   };
@@ -466,6 +468,10 @@ angular.module('fxe.services.store', [])
     return $localStorage.userChanges;
   };
 
+  var getNewLessons = function () {
+    return $localStorage.newLessons;
+  };
+
   var getDeletedLessons = function () {
     return $localStorage.deletedLessons;
   };
@@ -510,6 +516,7 @@ angular.module('fxe.services.store', [])
   this.getFriends = getFriends;
   this.getUserChanges = getUserChanges;
   this.getDeletedLessons = getDeletedLessons;
+  this.getNewLessons = getNewLessons;
   this.getLessonLastSync = getLessonLastSync;
   this.touchLessonLastSync = touchLessonLastSync;
 });

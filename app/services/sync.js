@@ -64,68 +64,109 @@ angular.module('fxe.services.sync', [])
 
     var lastSync = storeService.getLessonLastSync();
 
-    // FIXME newly created lessons can be deleted by this attitude
+    var remoteNew; // an array of lesson objects
+    var localNew; // an array of lesson objects
+    var remoteAll = {}; // a set of start times (AS STRING!)
+    var localAll = {}; // a set of start times (AS STRING!)
+    var remoteDeleted; // an array of start times
+    var localDeleted; // an array of start times
 
-    // handle new lessons ------------------------------------------------
-    var newLessons;
-    var newPromise = apiService.getLessons({
+    // fill remoteNew
+    var remoteNewPromise = apiService.getLessons({
         from: lastSync,
       })
-      .then(function (response) { // wait for lesson download
-        // store new API lessons for later and push new local lessons to API
-        newLessons = response.data;
-        return storeService.getVerboseLessonsBetween(lastSync, Date.now());
-      })
-      .then(function (lessons) { // wait for storeService to return lessons
-        // avoid empty request
-        if (lessons.length) return apiService.uploadLessons(lessons);
-      })
-      .then(function () { // wait for lesson upload
-        // copy new API lessons to storeService
-        angular.forEach(newLessons, storeService.addLesson);
-        storeService.touchLessonLastSync();
+      .then(function (response) {
+        remoteNew = response.data;
       });
 
-    // handle deleted lessons ------------------------------------------------
-    var allLessons = {}; // a set
-    var deletedPromise = apiService.getLessons({
+    // fill localNew
+    var localNewPromise = storeService.getVerboseLessonsBetween(lastSync, Date.now())
+      .then(function (lessons) {
+        localNew = lessons;
+      });
+
+    // fill remoteAll
+    var remoteAllPromise = apiService.getLessons({
         fields: 'start',
       })
-      .then(function (response) { // wait for lesson download
-        // store ALL lesson start times for later
+      .then(function (response) {
         angular.forEach(response.data, function (l) {
-          allLessons[l.start] = true;
-        });
-
-        // push locally deleted lessons to API
-        var apiRequests = [];
-        var deletedLessons = storeService.getDeletedLessons();
-        for (var l; l = deletedLessons.pop();) {
-          // avoid request if lesson has been already deleted from another device
-          if (!(l in allLessons)) continue;
-          apiRequests.push(apiService.deleteLesson(l).catch(function () {
-            // push back on error
-            deletedLessons.push(l);
-          }));
-        }
-
-        return $q.all(apiRequests);
-      })
-      .then(function () { // wait for ALL delete requests
-        // delete local lessons which are not in API lesson set
-        storeService.getAllLessons().then(function (lessons) {
-          angular.forEach(lessons, function (l) {
-            if (!(l.start in allLessons)) {
-              storeService.deleteLesson(l.start, true);
-            }
-          });
+          remoteAll[l.start] = true;
         });
       });
 
-    // wait for both chains to finish
-    return $q.all([newPromise, deletedPromise]).then(function () {
-      $log.info('lessons synced');
-    });
+    // fill localAll
+    var localAllPromise = storeService.getAllLessons()
+      .then(function (lessons) {
+        angular.forEach(lessons, function (l) {
+          localAll[l.start] = true;
+        });
+      });
+
+    // fill remoteDeleted
+    // uses localAll and remoteAll => wait for them resolve
+    var remoteDeletedPromise = $q.all([localAllPromise, remoteAllPromise])
+      .then(function () {
+        remoteDeleted = [];
+        Object.keys(localAll).forEach(function (start) {
+          // do not forget the parseInt() type conversion! localAll is a set of strings!
+          var intStart = parseInt(start);
+          if (!(start in remoteAll) && storeService.getNewLessons().indexOf(intStart) == -1) {
+            // in localAll, not in remoteAll and not a new lesson => must be remoteDeleted
+            remoteDeleted.push(intStart);
+          }
+        });
+      });
+
+    // fill localDeleted
+    localDeleted = storeService.getDeletedLessons();
+
+    // when we have all the data, do the changes
+    return $q.all([remoteNewPromise, localNewPromise, remoteAllPromise, localAllPromise, remoteDeletedPromise])
+      .then(function () {
+        var promises = [];
+
+        // push local new
+        if (localNew.length) {
+          var uploadLocalNewPromise = apiService.uploadLessons(localNew)
+            .then(function () {
+              storeService.getNewLessons().length = 0;
+            });
+          promises.push(uploadLocalNewPromise);
+        }
+
+        // store remote new
+        angular.forEach(remoteNew, function (lesson) {
+          promises.push(storeService.addLesson(lesson));
+        });
+
+        // push local deleted
+        for (var start; start = localDeleted.pop();) {
+          // avoid request if lesson has been already deleted from another device
+          if (remoteDeleted.indexOf(start) != -1) continue;
+
+          // API allows to delete only one lesson per query
+          var pushLocalDeletedPromise = apiService.deleteLesson(start)
+            .catch(function () {
+              // push back on error
+              localDeleted.push(start);
+            });
+
+          promises.push(pushLocalDeletedPromise);
+        }
+
+        // store remote deleted
+        angular.forEach(remoteDeleted, function (start) {
+          promises.push(storeService.deleteLesson(start, true));
+        });
+
+        // wait for all operations to finish
+        return $q.all(promises);
+      })
+      .then(function () {
+        storeService.touchLessonLastSync();
+        $log.info('lessons synced');
+      });
   };
 
   var syncAll = function () {
