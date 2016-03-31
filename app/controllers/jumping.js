@@ -118,8 +118,17 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     $scope.status = 'connecting';
   });
 
-  // and ensure experience is connected for both, now and future
-  $ionicPlatform.ready(bleDevice.holdConnection);
+  $ionicPlatform.ready(function () {
+    // hold connection (for now and future)
+    if (storeService.isPaired()) {
+      bleDevice.holdConnection();
+    }
+
+    // sync data
+    if (storeService.isLoggedIn()) {
+      syncService.syncAll();
+    }
+  });
 };
 
 module.controller('JumpingController', JumpingController);
