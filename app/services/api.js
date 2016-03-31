@@ -67,7 +67,7 @@ angular.module('fxe.services.api', [])
     params = params || {};
 
     angular.forEach(params, function (key, val) {
-      if (!(key in possibleParams)) delete params[key];
+      if (possibleParams.indexOf(key) == -1) delete params[key];
     });
 
     return params;
