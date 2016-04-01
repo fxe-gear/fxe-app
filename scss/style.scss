@@ -78,8 +78,13 @@ form {
   .nv-axis line {
     stroke: rgba($dark, .1);
   }
-  .nv-line {
-    stroke: $balanced;
+  .nv-line, .nv-area, .nv-bar {
+    stroke: $balanced !important;
+    fill: $balanced !important;
+  }
+  text {
+    font-size: 10px;
+    line-height: 15px;
   }
 }
 // custom views ------------------------------------------------------------------------------------

@@ -7,6 +7,42 @@ module.constant('diffGraphInterval', 120 * 1e3);
 
 var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson) {
 
+  var line = {
+    values: [],
+    key: 'score',
+  };
+  var chart = {
+    type: 'lineChart',
+    isArea: true,
+    height: 250,
+    duration: 500,
+    margin: {
+      top: 20,
+      right: 20,
+      bottom: 40,
+      left: 20,
+    },
+    xAxis: {
+      showMaxMin: false,
+      tickFormat: function (val) {
+        return dateFilter(msToDateFilter(val), 'HH:mm');
+      },
+    },
+    yAxis: {
+      ticks: 5,
+    },
+    forceY: [0, 50],
+    interactive: false,
+    showLabels: false,
+    showLegend: false,
+    interpolate: 'cardinal',
+  };
+
+  $scope.chartOptions = {
+    chart: chart,
+  };
+  $scope.chartData = [line];
+
   var share = function () {
     // TODO Facebook for Android not working! http://ngcordova.com/docs/plugins/socialSharing/
     // share image instead
@@ -29,61 +65,14 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
 
     storeService.getLessonDiffData(lesson.start, interval).then(function (data) {
 
-      var makeXtick = function (val) {
-        return dateFilter(msToDateFilter(val), 'HH:mm');
-      };
+      chart.xAxis.ticks = Math.min(data.length / 4, 8);
 
-      var chart = {
-        type: 'lineChart',
-        height: 220,
-        margin: {
-          top: 20,
-          right: 20,
-          bottom: 60,
-          left: 40,
-        },
-        xAxis: {
-          tickFormat: makeXtick,
-          axisLabel: 'time',
-        },
-        yAxis: {
-          axisLabel: 'score',
-          axisLabelDistance: -20,
-        },
-        yDomain: [0, 50],
-        interactive: false,
-        showLabels: false,
-        showLegend: false,
-        interpolate: 'basis',
-        duration: 400,
-        attr: {
-          width: function (d, i) {
-            return d.x;
-          },
-        },
-      };
-
-      var line = {
-        values: [],
-        key: '+ score in ' + (diffGraphInterval / 1e3) + 's',
-      };
-
-      line.values.push({
-        x: 0,
-        y: 0,
-      });
-
-      for (var i = 1; i <= data.length; i++) {
+      for (var i = 0; i <= data.length; i++) {
         line.values.push({
           x: i * interval,
-          y: data[i - 1],
+          y: i == 0 ? 0 : data[i - 1],
         });
       }
-
-      $scope.chartOptions = {
-        chart: chart,
-      };
-      $scope.chartData = [line];
 
     });
   };

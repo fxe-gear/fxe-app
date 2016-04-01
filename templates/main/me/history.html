@@ -12,15 +12,7 @@
       <button ng-click="shiftRange(1)" class="col button button-outline button-small button-dark icon ion-chevron-right"></button>
     </div>
 
-    <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
-      {
-        barStrokeWidth: 1,
-        barValueSpacing: 1,
-        scaleShowVerticalLines: false,
-        scaleFontSize: 8,
-        animationSteps: 30,
-      }
-    "></canvas>
+    <nvd3 options="chartOptions" data="chartData"></nvd3>
 
     <ion-list type="card" class="data" can-swipe="true">
 
