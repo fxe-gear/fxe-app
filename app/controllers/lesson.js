@@ -29,36 +29,61 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
 
     storeService.getLessonDiffData(lesson.start, interval).then(function (data) {
 
-      var makeLabel = function (val) {
-        return dateFilter(msToDateFilter(val), (lesson.duration > 3600 * 1e3) ? 'HH:mm:ss' : 'mm:ss');
+      var makeXtick = function (val) {
+        return dateFilter(msToDateFilter(val), 'HH:mm');
       };
 
-      $scope.chartOptions = {
-        chart: {
-          type: 'lineChart',
-          height: 500,
-          x: function (d) {
+      var chart = {
+        type: 'lineChart',
+        height: 220,
+        margin: {
+          top: 20,
+          right: 20,
+          bottom: 60,
+          left: 40,
+        },
+        xAxis: {
+          tickFormat: makeXtick,
+          axisLabel: 'time',
+        },
+        yAxis: {
+          axisLabel: 'score',
+          axisLabelDistance: -20,
+        },
+        yDomain: [0, 50],
+        interactive: false,
+        showLabels: false,
+        showLegend: false,
+        interpolate: 'basis',
+        duration: 400,
+        attr: {
+          width: function (d, i) {
             return d.x;
           },
-          y: function (d) {
-            return d.y;
-          },
-          showLabels: true,
-          duration: 500,
-        }
+        },
       };
 
-      $scope.chartData = [{
+      var line = {
         values: [],
-        key: 'Sine Wave',
-      }];
+        key: '+ score in ' + (diffGraphInterval / 1e3) + 's',
+      };
 
-      for (var i = 0; i < data.length; i++) {
-        $scope.chartData[0].values.push({
-          x: makeLabel(i * interval),
-          y: data[i],
+      line.values.push({
+        x: 0,
+        y: 0,
+      });
+
+      for (var i = 1; i <= data.length; i++) {
+        line.values.push({
+          x: i * interval,
+          y: data[i - 1],
         });
       }
+
+      $scope.chartOptions = {
+        chart: chart,
+      };
+      $scope.chartData = [line];
 
     });
   };

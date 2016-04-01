@@ -4,9 +4,9 @@ Allow angular.js to be loaded in body, hiding cloaked elements until
 templates compile.  The !important is important given that there may be
 other selectors that are more specific or come later and might alter display.
 */
-[ng\:cloak],
+.ng-cloak,
 [ng-cloak],
-.ng-cloak {
+[ng\:cloak] {
   display: none !important;
 }
 // ionic components overrides ----------------------------------------------------------------------
@@ -15,7 +15,7 @@ other selectors that are more specific or come later and might alter display.
   background-size: cover;
 }
 // tabs
-.tabs-background-balanced>.tabs {
+.tabs-background-balanced > .tabs {
   background-color: rgba($balanced, $bar-transparency) !important;
   border-bottom: 0 !important;
   box-shadow: 0 0 10px rgba($dark, .8);
@@ -35,9 +35,9 @@ other selectors that are more specific or come later and might alter display.
 }
 // popup
 .popup,
-.popup-title,
+.popup-body,
 .popup-sub-title,
-.popup-body {
+.popup-title {
   color: #000;
 }
 .popup-head {
@@ -71,6 +71,15 @@ form {
     &.ng-inactive {
       display: none;
     }
+  }
+}
+// nvD3
+.nvd3 {
+  .nv-axis line {
+    stroke: rgba($dark, .1);
+  }
+  .nv-line {
+    stroke: $balanced;
   }
 }
 // custom views ------------------------------------------------------------------------------------
