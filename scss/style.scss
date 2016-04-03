@@ -83,10 +83,18 @@ form {
   .nv-axis line {
     stroke: rgba($dark, .1);
   }
-  .nv-bar,
-  .nv-group {
+  .nv-group.nv-series-0 .nv-bar,
+  .type-jumping & .nv-area {
     stroke: $balanced !important;
     fill: $balanced !important;
+  }
+  .nv-group.nv-series-1 .nv-bar,
+  .type-running & .nv-area {
+    stroke: $energized !important;
+    fill: $energized !important;
+  }
+  & .nv-group .nv-line {
+    display: none;
   }
   text {
     font-size: 10px;

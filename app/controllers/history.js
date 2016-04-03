@@ -11,9 +11,13 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   };
   $scope.range = null;
 
-  var bars = {
+  var jumpingBars = {
     values: [],
-    key: 'somethigs',
+    key: 'Jumping',
+  };
+  var runningBars = {
+    values: [],
+    key: 'Running',
   };
   var chart = {
     type: 'multiBarChart',
@@ -36,6 +40,7 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
     showLabels: false,
     showLegend: false,
     showControls: false,
+    stacked: true,
     tooltip: {
       enabled: false,
     },
@@ -43,7 +48,7 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   $scope.chartOptions = {
     chart: chart,
   };
-  $scope.chartData = [bars];
+  $scope.chartData = [jumpingBars, runningBars];
 
   $scope.startDate = null;
   $scope.endDate = null;
@@ -93,7 +98,8 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   var fillChart = function () {
     var label;
 
-    bars.values.length = 0;
+    jumpingBars.values.length = 0;
+    runningBars.values.length = 0;
 
     // oldest lesson
     var currentLesson = $scope.lessons.length - 1;
@@ -107,14 +113,20 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
       if (groupingFn[$scope.range](date, $scope.endDate)) end = true;
 
       // take all lessons for this group and sum their score
-      var sum = 0;
+      var sum = [0, 0]; // first index = jumping, second index = running
       for (; currentLesson >= 0 && groupingFn[$scope.range](date, new Date($scope.lessons[currentLesson].start)); currentLesson--) {
-        sum += $scope.lessons[currentLesson].score;
+        var l = $scope.lessons[currentLesson];
+        sum[l.type == 1 ? 0 : 1] += l.score;
       }
 
-      bars.values.push({
+      jumpingBars.values.push({
         x: new Date(date),
-        y: sum,
+        y: sum[0],
+      });
+
+      runningBars.values.push({
+        x: new Date(date),
+        y: sum[1],
       });
 
       // generate date group and add label
@@ -224,7 +236,10 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   $scope.delete = function (index, start) {
     $scope.lessons.splice(index, 1);
-    storeService.deleteLesson(start);
+    storeService.deleteLesson(start)
+      .then(function () {
+        reloadLessons();
+      });
   };
 
   $ionicPlatform.ready(function () {

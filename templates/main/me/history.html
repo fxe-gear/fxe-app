@@ -25,8 +25,8 @@
           <div class="col">Duration:</div>
         </div>
         <div class="row values">
-          <div class="col"><span class="score">{{ (summary.score / lessons.length || 0) | number:2 }}</span></div>
-          <div class="col"><span class="time">{{ (summary.duration / lessons.length || 0) | msToTimeSpan }}</span></div>
+          <div class="col"><span class="score">{{ lessons.length ? (summary.score / lessons.length | number:2) : 0 }}</span></div>
+          <div class="col"><span class="time">{{ lessons.length ? (summary.duration / lessons.length | msToTimeSpan) : 0 }}</span></div>
         </div>
       </div>
 
