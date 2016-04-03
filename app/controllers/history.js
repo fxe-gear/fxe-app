@@ -197,6 +197,11 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
       androidTheme: 5, // nice calendar widget
     };
     $cordovaDatePicker.show(options).then(function (date) {
+      if (typeof date === 'undefined') {
+        // iOS callback is success without param if canceled
+        return;
+      }
+
       computeDateRange(date);
       reloadLessons();
     });
