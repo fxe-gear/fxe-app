@@ -17,6 +17,10 @@ var FriendsController = function ($scope, $state, $ionicHistory, storeService) {
     $scope.range = range;
   };
 
+  $scope.hasFriends = function () {
+    return Object.keys($scope.friends).length != 0;
+  };
+
   $scope.goto = function (target) {
     // handle "Login" button
     $ionicHistory.nextViewOptions({

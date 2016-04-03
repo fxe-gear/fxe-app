@@ -4,6 +4,7 @@
       {{ ::title }}
     </div>
 
+    <!-- use ng-if (removes DOM elements if condition is not met) otherwise hidden passord element will break form validation -->
     <a ng-click="f.showEmailField = true" class="item balanced" ng-if="change && !f.showEmailField">Change email</a>
     <div class="item item-text-wrap" ng-if="change && f.showEmailField">Please enter your new email address. You will have to confirm its ownership.</div>
     <label class="item item-input required" ng-class="{ 'invalid' : f.email.$invalid && f.email.$dirty }" ng-if="!change || f.showEmailField">
