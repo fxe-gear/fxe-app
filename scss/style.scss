@@ -46,6 +46,11 @@ other selectors that are more specific or come later and might alter display.
 .popup-title {
   font-weight: bold;
 }
+// popover
+.popover {
+  // top: 10% !important;
+  width: 90%;
+}
 // button-bar inside list
 .list .item-input .button-bar {
   flex-basis: 65%;
@@ -87,6 +92,11 @@ form {
     font-size: 10px;
     line-height: 15px;
   }
+}
+// animations
+.animated {
+  -webkit-animation-duration: .2s;
+  animation-duration: .2s;
 }
 // custom views ------------------------------------------------------------------------------------
 .shadow {

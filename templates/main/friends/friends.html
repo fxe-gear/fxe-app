@@ -29,7 +29,8 @@
           </span>
         </p>
       </div>
-      <p class="item no-result" ng-show="loggedIn && friends.length == 0">None of your friends is using FXE.</p>
+      <!-- ng-show doesnt work! -->
+      <p class="item no-result" ng-hide="!loggedIn || friends.length == 0">None of your friends is using FXE.</p>
     </div>
 
 

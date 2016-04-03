@@ -4,8 +4,12 @@
     <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-show="!paired">Connect your FXE</a>
     <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-show="!loggedIn">Login</a>
 
-    <div class="card" ng-show="loggedIn">
-      <jump-account user="user" title="My jumping account"></jump-account>
+    <div ng-show="loggedIn">
+      <jump-account class="card" user="user" title="My profile" change="true">
+        <button class="button button-block button-balanced" ng-disabled="$parent.f.$invalid || $parent.f.syncInProgress" ng-hide="$parent.f.$pristine" ng-click="sync($parent.f)">
+          {{ !$parent.f.syncInProgress ? 'Save changes' : 'Saving...' }}
+        </button>
+      </jump-account>
     </div>
 
     <div class="card list">

@@ -1,68 +1,72 @@
-<form name="f" class="list" novalidate ng-model-options="{ updateOn: 'default blur', debounce: { default: 500, blur: 0 } }">
-  <div class="item item-divider" ng-if="title">
-    {{ ::title }}
-  </div>
+<form name="f" novalidate ng-model-options="{ updateOn: 'default blur', debounce: { default: 500, blur: 100 } }">
+  <div class="list" ng-class="class">
+    <div class="item item-divider" ng-if="title">
+      {{ ::title }}
+    </div>
 
-  <label class="item item-input required" ng-class="{ 'invalid' : f.email.$invalid && f.email.$dirty }">
-    <span class="input-label">Email:</span>
-    <input name="email" type="email" required ng-model="user.email">
-  </label>
-  <jump-form-error input="f.email">
-    <div ng-message="required">Email is required.</div>
-    <div ng-message="email">Email is invalid.</div>
-  </jump-form-error>
+    <a ng-click="f.showEmailField = true" class="item balanced" ng-if="change && !f.showEmailField">Change email</a>
+    <div class="item item-text-wrap" ng-if="change && f.showEmailField">Please enter your new email address. You will have to confirm its ownership.</div>
+    <label class="item item-input required" ng-class="{ 'invalid' : f.email.$invalid && f.email.$dirty }" ng-if="!change || f.showEmailField">
+      <span class="input-label">Email:</span>
+      <input name="email" type="email" required ng-model="user.email">
+    </label>
+    <jump-form-error input="f.email">
+      <div ng-message="required">Email is required.</div>
+      <div ng-message="email">Email is invalid.</div>
+    </jump-form-error>
 
-  <label class="item item-input required" ng-class="{ 'invalid' : f.password.$invalid && f.password.$dirty }">
-    <span class="input-label">Password:</span>
-    <input name="password" type="password" required ng-minlength="6" ng-model="user.password">
-  </label>
-  <jump-form-error input="f.password">
-    <div ng-message="required">Password is required.</div>
-    <div ng-message="minlength">Password must be at least 6 characters long.</div>
-  </jump-form-error>
+    <a ng-click="f.showPasswordField = true; user.password = ''" class="item balanced" ng-if="change && !f.showPasswordField">Change password</a>
+    <label class="item item-input required" ng-class="{ 'invalid' : f.password.$invalid && f.password.$dirty }" ng-if="!change || f.showPasswordField">
+      <span class="input-label">Password:</span>
+      <input name="password" type="password" required ng-minlength="6" ng-model="user.password">
+    </label>
+    <jump-form-error input="f.password">
+      <div ng-message="required">Password is required.</div>
+      <div ng-message="minlength">Password must be at least 6 characters long.</div>
+    </jump-form-error>
 
-  <label class="item item-input" ng-class="{ 'invalid' : f.name.$invalid && f.name.$dirty }">
-    <span class="input-label">Name:</span>
-    <input name="name" type="text" ng-maxlength="255" ng-model="user.name">
-  </label>
-  <jump-form-error input="f.name">
-    <div ng-message="maxlength">Name must not be longer than 255 characters.</div>
-  </jump-form-error>
+    <label class="item item-input" ng-class="{ 'invalid' : f.name.$invalid && f.name.$dirty }">
+      <span class="input-label">Name:</span>
+      <input name="name" type="text" ng-maxlength="255" ng-model="user.name">
+    </label>
+    <jump-form-error input="f.name">
+      <div ng-message="maxlength">Name must not be longer than 255 characters.</div>
+    </jump-form-error>
 
-  <label class="item item-input" ng-class="{ 'invalid' : f.weight.$invalid && f.weight.$dirty }">
-    <span class="input-label">Weight:</span>
-    <input name="weight" type="number" ng-model="user.weight" min="0" max="65534" placeholder="{{ user.units ? user.units == 'metric' ? '(kg)' : '(lbs)' : '' }}">
-  </label>
-  <jump-form-error input="f.weight">
-    <div ng-message="min">Weight must not be negative.</div>
-    <div ng-message="max">Wow, are you so heavy?</div>
-  </jump-form-error>
+    <label class="item item-input" ng-class="{ 'invalid' : f.weight.$invalid && f.weight.$dirty }">
+      <span class="input-label">Weight:</span>
+      <input name="weight" type="number" ng-model="user.weight" min="0" max="65534" placeholder="{{ user.units ? user.units == 'metric' ? '(kg)' : '(lbs)' : '' }}">
+    </label>
+    <jump-form-error input="f.weight">
+      <div ng-message="min">Weight must not be negative.</div>
+      <div ng-message="max">Wow, are you so heavy?</div>
+    </jump-form-error>
 
-  <label class="item item-input" ng-class="{ 'invalid' : f.age.$invalid && f.age.$dirty }">
-    <span class="input-label">Age:</span>
-    <input name="age" type="number" ng-model="user.age" min="0" max="255">
-  </label>
-  <jump-form-error input="f.age">
-    <div ng-message="min">Age must not be negative.</div>
-    <div ng-message="max">Wow, are you so old?</div>
-  </jump-form-error>
+    <label class="item item-input" ng-class="{ 'invalid' : f.age.$invalid && f.age.$dirty }">
+      <span class="input-label">Age:</span>
+      <input name="age" type="number" ng-model="user.age" min="0" max="255">
+    </label>
+    <jump-form-error input="f.age">
+      <div ng-message="min">Age must not be negative.</div>
+      <div ng-message="max">Wow, are you so old?</div>
+    </jump-form-error>
 
-  <div class="item item-input">
-    <span class="input-label">Gender:</span>
-    <div class="button-bar">
-      <a class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'male'}" ng-click="user.gender = 'male'">Male</a>
-      <a class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'female'}" ng-click="user.gender = 'female'">Female</a>
+    <div class="item item-input">
+      <span class="input-label">Gender:</span>
+      <div class="button-bar">
+        <a class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'male'}" ng-click="user.gender = 'male'; f.$setDirty()">Male</a>
+        <a class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'female'}" ng-click="user.gender = 'female'; f.$setDirty()">Female</a>
+      </div>
+    </div>
+
+    <div class="item item-input">
+      <span class="input-label">Units:</span>
+      <div class="button-bar">
+        <a class="button button-small button-dark" ng-class="{'button-outline': user.units != 'metric'}" ng-click="user.units = 'metric'; f.$setDirty()">Metric</a>
+        <a class="button button-small button-dark" ng-class="{'button-outline': user.units != 'imperial'}" ng-click="user.units = 'imperial'; f.$setDirty()">Imperial</a>
+      </div>
     </div>
   </div>
-
-  <div class="item item-input">
-    <span class="input-label">Units:</span>
-    <div class="button-bar">
-      <a class="button button-small button-dark" ng-class="{'button-outline': user.units != 'metric'}" ng-click="user.units = 'metric'">Metric</a>
-      <a class="button button-small button-dark" ng-class="{'button-outline': user.units != 'imperial'}" ng-click="user.units = 'imperial'">Imperial</a>
-    </div>
-  </div>
-
-  <div ng-transclude ng-if="hasTranscluded"></div>
+  <ng-transclude ng-if="hasTranscluded"></ng-transclude>
 
 </form>
