@@ -8,7 +8,7 @@
     </div>
     <div class="row button-bar date-bar">
       <button ng-click="shiftRange(-1)" class="col button button-outline button-small button-dark icon ion-chevron-left"></button>
-      <button ng-click="changeDate()" style="flex-basis:75%;" class="col button button-outline button-small button-dark">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
+      <button ng-click="changeDate()" style="flex-basis:75%;" class="col button button-outline button-small button-dark">{{ startDate | date:'dd.MM.yy' }} – {{ endDate | date:'dd.MM.yy' }}</button>
       <button ng-click="shiftRange(1)" class="col button button-outline button-small button-dark icon ion-chevron-right"></button>
     </div>
 
@@ -50,7 +50,7 @@
         History
       </div>
       <ion-item ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start">
-        <h2>Jumping {{ ::lesson.start | date:'short' }}</h2>
+        <h2>Jumping {{ ::lesson.start | date:'EEE dd.MM. HH:mm' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToDate | date:'HH:mm' }}
         <ion-option-button class="button-assertive" ng-click="delete($index, lesson.start)">Delete</ion-option-button>
       </ion-item>
