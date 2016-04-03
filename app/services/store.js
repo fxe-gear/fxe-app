@@ -8,7 +8,7 @@ angular.module('fxe.services.store', [])
   frequency: 3,
 })
 
-.service('storeService', function ($cordovaSQLite, $localStorage, $q, $log, scoreTypes) {
+.service('storeService', function ($ionicPlatform, $cordovaSQLite, $localStorage, $q, $log, scoreTypes) {
 
   // prepare default (empty) lesson object
   var emptyLesson = {
@@ -63,30 +63,44 @@ angular.module('fxe.services.store', [])
 
   var db;
 
-  var getDB = function () {
+  var _getDB = function () {
     if (db) {
-      return db;
+      return $q.resolve(db);
     }
 
-    // empty version means "doesn't care"
+    return $ionicPlatform.ready()
+      .then(function () {
+        // empty version means "doesn't care"
 
-    if (window.sqlitePlugin) { // native sqlite DB
-      db = $cordovaSQLite.openDB({
-        name: 'store.sqlite',
-        bgType: true,
-        version: '',
+        if (window.sqlitePlugin) { // native sqlite DB
+          db = $cordovaSQLite.openDB({
+            name: 'store.sqlite',
+            bgType: true,
+            version: '',
+            iosDatabaseLocation: 'default',
+          });
+
+        } else { // fallback to websql
+          db = window.openDatabase('store', '', null, 2 * 1024 * 1024);
+        }
+
+        createSchema(db);
+        return db;
       });
+  };
 
-    } else { // fallback to websql
-      db = window.openDatabase('store', '', null, 2 * 1024 * 1024);
-    }
-
-    createSchema(db);
-    return db;
+  var execSQL = function (query, bindings) {
+    return _getDB().then(function (db) {
+        return $cordovaSQLite.execute(db, query, bindings)
+          .catch(function (err) {
+            $log.error('SQL query failed: ' + err.message + ' in query ' + query);
+            throw err;
+          });
+      });
   };
 
   var prepareDB = function () {
-    getDB();
+    _getDB();
   };
 
   var createSchema = function (db) {
@@ -96,7 +110,7 @@ angular.module('fxe.services.store', [])
 
   var _dumpDB = function () {
 
-    return $cordovaSQLite.execute(getDB(), 'SELECT * FROM lesson', []).then(function (lesson) {
+    return execSQL('SELECT * FROM lesson', []).then(function (lesson) {
       var res = {
         lesson: [],
         score: [],
@@ -104,7 +118,7 @@ angular.module('fxe.services.store', [])
 
       for (var i = 0; i < lesson.rows.length; i++) res.lesson.push(lesson.rows.item(i));
 
-      $cordovaSQLite.execute(getDB(), 'SELECT * FROM score', []).then(function (score) {
+      execSQL('SELECT * FROM score', []).then(function (score) {
         for (var i = 0; i < score.rows.length; i++) res.score.push(score.rows.item(i));
 
         var xmlhttp = new XMLHttpRequest();
@@ -119,7 +133,7 @@ angular.module('fxe.services.store', [])
   var startLesson = function () {
     var start = Date.now();
     var query = 'INSERT INTO lesson (start_time) VALUES (?)';
-    return $cordovaSQLite.execute(getDB(), query, [start]).then(function () {
+    return execSQL(query, [start]).then(function () {
       $localStorage.currentLesson.start = start;
     });
   };
@@ -128,7 +142,7 @@ angular.module('fxe.services.store', [])
     var start = $localStorage.currentLesson.start;
     var time = Date.now();
     var query = 'INSERT INTO score (start_time, time, score, type) VALUES (?, ?, ?, ?)';
-    return $cordovaSQLite.execute(getDB(), query, [start, time, score, type]).then(function () {
+    return execSQL(query, [start, time, score, type]).then(function () {
       $localStorage.currentLesson.score[type] = score;
     });
   };
@@ -137,7 +151,7 @@ angular.module('fxe.services.store', [])
     var end = Date.now();
     var start = $localStorage.currentLesson.start;
     var query = 'UPDATE lesson SET end_time = ? WHERE start_time = ?';
-    return $cordovaSQLite.execute(getDB(), query, [end, start]).then(function () {
+    return execSQL(query, [end, start]).then(function () {
       getNewLessons().push(start);
       angular.copy(emptyLesson, $localStorage.currentLesson);
     });
@@ -178,11 +192,7 @@ angular.module('fxe.services.store', [])
 
     // run all queries parallely
     queries = queries.map(function (query, i) {
-      return $cordovaSQLite.execute(getDB(), query, bindings[i])
-        .catch(function (err) {
-          $log.error('adding lesson failed: ' + err.message + ' in query ' + query);
-          throw err;
-        });
+      return execSQL(query, bindings[i]);
     });
 
     // wait for all queries to finish
@@ -192,18 +202,14 @@ angular.module('fxe.services.store', [])
   var deleteLesson = function (start, dbOnly) {
     // Sqlite BUG: cannot bind multiple statements per query => run 2 queries
     var query = 'DELETE FROM lesson WHERE start_time = ?;';
-    return $cordovaSQLite.execute(getDB(), query, [start])
+    return execSQL(query, [start])
       .then(function () {
         query = 'DELETE FROM score WHERE start_time = ?;';
-        return $cordovaSQLite.execute(getDB(), query, [start]);
+        return execSQL(query, [start]);
       })
       .then(function () {
         // if not dbOnly, then also add to deletedLessons array
         if (dbOnly !== true) getDeletedLessons().push(start);
-      })
-      .catch(function (err) {
-        $log.error('deleting lesson failed: ' + err.message + ' in query ' + query);
-        throw err;
       });
   };
 
@@ -224,11 +230,8 @@ angular.module('fxe.services.store', [])
 
     var query = 'SELECT COUNT(1) as count FROM lesson';
 
-    $cordovaSQLite.execute(getDB(), query, []).then(function (res) {
+    execSQL(query, []).then(function (res) {
       q.resolve(res.rows.item(0).count);
-    }).catch(function (err) {
-      $log.error('getting lesson count failed: ' + err.message + ' in query ' + query);
-      q.reject(err);
     });
 
     return q.promise;
@@ -253,7 +256,7 @@ angular.module('fxe.services.store', [])
 
     var res = {};
 
-    return $cordovaSQLite.execute(getDB(), query.join(' '), [date1, date2])
+    return execSQL(query.join(' '), [date1, date2])
       .then(function (lessons) {
         // fill result
         for (var i = 0; i < lessons.rows.length; i++) {
@@ -269,7 +272,7 @@ angular.module('fxe.services.store', [])
         query.length = 0;
         query.push('SELECT start_time AS start, time, type, score FROM score');
         query.push('WHERE start_time BETWEEN ? AND ?');
-        return $cordovaSQLite.execute(getDB(), query.join(' '), [date1, date2]);
+        return execSQL(query.join(' '), [date1, date2]);
       })
       .then(function (scores) {
         // fill result scores for ALL selected lessons
@@ -286,10 +289,6 @@ angular.module('fxe.services.store', [])
         return Object.keys(res).map(function (key) {
           return res[key];
         });
-      })
-      .catch(function (err) {
-        $log.error('getting verbose lesson between two dates failed: ' + err.message + ' in query ' + query.join(' '));
-        throw err;
       });
   };
 
@@ -301,13 +300,10 @@ angular.module('fxe.services.store', [])
     query.splice(-1, 0, 'AND start_time BETWEEN ? AND ?');
     query.push('ORDER BY start_time DESC');
 
-    $cordovaSQLite.execute(getDB(), query.join(' '), [date1, date2]).then(function (res) {
+    execSQL(query.join(' '), [date1, date2]).then(function (res) {
       var ret = [];
       for (var i = 0; i < res.rows.length; i++) ret.push(res.rows.item(i));
       q.resolve(ret);
-    }).catch(function (err) {
-      $log.error('getting lesson failed: ' + err.message + ' in query ' + query.join(' '));
-      q.reject(err);
     });
 
     return q.promise;
@@ -352,10 +348,7 @@ angular.module('fxe.services.store', [])
       };
     }
 
-    $cordovaSQLite.execute(getDB(), query.join(' '), inject).then(callback).catch(function (err) {
-      $log.error('getting lesson failed: ' + err.message + ' in query ' + query.join(' '));
-      q.reject(err);
-    });
+    execSQL(query.join(' '), inject).then(callback);
 
     return q.promise;
   };
@@ -371,7 +364,7 @@ angular.module('fxe.services.store', [])
     query.push('SELECT 0, start_time, ((time - start_time) / ' + interval + ') AS diff_group, type, MAX(score)'); // do NOT bind interval using "?" - problem with data types
     query.push('FROM score WHERE start_time = ? GROUP BY type, diff_group ORDER BY diff_group ASC');
 
-    $cordovaSQLite.execute(getDB(), query.join(' '), [start, start]).then(function (res) {
+    execSQL(query.join(' '), [start, start]).then(function (res) {
       // lesson times are in the first row
       var start = res.rows.item(0).start;
       var end = res.rows.item(0).end;
@@ -405,9 +398,6 @@ angular.module('fxe.services.store', [])
 
       q.resolve(ret);
 
-    }).catch(function (err) {
-      $log.error('getting lesson diff data failed: ' + err.message + ', query ' + query.join(' '));
-      q.reject(err);
     });
 
     return q.promise;
