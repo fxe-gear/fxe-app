@@ -2,8 +2,8 @@
   "name": "fxe",
   "private": "true",
   "dependencies": {
-    "ionic": "git://github.com/tomasbedrich/ionic#7d8a83e58796b29a5b4f52183ad7d821ba9cb30e",
-    "ngCordova": "git://github.com/tomasbedrich/ng-cordova.git#b7fc33404c97893c4186a4f6dec4394ce8059c8e",
+    "ionic": "git://github.com/tomasbedrich/ionic#a61912ffc7c1be434e5699946abea19a6979482f",
+    "ngCordova": "git://github.com/driftyco/ng-cordova#v0.1.24-alpha",
     "angular": "1.x",
     "stacktrace-js": "1.x",
     "angular-websocket": "1.x",
@@ -18,6 +18,6 @@
     }
   },
   "resolutions": {
-    "angular": "1.5.0"
+    "angular": "1.5.3"
   }
 }
