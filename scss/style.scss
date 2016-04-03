@@ -233,6 +233,16 @@ form {
     }
   }
 }
+.friends {
+  table {
+    font-size: 0.9em;
+    th {
+      font-weight: bold;
+      text-align: right;
+      padding-right: 0.3em;
+    }
+  }
+}
 .no-result {
   text-align: center;
 }
