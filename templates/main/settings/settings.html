@@ -6,7 +6,7 @@
 
     <div ng-show="loggedIn">
       <jump-account class="card" user="user" title="My profile" change="true">
-        <button class="button button-block button-balanced" ng-disabled="$parent.f.$invalid || $parent.f.syncInProgress" ng-hide="$parent.f.$pristine" ng-click="sync($parent.f)">
+        <button class="button button-block button-balanced" ng-disabled="$parent.f.$invalid || $parent.f.syncInProgress" ng-hide="$parent.f.$pristine" ng-click="sync($parent.f); $parent.f.showEmailField = false; $parent.f.showPasswordField = false">
           {{ !$parent.f.syncInProgress ? 'Save changes' : 'Saving...' }}
         </button>
       </jump-account>

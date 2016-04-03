@@ -2,7 +2,7 @@
 
 var module = angular.module('fxe.controllers.settings', []);
 
-var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, $ionicHistory, storeService, syncService, diffWatch) {
+var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, $cordovaToast, $ionicHistory, storeService, syncService, diffWatch) {
 
   $scope.user = {};
 
@@ -38,6 +38,7 @@ var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
         disableUserWatcher = diffWatch($scope, 'user', onUserChange); // enable
         form.syncInProgress = false;
         form.$setPristine();
+        return $cordovaToast.showShortBottom('Saved.');
       })
       .catch(function (error) {
         // TODO handle server side validation errors
