@@ -23,11 +23,9 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
       left: 20,
     },
     xAxis: {
-      showMaxMin: false,
-      tickFormat: function (val) {
-        return dateFilter(msToDateFilter(val), 'HH:mm');
-      },
+      tickFormat: d3.time.format('%H:%M'),
     },
+    xScale: d3.time.scale(),
     yAxis: {
       ticks: 5,
     },
@@ -64,12 +62,9 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
     var interval = (lesson.duration < limitLessonLength) ? diffGraphInterval : (diffGraphInterval * lesson.duration / limitLessonLength);
 
     storeService.getLessonDiffData(lesson.start, interval).then(function (data) {
-
-      chart.xAxis.ticks = Math.min(data.length / 4, 8);
-
       for (var i = 0; i <= data.length; i++) {
         line.values.push({
-          x: i * interval,
+          x: msToDateFilter(i * interval),
           y: i == 0 ? 0 : data[i - 1],
         });
       }

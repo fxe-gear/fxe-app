@@ -78,7 +78,8 @@ form {
   .nv-axis line {
     stroke: rgba($dark, .1);
   }
-  .nv-line, .nv-area, .nv-bar {
+  .nv-bar,
+  .nv-group {
     stroke: $balanced !important;
     fill: $balanced !important;
   }
