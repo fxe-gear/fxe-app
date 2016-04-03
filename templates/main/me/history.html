@@ -12,15 +12,7 @@
       <button ng-click="shiftRange(1)" class="col button button-outline button-small button-dark icon ion-chevron-right"></button>
     </div>
 
-    <canvas class="chart chart-bar" chart-data="chartData" chart-labels="chartLabels" chart-options="
-      {
-        barStrokeWidth: 1,
-        barValueSpacing: 1,
-        scaleShowVerticalLines: false,
-        scaleFontSize: 8,
-        animationSteps: 30,
-      }
-    "></canvas>
+    <nvd3 options="chartOptions" data="chartData"></nvd3>
 
     <ion-list type="card" class="data" can-swipe="true">
 
@@ -59,7 +51,7 @@
       </div>
       <ion-item ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start">
         <h2>Jumping {{ ::lesson.start | date:'short' }}</h2>
-        <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToTimeSpan }}
+        <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToDate | date:'HH:mm' }}
         <ion-option-button class="button-assertive" ng-click="delete($index, lesson.start)">Delete</ion-option-button>
       </ion-item>
       <ion-item ng-hide="lessons.length" class="no-result">

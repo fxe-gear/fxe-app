@@ -7,6 +7,40 @@ module.constant('diffGraphInterval', 120 * 1e3);
 
 var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson) {
 
+  var line = {
+    values: [],
+    key: 'score',
+  };
+  var chart = {
+    type: 'lineChart',
+    isArea: true,
+    height: 250,
+    duration: 500,
+    margin: {
+      top: 20,
+      right: 20,
+      bottom: 40,
+      left: 20,
+    },
+    xAxis: {
+      tickFormat: d3.time.format('%H:%M'),
+    },
+    xScale: d3.time.scale(),
+    yAxis: {
+      ticks: 5,
+    },
+    forceY: [0, 50],
+    interactive: false,
+    showLabels: false,
+    showLegend: false,
+    interpolate: 'cardinal',
+  };
+
+  $scope.chartOptions = {
+    chart: chart,
+  };
+  $scope.chartData = [line];
+
   var share = function () {
     // TODO Facebook for Android not working! http://ngcordova.com/docs/plugins/socialSharing/
     // share image instead
@@ -28,23 +62,11 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
     var interval = (lesson.duration < limitLessonLength) ? diffGraphInterval : (diffGraphInterval * lesson.duration / limitLessonLength);
 
     storeService.getLessonDiffData(lesson.start, interval).then(function (data) {
-
-      var makeLabel = function (val) {
-        return dateFilter(msToDateFilter(val), (lesson.duration > 3600 * 1e3) ? 'HH:mm:ss' : 'mm:ss');
-      };
-
-      // fill labels
-      $scope.chartLabels = [];
-      for (var i = 0; i < interval * (data.length + 1); i += interval) { // add one label after data
-        $scope.chartLabels.push(makeLabel(i));
-      }
-
-      // fill score
-      $scope.chartData = [
-        [0],
-      ];
-      for (var i = 0; i < data.length; i++) {
-        $scope.chartData[0].push(data[i]);
+      for (var i = 0; i <= data.length; i++) {
+        line.values.push({
+          x: msToDateFilter(i * interval),
+          y: i == 0 ? 0 : data[i - 1],
+        });
       }
 
     });

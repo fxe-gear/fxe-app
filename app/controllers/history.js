@@ -11,6 +11,40 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   };
   $scope.range = null;
 
+  var bars = {
+    values: [],
+    key: 'somethigs',
+  };
+  var chart = {
+    type: 'multiBarChart',
+    height: 250,
+    margin: {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 40,
+    },
+    xAxis: {},
+    yAxis: {
+      tickFormat: function (num) {
+        return num.toFixed(0);
+      },
+    },
+    forceY: [0, 100],
+    reduceXTicks: false,
+    interactive: false,
+    showLabels: false,
+    showLegend: false,
+    showControls: false,
+    tooltip: {
+      enabled: false,
+    },
+  };
+  $scope.chartOptions = {
+    chart: chart,
+  };
+  $scope.chartData = [bars];
+
   $scope.startDate = null;
   $scope.endDate = null;
   var allLessonCount = 0;
@@ -57,11 +91,9 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   // requires $scope.lessons to be set
   var fillChart = function () {
+    var label;
 
-    $scope.chartLabels = [];
-    $scope.chartData = [
-      [],
-    ];
+    bars.values.length = 0;
 
     // oldest lesson
     var currentLesson = $scope.lessons.length - 1;
@@ -80,19 +112,19 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
         sum += $scope.lessons[currentLesson].score;
       }
 
-      $scope.chartData[0].push(sum.toFixed(0));
+      bars.values.push({
+        x: new Date(date),
+        y: sum,
+      });
 
       // generate date group and add label
       if ($scope.range == 'week') {
-        $scope.chartLabels.push(dateFilter(date, 'MM/dd'));
         date.setDate(date.getDate() + 1);
 
       } else if ($scope.range == 'month') {
-        $scope.chartLabels.push(dateFilter(date, 'd') + ordinalFilter(date.getDate()));
         date.setDate(date.getDate() + 1);
 
       } else if ($scope.range == 'year') {
-        $scope.chartLabels.push(dateFilter(date, 'MMM'));
         date.setMonth(date.getMonth() + 1);
       }
 
@@ -122,12 +154,28 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   var reloadLessons = function () {
     // load lessons for current date interval
-    return storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime()).then(function (lessons) {
-      $scope.lessons.length = 0;
-      for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
-      fillChart();
-      fillSummary();
-    });
+    return storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime())
+      .then(function (lessons) {
+        $scope.lessons.length = 0;
+        for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
+
+        // setup chart ticks
+        if ($scope.range == 'week') {
+          chart.xAxis.tickValues = d3.time.days($scope.startDate, $scope.endDate);
+          chart.xAxis.tickFormat = d3.time.format('%m/%d');
+
+        } else if ($scope.range == 'month') {
+          chart.xAxis.tickValues = d3.time.weeks($scope.startDate, $scope.endDate);
+          chart.xAxis.tickFormat = d3.time.format('%m/%d');
+
+        } else if ($scope.range == 'year') {
+          chart.xAxis.tickValues = d3.time.months($scope.startDate, $scope.endDate);
+          chart.xAxis.tickFormat = d3.time.format('%b');
+        }
+
+        fillChart();
+        fillSummary();
+      });
   };
 
   $scope.changeRange = function (range) {

@@ -6,7 +6,7 @@ angular.module('fxe', [
   'ngCordova',
   'ngStorage',
   'ngWebSocket',
-  'chart.js',
+  'nvd3',
 
   'fxe.services.util',
   'fxe.services.user',
