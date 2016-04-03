@@ -162,11 +162,11 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
         // setup chart ticks
         if ($scope.range == 'week') {
           chart.xAxis.tickValues = d3.time.days($scope.startDate, $scope.endDate);
-          chart.xAxis.tickFormat = d3.time.format('%m/%d');
+          chart.xAxis.tickFormat = d3.time.format('%d.%m.');
 
         } else if ($scope.range == 'month') {
           chart.xAxis.tickValues = d3.time.weeks($scope.startDate, $scope.endDate);
-          chart.xAxis.tickFormat = d3.time.format('%m/%d');
+          chart.xAxis.tickFormat = d3.time.format('%d.%m.');
 
         } else if ($scope.range == 'year') {
           chart.xAxis.tickValues = d3.time.months($scope.startDate, $scope.endDate);
