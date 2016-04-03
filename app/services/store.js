@@ -8,11 +8,17 @@ angular.module('fxe.services.store', [])
   frequency: 3,
 })
 
-.service('storeService', function ($ionicPlatform, $cordovaSQLite, $localStorage, $q, $log, scoreTypes) {
+.constant('lessonTypes', {
+  jumping: 1,
+  running: 2,
+})
+
+.service('storeService', function ($ionicPlatform, $cordovaSQLite, $localStorage, $q, $log, scoreTypes, lessonTypes) {
 
   // prepare default (empty) lesson object
   var emptyLesson = {
     start: null,
+    type: null,
     score: {},
   };
   angular.forEach(scoreTypes, function (value, key) {
@@ -104,7 +110,7 @@ angular.module('fxe.services.store', [])
   };
 
   var createSchema = function (db) {
-    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME)');
+    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME, type TINYINT NOT NULL)');
     $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
   };
 
@@ -130,11 +136,12 @@ angular.module('fxe.services.store', [])
     });
   };
 
-  var startLesson = function () {
+  var startLesson = function (type) {
     var start = Date.now();
-    var query = 'INSERT INTO lesson (start_time) VALUES (?)';
-    return execSQL(query, [start]).then(function () {
+    var query = 'INSERT INTO lesson (start_time, type) VALUES (?, ?)';
+    return execSQL(query, [start, type]).then(function () {
       $localStorage.currentLesson.start = start;
+      $localStorage.currentLesson.type = type;
     });
   };
 
@@ -162,8 +169,8 @@ angular.module('fxe.services.store', [])
     var bindings = [];
 
     // insert lesson
-    queries.push('INSERT INTO lesson (start_time, end_time) VALUES (?, ?);');
-    bindings.push([lesson.start, lesson.end]);
+    queries.push('INSERT INTO lesson (start_time, end_time, type) VALUES (?, ?, ?);');
+    bindings.push([lesson.start, lesson.end, lesson.type]);
 
     var j = 0;
     var INSERT_AT_ONCE = 100;
@@ -219,7 +226,7 @@ angular.module('fxe.services.store', [])
 
   var _getLessonsQuery = function () {
     var query = [];
-    query.push('SELECT start_time AS start, end_time AS end, duration, COALESCE(SUM(score), 0) AS score FROM');
+    query.push('SELECT start_time AS start, end_time AS end, type, duration, COALESCE(SUM(score), 0) AS score FROM');
     query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, s.type)');
     query.push('GROUP BY start_time');
     return query;
@@ -249,7 +256,7 @@ angular.module('fxe.services.store', [])
 
     // select lessons data
     var query = [];
-    query.push('SELECT start_time AS start, end_time AS end FROM lesson');
+    query.push('SELECT start_time AS start, end_time AS end, type FROM lesson');
     query.push('WHERE end_time IS NOT NULL');
     query.push('AND start_time BETWEEN ? AND ?');
     query.push('ORDER BY start_time DESC');
@@ -264,6 +271,7 @@ angular.module('fxe.services.store', [])
           res[l.start] = {
             start: l.start,
             end: l.end,
+            type: l.type,
             score: [],
           };
         }
@@ -359,7 +367,7 @@ angular.module('fxe.services.store', [])
 
     // sum all score types together (select lesson data grouped to N-seconds intervals)
     var query = [];
-    query.push('SELECT end_time AS end, start_time AS start, -1 as diffGroup, 0 as type, 0 as score FROM lesson WHERE start_time = ?'); // select lesson start + end time
+    query.push('SELECT end_time AS end, start_time AS start, -1 as diffGroup, type, 0 AS score FROM lesson WHERE start_time = ?'); // select lesson start + end time + type
     query.push('UNION');
     query.push('SELECT 0, start_time, ((time - start_time) / ' + interval + ') AS diff_group, type, MAX(score)'); // do NOT bind interval using "?" - problem with data types
     query.push('FROM score WHERE start_time = ? GROUP BY type, diff_group ORDER BY diff_group ASC');
