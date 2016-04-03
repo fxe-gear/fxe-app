@@ -227,7 +227,7 @@ angular.module('fxe.services.store', [])
   var _getLessonsQuery = function () {
     var query = [];
     query.push('SELECT start_time AS start, end_time AS end, type, duration, COALESCE(SUM(score), 0) AS score FROM');
-    query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, s.type)');
+    query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type AS score_type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, score_type)');
     query.push('GROUP BY start_time');
     return query;
   };

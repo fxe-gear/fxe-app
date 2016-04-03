@@ -57,6 +57,7 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
       $localStorage.$reset();
       $cordovaSQLite.deleteDB({
         name: 'store.sqlite',
+        iosDatabaseLocation: 'default',
       });
       ionic.Platform.exitApp();
     });
