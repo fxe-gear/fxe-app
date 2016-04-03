@@ -1,4 +1,4 @@
-<ion-view title="Lesson {{ ::lesson.start | date:'short' }}">
+<ion-view title="{{ ::lesson.type == 1 ? 'Jumping' : 'Running' }} {{ ::lesson.start | date:'short' }}">
   <ion-content padding="true" class="lesson">
 
     <div class="info">

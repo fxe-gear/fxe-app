@@ -95,8 +95,8 @@ form {
 }
 // animations
 .animated {
-  -webkit-animation-duration: .2s;
-  animation-duration: .2s;
+  -webkit-animation-duration: 0.2s;
+  animation-duration: 0.2s;
 }
 // custom views ------------------------------------------------------------------------------------
 .shadow {
@@ -227,10 +227,6 @@ form {
       border-top-right-radius: 0;
     }
   }
-  .chart {
-    margin-top: $content-padding * 2;
-    margin-bottom: 0;
-  }
   .data {
     .row {
       padding: 0;
@@ -240,6 +236,14 @@ form {
     }
     .values {
       font-size: 2rem;
+    }
+    .type-jumping .item-content {
+      background: url("../img/jumping.png") white no-repeat 93% 50%;
+      background-size: 2em;
+    }
+    .type-running .item-content {
+      background: url("../img/running.png") white no-repeat 93% 50%;
+      background-size: 2em;
     }
   }
 }
