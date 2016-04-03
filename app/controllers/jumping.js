@@ -19,11 +19,12 @@ module.directive('animateOnChange', function ($animate, $timeout) {
     scope.$watch(attr.animateOnChange, function (nv, ov) {
       if (nv != ov) { // if value differs
         $timeout.cancel(timer); // cancel old timer if running
-        $animate.addClass(elem, 'fresh').then(function () {
-          timer = $timeout(function () {
-            $animate.removeClass(elem, 'fresh');
-          }, 500);
-        });
+        $animate.addClass(elem, 'fresh')
+          .then(function () {
+            timer = $timeout(function () {
+              $animate.removeClass(elem, 'fresh');
+            }, 500);
+          });
       }
     });
   };
@@ -37,6 +38,11 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   $scope.connected = false;
   $scope.status = 'reconnecting';
   $scope.lesson = null;
+  $scope.type = 1;
+
+  $scope.changeType = function (type) {
+    $scope.type = type;
+  };
 
   $scope.getDuration = function () {
     // return elapsed time from start of measurement (in milliseconds)
@@ -44,34 +50,40 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   };
 
   $scope.start = function () {
-    return fxeService.startMeasurement().then(function () {
-      $scope.lesson = storeService.getCurrentLesson();
-      $scope.running = true;
-      timer = $interval(angular.noop, 1000); // just to update duration
-    });
+    return fxeService.startMeasurement($scope.type)
+      .then(function () {
+        $scope.lesson = storeService.getCurrentLesson();
+        $scope.running = true;
+        timer = $interval(angular.noop, 1000); // just to update duration
+      });
   };
 
   $scope.stop = function () {
-    fxeService.stopMeasurement().then(function () {
-      // TODO go to nested state
-      // https://gist.github.com/Deminetix/f7e0d9b91b685df5fc0d
-      // http://codepen.io/TimothyKrell/pen/bnukj?editors=101
-      return $state.go('main.history');
-    }).then(function () {
-      $interval.cancel(timer);
-      $scope.running = false;
-      return syncService.syncLessons();
-    });
+    fxeService.stopMeasurement()
+      .then(function () {
+        // TODO go to nested state
+        // https://gist.github.com/Deminetix/f7e0d9b91b685df5fc0d
+        // http://codepen.io/TimothyKrell/pen/bnukj?editors=101
+        return $state.go('main.history');
+      })
+      .then(function () {
+        $interval.cancel(timer);
+        $scope.running = false;
+        return syncService.syncLessons();
+      });
   };
 
   // hide GUI overlay and display measuring screen
   var onFxeConnected = function () {
-    fxeService.isMeasuring().then(function (measuring) {
-      if (measuring) return $scope.start();
-    }).then(function () {
-      // delay setting of $scope.connected due to GUI overlay after start
-      $scope.connected = true;
-    }).then(fxeService.enableBatteryWarning);
+    fxeService.isMeasuring()
+      .then(function (measuring) {
+        if (measuring) return $scope.start();
+      })
+      .then(function () {
+        // delay setting of $scope.connected due to GUI overlay after start
+        $scope.connected = true;
+      })
+      .then(fxeService.enableBatteryWarning);
   };
 
   var onFxeDisconnected = function () {
