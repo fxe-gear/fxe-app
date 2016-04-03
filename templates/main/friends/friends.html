@@ -17,24 +17,26 @@
       <div class="item item-avatar" ng-repeat="(id, person) in friends | orderByScoreDesc:range">
         <img ng-src="{{ ::person.picture }}" alt="avatar">
         <h2>{{ ::person.name }}</h2>
-        <p>
-          <strong>
-            {{ person.score[range] || 0 | number:0 }}
-            <ng-pluralize count="person.score[range]" when="{1: 'point', 'other': 'points'}"></ng-pluralize>
-          </strong>
-          <span ng-switch on="range">
-            <span ng-switch-when="last">from last lesson</span>
-          <span ng-switch-when="week">this week</span>
-          <span ng-switch-when="month">this month</span>
-          </span>
-        </p>
-        <p>
-          <strong>
-            {{ person.score['average'] || 0 | number:0 }}
-          <ng-pluralize count="person.score[range] / 4" when="{1: 'point', 'other': 'points'}"></ng-pluralize>
-          </strong>
-          average
-        </p>
+        <table>
+          <tr>
+            <th>
+              {{ person.score[range] || 0 | number:0 }}
+              <ng-pluralize count="person.score[range]" when="{1: 'point', 'other': 'points'}"></ng-pluralize>
+            </th>
+            <td ng-switch on="range">
+              <span ng-switch-when="last">from last lesson</span>
+              <span ng-switch-when="week">this week</span>
+              <span ng-switch-when="month">this month</span>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              {{ person.score['average'] || 0 | number:0 }}
+              <ng-pluralize count="person.score[range] / 4" when="{1: 'point', 'other': 'points'}"></ng-pluralize>
+            </th>
+            <td>average</td>
+          </tr>
+        </table>
       </div>
       <p class="item no-result" ng-show="loggedIn && friends.length == 0">None of your friends is using FXE.</p>
     </div>
