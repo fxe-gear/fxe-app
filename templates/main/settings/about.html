@@ -1,11 +1,42 @@
 <ion-view title="About">
-  <ion-content padding="true" class="settings">
+  <ion-content padding="true" class="about">
 
-    <h2>Version</h2>
-    <p>
-      <!-- build:git-head-sha -->
-      <!-- endbuild -->
-    </p>
+    <div class="center">
+      <img src="img/logo.png" alt="logo" class="logo">
+    </div>
+
+    <div class="card">
+      <div class="item item-divider">
+        App version
+      </div>
+      <div class="item item-text-wrap">
+        <!-- build:git-tag -->
+        <!-- endbuild -->
+      </div>
+      <div class="item item-divider">
+        GIT branch
+      </div>
+      <div class="item item-text-wrap">
+        <!-- build:git-branch -->
+        <!-- endbuild -->
+      </div>
+      <div class="item item-divider">
+        GIT SHA
+      </div>
+      <div class="item item-text-wrap" ng-click="becomeDeveloper()">
+        <!-- build:git-head-sha -->
+        <!-- endbuild -->
+      </div>
+      <div class="item item-divider">
+        Build date
+      </div>
+      <div class="item item-text-wrap">
+        <!-- build:date -->
+        <!-- endbuild -->
+      </div>
+    </div>
+
+    <a ng-if="isDeveloper" class="button button-block button-outline button-dark" ui-sref="main.developer">Developer tools</a>
 
   </ion-content>
 </ion-view>

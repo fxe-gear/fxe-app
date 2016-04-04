@@ -97,6 +97,9 @@ gulp.task('templates', function (done) {
     .pipe(templateCache(templateCacheOptions))
     .pipe(replace({
       'git-head-sha': git.long(),
+      'git-tag': git.tag(),
+      'git-branch': git.branch(),
+      date: new Date().toString(),
     }))
     .pipe(changed(destPaths.js))
     .pipe(gulp.dest(destPaths.js));
