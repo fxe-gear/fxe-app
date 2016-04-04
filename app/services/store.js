@@ -19,6 +19,7 @@ angular.module('fxe.services.store', [])
   var emptyLesson = {
     start: null,
     type: null,
+    event: null,
     score: {},
   };
   angular.forEach(scoreTypes, function (value, key) {
@@ -97,12 +98,12 @@ angular.module('fxe.services.store', [])
 
   var execSQL = function (query, bindings) {
     return _getDB().then(function (db) {
-        return $cordovaSQLite.execute(db, query, bindings)
-          .catch(function (err) {
-            $log.error('SQL query failed: ' + err.message + ' in query ' + query);
-            throw err;
-          });
-      });
+      return $cordovaSQLite.execute(db, query, bindings)
+        .catch(function (err) {
+          $log.error('SQL query failed: ' + err.message + ' in query ' + query);
+          throw err;
+        });
+    });
   };
 
   var prepareDB = function () {
@@ -110,7 +111,7 @@ angular.module('fxe.services.store', [])
   };
 
   var createSchema = function (db) {
-    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME, type TINYINT NOT NULL)');
+    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME, type TINYINT NOT NULL, event INT)');
     $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME, score FLOAT NOT NULL, type TINYINT, PRIMARY KEY (start_time, time))');
   };
 
@@ -136,13 +137,22 @@ angular.module('fxe.services.store', [])
     });
   };
 
-  var startLesson = function (type) {
+  var startLesson = function (type, event) {
     var start = Date.now();
-    var query = 'INSERT INTO lesson (start_time, type) VALUES (?, ?)';
-    return execSQL(query, [start, type]).then(function () {
-      $localStorage.currentLesson.start = start;
-      $localStorage.currentLesson.type = type;
-    });
+
+    var promise;
+    if (typeof event === 'undefined') {
+      promise = execSQL('INSERT INTO lesson (start_time, type) VALUES (?, ?)', [start, type]);
+    } else {
+      promise = execSQL('INSERT INTO lesson (start_time, type, event) VALUES (?, ?, ?)', [start, type, event]);
+    }
+
+    return promise
+      .then(function () {
+        $localStorage.currentLesson.start = start;
+        $localStorage.currentLesson.type = type;
+        $localStorage.currentLesson.event = event;
+      });
   };
 
   var addScore = function (score, type) {
@@ -169,8 +179,8 @@ angular.module('fxe.services.store', [])
     var bindings = [];
 
     // insert lesson
-    queries.push('INSERT INTO lesson (start_time, end_time, type) VALUES (?, ?, ?);');
-    bindings.push([lesson.start, lesson.end, lesson.type]);
+    queries.push('INSERT INTO lesson (start_time, end_time, type, event) VALUES (?, ?, ?, ?);');
+    bindings.push([lesson.start, lesson.end, lesson.type, 'event' in lesson ? lesson.event : null]);
 
     var j = 0;
     var INSERT_AT_ONCE = 100;
@@ -226,7 +236,7 @@ angular.module('fxe.services.store', [])
 
   var _getLessonsQuery = function () {
     var query = [];
-    query.push('SELECT start_time AS start, end_time AS end, type, duration, COALESCE(SUM(score), 0) AS score FROM');
+    query.push('SELECT start_time AS start, end_time AS end, type, event, duration, COALESCE(SUM(score), 0) AS score FROM');
     query.push('  (SELECT l.*, (end_time - l.start_time) AS duration, MAX(s.score) AS score, s.type AS score_type FROM lesson l LEFT JOIN score s ON l.start_time = s.start_time GROUP BY l.start_time, score_type)');
     query.push('GROUP BY start_time');
     return query;
@@ -256,7 +266,7 @@ angular.module('fxe.services.store', [])
 
     // select lessons data
     var query = [];
-    query.push('SELECT start_time AS start, end_time AS end, type FROM lesson');
+    query.push('SELECT start_time AS start, end_time AS end, type, event FROM lesson');
     query.push('WHERE end_time IS NOT NULL');
     query.push('AND start_time BETWEEN ? AND ?');
     query.push('ORDER BY start_time DESC');
@@ -272,6 +282,7 @@ angular.module('fxe.services.store', [])
             start: l.start,
             end: l.end,
             type: l.type,
+            event: l.event,
             score: [],
           };
         }
