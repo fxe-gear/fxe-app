@@ -1,11 +1,6 @@
 <ion-view title="FXE">
   <ion-content padding="true" class="jumping" ng-class="running ? 'running' : 'not-running'">
 
-    <div class="row button-bar" ng-hide="running">
-      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline': type != 1}" class="col button button-small button-dark">jumping</button>
-      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline': type != 2}" class="col button button-small button-dark">running</button>
-    </div>
-
     <div ng-hide="running">
       <img src="img/logo.png" alt="logo" class="logo">
     </div>
@@ -27,9 +22,14 @@
       </p>
     </div>
 
-    <button ng-click="start()" ng-hide="running" ng-disabled="!connected" class="ion-ios-play button-balanced start-stop button button-block button-large icon-left">Start</button>
-    <button ng-click="stop()" ng-hide="!running" ng-disabled="!connected" class="ion-stop button-assertive start-stop button button-block button-large icon-left">End lesson</button>
-    <button ng-click="join()" ng-hide="running" ng-disabled="!connected" class="button button-balanced button-block button-large button-outline icon-left ion-person-stalker">Join event</button>
+    <div class="button-bar" ng-hide="running">
+      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="col button button-small button-balanced">jumping</button>
+      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="col button button-small button-royal">running</button>
+    </div>
+
+    <button ng-click="start()" ng-hide="running" ng-disabled="!connected" ng-class="{'button-balanced': type == 1, 'button-royal': type == 2}" class="ion-ios-play start-stop start button button-block button-large icon-left">Start</button>
+    <button ng-click="stop()" ng-hide="!running" ng-disabled="!connected" class="ion-stop button-assertive start-stop stop button button-block button-large icon-left">End lesson</button>
+    <button ng-click="join()" ng-hide="running" ng-disabled="!connected" class="button button-dark button-block button-large button-outline icon-left ion-person-stalker">Join event</button>
 
   </ion-content>
 </ion-view>

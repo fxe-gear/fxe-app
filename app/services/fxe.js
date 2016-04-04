@@ -103,12 +103,12 @@ angular.module('fxe.services.fxe', [])
     storeService.addScore(score, type);
   };
 
-  var startMeasurement = function () {
+  var startMeasurement = function (type) {
     $log.debug('starting measurement');
 
     // BLE raw data
     var zeroScore = new Float32Array([0]);
-    var startCommand = new Uint8Array([0x01]);
+    var startCommand = new Uint8Array([type == 1 ? 0x01 : 0x02]); // 1 = jumping, 2 = running
     var timeoutLength = new Uint8Array([0xff]); // in seconds
 
     isMeasuring().then(function (measuring) {
@@ -122,7 +122,7 @@ angular.module('fxe.services.fxe', [])
 
       } else {
         // delete previous scores
-        storeService.startLesson();
+        storeService.startLesson(type);
         angular.forEach(scoreUUIDs, function (uuid) {
           bleDevice.write(bls.fxe.uuid, uuid, zeroScore);
         });

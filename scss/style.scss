@@ -15,10 +15,8 @@ other selectors that are more specific or come later and might alter display.
   background-size: cover;
 }
 // tabs
-.tabs-background-balanced > .tabs {
-  background-color: rgba($balanced, $bar-transparency) !important;
-  border-bottom: 0 !important;
-  box-shadow: 0 0 10px rgba($dark, .8);
+.tabs {
+  box-shadow: 0 0 10px rgba($dark, .4);
 }
 .tab-item {
   text-transform: uppercase;
@@ -78,6 +76,7 @@ form {
     }
   }
 }
+
 // nvD3
 .nvd3 {
   .nv-axis line {
@@ -90,8 +89,8 @@ form {
   }
   .nv-group.nv-series-1 .nv-bar,
   .type-running & .nv-area {
-    stroke: $energized !important;
-    fill: $energized !important;
+    stroke: $royal !important;
+    fill: $royal !important;
   }
   & .nv-group .nv-line {
     display: none;
@@ -200,6 +199,12 @@ form {
     line-height: $button-large-height * $scale - $button-border-width;
     &:before {
       font-size: $button-large-icon-size * 1.6;
+      line-height: $button-large-height * $scale - ($button-border-width * 2) - 1;
+    }
+    &.stop:before {
+      // because stop icon is bigger
+      $button-large-icon-size: 1em;
+      font-size: $button-large-icon-size * 1.2;
       line-height: $button-large-height * $scale - ($button-border-width * 2) - 1;
     }
   }
