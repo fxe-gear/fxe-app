@@ -111,7 +111,7 @@ angular.module('fxe.services.store', [])
 
   var createSchema = function (db) {
     $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME, type TINYINT NOT NULL)');
-    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME PRIMARY KEY, score FLOAT NOT NULL, type TINYINT)');
+    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME, score FLOAT NOT NULL, type TINYINT, PRIMARY KEY (start_time, time))');
   };
 
   var _dumpDB = function () {
