@@ -22,14 +22,39 @@
       </p>
     </div>
 
-    <div class="button-bar" ng-hide="running">
-      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="col button button-small button-balanced">jumping</button>
-      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="col button button-small button-royal">running</button>
-    </div>
 
     <button ng-click="start()" ng-hide="running" ng-disabled="!connected" ng-class="{'button-balanced': type == 1, 'button-royal': type == 2}" class="ion-ios-play start-stop start button button-block button-large icon-left">Start</button>
     <button ng-click="stop()" ng-hide="!running" ng-disabled="!connected" class="ion-stop button-assertive start-stop stop button button-block button-large icon-left">End lesson</button>
-    <button ng-click="join()" ng-hide="running" ng-disabled="!connected" class="button button-dark button-block button-large button-outline icon-left ion-person-stalker">Join event</button>
+
+    <div class="button-bar" ng-hide="running">
+      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="col button button-balanced">jumping</button>
+      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="col button button-royal">running</button>
+    </div>
+
+    <button ng-click="showEvents($event)" ng-hide="running" ng-disabled="!connected" class="button button-block icon-left ion-person-stalker" ng-class="{'button-outline button-dark': !event, 'button-balanced': type == 1, 'button-royal': type == 2}">
+      {{ event ? event.name : 'Join event' }}
+    </button>
 
   </ion-content>
 </ion-view>
+
+<script id="events.html" type="text/ng-template">
+  <ion-popover-view>
+    <ion-header-bar class="bar-stable">
+      <h1 class="title">Join event</h1>
+      <div class="buttons">
+        <button class="button" ng-click="joinEvent(null)">Cancel</button>
+      </div>
+    </ion-header-bar>
+    <ion-content>
+      <ion-list>
+        <ion-item ng-click="joinEvent(event.id)" ng-repeat="event in events track by event.id">
+          {{ event.name }}
+        </ion-item>
+        <ion-item ng-hide="events.length" class="no-result">
+          No events found.
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-popover-view>
+</script>

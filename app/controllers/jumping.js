@@ -30,7 +30,9 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $interval, fxeService, bleDevice, storeService, syncService) {
+module.constant('eventLimit', 3);
+
+var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $ionicPopover, $interval, fxeService, bleDevice, apiService, storeService, syncService, eventLimit) {
   var timer = null;
   var batteryPopup = null;
 
@@ -39,6 +41,13 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   $scope.status = 'reconnecting';
   $scope.lesson = null;
   $scope.type = 1;
+  $scope.event = null;
+
+  $ionicPopover.fromTemplateUrl('events.html', {
+    scope: $scope,
+  }).then(function (popover) {
+    $scope.popover = popover;
+  });
 
   $scope.changeType = function (type) {
     $scope.type = type;
@@ -50,12 +59,38 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   };
 
   $scope.start = function () {
-    return fxeService.startMeasurement($scope.type)
+    return fxeService.startMeasurement($scope.type, $scope.event ? $scope.event.id : null)
       .then(function () {
         $scope.lesson = storeService.getCurrentLesson();
         $scope.running = true;
         timer = $interval(angular.noop, 1000); // just to update duration
       });
+  };
+
+  $scope.showEvents = function ($event) {
+    return apiService.getEvents(eventLimit)
+      .then(function (response) {
+        $scope.popover.show($event);
+        $scope.events = response.data;
+      });
+  };
+
+  $scope.joinEvent = function (id) {
+    $scope.popover.hide();
+
+    // used by cancel button
+    if (!id) {
+      $scope.event = null;
+      return;
+    }
+
+    // select event by ID
+    for (var i = 0; i < $scope.events.length; i++) {
+      if ($scope.events[i].id == id) {
+        $scope.event = $scope.events[i];
+        return;
+      }
+    }
   };
 
   $scope.stop = function () {
@@ -110,6 +145,10 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
         if (connected) onFxeConnected();
         else onFxeDisconnected();
       });
+  });
+
+  $scope.$on('$destroy', function () {
+    $scope.popover.remove();
   });
 
   // listen for future state changes
