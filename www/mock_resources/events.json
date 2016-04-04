@@ -3,13 +3,20 @@
         "id": 1234,
         "name": "Jumping party summer edition 2015",
         "start": 1453944220279,
+        "end": 1453944691408,
         "lat": 49.2192133,
         "lon": -13.2192133
     }, {
         "id": 1235,
-        "name": "Jumping party summer edition 2014",
+        "name": "David's lesson",
         "start": 1453944261887,
         "end": 1453944691408,
+        "lat": 49.2192133,
+        "lon": -13.2192133
+    }, {
+        "id": 1236,
+        "name": "FIBO 2016",
+        "start": 1453944281887,
         "lat": 49.2192133,
         "lon": -13.2192133
     }
