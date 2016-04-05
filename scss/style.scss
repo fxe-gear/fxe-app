@@ -196,18 +196,18 @@ form {
     $scale: 1.2;
     height: $button-large-height * $scale;
     font-size: $button-large-font-size * 1.6;
-    padding: 0 $button-large-padding * $scale;
-    line-height: $button-large-height * $scale - $button-border-width;
     &:before {
       font-size: $button-large-icon-size * 1.6;
-      line-height: $button-large-height * $scale - ($button-border-width * 2) - 1;
     }
     &.stop:before {
       // because stop icon is bigger
-      $button-large-icon-size: 1em;
       font-size: $button-large-icon-size * 1.2;
-      line-height: $button-large-height * $scale - ($button-border-width * 2) - 1;
     }
+  }
+  .event {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .label {
     font-size: 1.2rem;

@@ -5,7 +5,7 @@
     </div>
 
     <!-- use ng-if (removes DOM elements if condition is not met) otherwise hidden passord element will break form validation -->
-    <button ng-click="f.showEmailField = true" class="item balanced" ng-if="change && !f.showEmailField">Change email</button>
+    <a ng-click="f.showEmailField = true" class="item balanced" ng-if="change && !f.showEmailField">Change email</a>
     <div class="item item-text-wrap" ng-if="change && f.showEmailField">Please enter your new email address. You will have to confirm its ownership.</div>
     <label class="item item-input required" ng-class="{ 'invalid' : f.email.$invalid && f.email.$dirty }" ng-if="!change || f.showEmailField">
       <span class="input-label">Email:</span>
@@ -16,7 +16,7 @@
       <div ng-message="email">Email is invalid.</div>
     </jump-form-error>
 
-    <button ng-click="f.showPasswordField = true; user.password = ''" class="item balanced" ng-if="change && !f.showPasswordField">Change password</button>
+    <a ng-click="f.showPasswordField = true; user.password = ''" class="item balanced" ng-if="change && !f.showPasswordField">Change password</a>
     <label class="item item-input required" ng-class="{ 'invalid' : f.password.$invalid && f.password.$dirty }" ng-if="!change || f.showPasswordField">
       <span class="input-label">Password:</span>
       <input name="password" type="password" required ng-minlength="6" ng-model="user.password">

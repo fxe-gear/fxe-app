@@ -7,6 +7,9 @@
           <span class="input-label">Email:</span>
           <input name="email" type="email" required ng-model="user.email">
         </label>
+        <jump-form-error input="f.email">
+          <div ng-message="email">Email is invalid.</div>
+        </jump-form-error>
         <label class="item item-input">
           <span class="input-label">Password:</span>
           <input name="password" type="password" required ng-model="user.password">

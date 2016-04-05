@@ -1,6 +1,6 @@
 {
   "name": "fxe",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:tomasbedrich/fxe-app.git"
@@ -48,19 +48,19 @@
     },
     "cordova-plugin-datepicker",
     {
-      "id": "com.phonegap.plugins.facebookconnect",
-      "locator": "../phonegap-facebook-plugin",
-      "variables": {
-        "APP_ID": "702447366556323",
-        "APP_NAME": "FXE"
-      }
-    },
-    {
       "locator": "../cordova-plugin-googleplus",
       "id": "cordova-plugin-googleplus",
       "variables": {
         "REVERSED_CLIENT_ID": "com.googleusercontent.apps.308119773382-oehse3ii5t978j226s5qm8efahn1b8nc"
       }
+    },
+    {
+      "variables": {
+        "APP_ID": "471199706406826",
+        "APP_NAME": "FXE"
+      },
+      "locator": "cordova-plugin-facebook4",
+      "id": "cordova-plugin-facebook4"
     }
   ],
   "cordovaPlatforms": [

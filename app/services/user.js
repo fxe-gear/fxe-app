@@ -21,14 +21,21 @@ angular.module('fxe.services.user', [])
         return $cordovaFacebook.login(fields);
       })
       .then(function (response) {
+        return $cordovaFacebook.getAccessToken();
+      })
+      .then(function (token) {
         // convert expiresIn (relative seconds) to expiresAt (milliseconds timestamp)
-        var expiresAt = new Date();
-        expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
-        expiresAt = expiresAt.getTime();
+        // var expiresAt = new Date();
+        // expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
+        // expiresAt = expiresAt.getTime();
 
         // store token
-        storeService.setToken('facebook', response.authResponse.accessToken, expiresAt);
+        storeService.setToken('facebook', token, 0);
         $log.info('got facebook token');
+      })
+      .catch(function (error) {
+        $log.error('getting facebook token failed:' + error)
+        throw error;
       });
   };
 
@@ -57,6 +64,10 @@ angular.module('fxe.services.user', [])
         }, callback, q.reject);
 
         return q.promise;
+      })
+      .catch(function (error) {
+        $log.error('getting google token failed:' + error)
+        throw error;
       });
   };
 
@@ -68,41 +79,47 @@ angular.module('fxe.services.user', [])
   var loginFacebook = function () {
     $log.debug('logging in using facebook provider');
     var provider = user.provider.facebook;
-    return apiService.loginFacebook(provider.token, provider.expiresAt).then(loginCallback);
+    return apiService.loginFacebook(provider.token, provider.expiresAt)
+      .then(loginCallback);
   };
 
   var loginGoogle = function () {
     $log.debug('logging in using google provider');
     var provider = user.provider.google;
-    return apiService.loginGoogle(provider.token, provider.expiresAt).then(loginCallback);
+    return apiService.loginGoogle(provider.token, provider.expiresAt)
+      .then(loginCallback);
   };
 
   var loginJumping = function () {
     $log.debug('logging in using jumping provider');
-    return apiService.loginJumping(user.email, user.password).then(loginCallback);
+    return apiService.loginJumping(user.email, user.password)
+      .then(loginCallback);
   };
 
   var createAccount = function () {
     $log.debug('creating user account');
-    return apiService.createUser(user).then(function (response) {
-      $log.info('user account created');
-      loginCallback(response);
-    });
+    return apiService.createUser(user)
+      .then(function (response) {
+        $log.info('user account created');
+        loginCallback(response);
+      });
   };
 
   var loadDetails = function () {
     $log.debug('loading user details');
-    return apiService.getUser().then(function (response) {
-      angular.merge(user, response.data);
-      $log.info('user details loaded');
-    });
+    return apiService.getUser()
+      .then(function (response) {
+        angular.merge(user, response.data);
+        $log.info('user details loaded');
+      });
   };
 
   var resetPassword = function () {
     $log.debug('requesting user password reset');
-    return apiService.resetPassword(user.email).then(function (response) {
-      $log.info('user password reset requested');
-    });
+    return apiService.resetPassword(user.email)
+      .then(function (response) {
+        $log.info('user password reset requested');
+      });
   };
 
   // service public API

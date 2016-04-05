@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.jumping.fxe" version="0.8.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.jumping.fxe" version="0.9.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>FXE</name>
   <description></description>
   <author email="ja@tbedrich.cz" href="http://tbedrich.cz/">Tomáš Bedřich</author>
@@ -12,11 +12,11 @@
   <preference name="android-targetSdkVersion" value="22"/>
   <preference name="BackupWebStorage" value="none"/>
   <preference name="SplashScreen" value="screen"/>
-  <preference name="SplashScreenDelay" value="2000"/>
+  <preference name="SplashScreenDelay" value="3000"/>
   <preference name="xwalkVersion" value="16+"/>
   <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect"/>
   <preference name="xwalkMode" value="embedded"/>
-  <preference name="xwalkMultipleApk" value="true"/>
+  <preference name="xwalkMultipleApk" value="false"/>
   <hook src="hooks/010_gulp.js" type="before_build"/>
   <hook src="hooks/010_gulp.js" type="before_run"/>
   <feature name="StatusBar">
