@@ -5,7 +5,7 @@
     </div>
 
     <!-- use ng-if (removes DOM elements if condition is not met) otherwise hidden passord element will break form validation -->
-    <a ng-click="f.showEmailField = true" class="item balanced" ng-if="change && !f.showEmailField">Change email</a>
+    <button ng-click="f.showEmailField = true" class="item balanced" ng-if="change && !f.showEmailField">Change email</button>
     <div class="item item-text-wrap" ng-if="change && f.showEmailField">Please enter your new email address. You will have to confirm its ownership.</div>
     <label class="item item-input required" ng-class="{ 'invalid' : f.email.$invalid && f.email.$dirty }" ng-if="!change || f.showEmailField">
       <span class="input-label">Email:</span>
@@ -16,7 +16,7 @@
       <div ng-message="email">Email is invalid.</div>
     </jump-form-error>
 
-    <a ng-click="f.showPasswordField = true; user.password = ''" class="item balanced" ng-if="change && !f.showPasswordField">Change password</a>
+    <button ng-click="f.showPasswordField = true; user.password = ''" class="item balanced" ng-if="change && !f.showPasswordField">Change password</button>
     <label class="item item-input required" ng-class="{ 'invalid' : f.password.$invalid && f.password.$dirty }" ng-if="!change || f.showPasswordField">
       <span class="input-label">Password:</span>
       <input name="password" type="password" required ng-minlength="6" ng-model="user.password">
@@ -55,16 +55,16 @@
     <div class="item item-input">
       <span class="input-label">Gender:</span>
       <div class="button-bar">
-        <a class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'male'}" ng-click="user.gender = 'male'; f.$setDirty()">Male</a>
-        <a class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'female'}" ng-click="user.gender = 'female'; f.$setDirty()">Female</a>
+        <button class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'male'}" ng-click="user.gender = 'male'; f.$setDirty()">Male</button>
+        <button class="button button-small button-dark" ng-class="{'button-outline': user.gender != 'female'}" ng-click="user.gender = 'female'; f.$setDirty()">Female</button>
       </div>
     </div>
 
     <div class="item item-input">
       <span class="input-label">Units:</span>
       <div class="button-bar">
-        <a class="button button-small button-dark" ng-class="{'button-outline': user.units != 'metric'}" ng-click="user.units = 'metric'; f.$setDirty()">Metric</a>
-        <a class="button button-small button-dark" ng-class="{'button-outline': user.units != 'imperial'}" ng-click="user.units = 'imperial'; f.$setDirty()">Imperial</a>
+        <button class="button button-small button-dark" ng-class="{'button-outline': user.units != 'metric'}" ng-click="user.units = 'metric'; f.$setDirty()">Metric</button>
+        <button class="button button-small button-dark" ng-class="{'button-outline': user.units != 'imperial'}" ng-click="user.units = 'imperial'; f.$setDirty()">Imperial</button>
       </div>
     </div>
   </div>

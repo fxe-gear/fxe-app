@@ -23,12 +23,12 @@
     </div>
 
 
-    <button ng-click="start()" ng-hide="running" ng-disabled="!connected" ng-class="{'button-balanced': type == 1, 'button-royal': type == 2}" class="ion-ios-play start-stop start button button-block button-large icon-left">Start</button>
+    <button ng-click="start()" ng-hide="running" ng-disabled="!connected" ng-class="{'button-balanced': type == 1, 'button-royal': type == 2}" class="ion-ios-play start-stop start button button-block icon-left">Start</button>
     <button ng-click="stop()" ng-hide="!running" ng-disabled="!connected" class="ion-stop button-assertive start-stop stop button button-block button-large icon-left">End lesson</button>
 
     <div class="button-bar" ng-hide="running">
-      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="col button button-balanced">jumping</button>
-      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="col button button-royal">running</button>
+      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="button button-balanced">jumping</button>
+      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="button button-royal">running</button>
     </div>
 
     <button ng-click="showEvents($event)" ng-hide="running" ng-disabled="!connected" class="button button-block icon-left ion-person-stalker" ng-class="{'button-outline button-dark': !event, 'button-balanced': type == 1, 'button-royal': type == 2}">
