@@ -1,8 +1,17 @@
 <ion-view title="FXE">
   <ion-content padding="true" class="jumping" ng-class="running ? 'running' : 'not-running'">
 
-    <div ng-hide="running">
-      <img src="img/logo.png" alt="logo" class="logo">
+
+    <div ng-hide="running" class="illustration">
+      <img src="img/jumping.png" alt="" ng-show="type == 1">
+      <img src="img/running.png" alt="" ng-show="type == 2">
+      <img src="img/cycling.png" alt="" ng-show="type == 3">
+    </div>
+
+    <div class="button-bar" ng-hide="running">
+      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="button button-small button-balanced">jumping</button>
+      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="button button-small button-royal">running</button>
+      <button ng-disabled="!connected" ng-click="changeType(3)" ng-class="{'button-outline button-dark': type != 3}" class="button button-small button-energized">cycling</button>
     </div>
 
     <div ng-hide="!running">
@@ -22,16 +31,12 @@
       </p>
     </div>
 
-
-    <button ng-click="start()" ng-hide="running" ng-disabled="!connected" ng-class="{'button-balanced': type == 1, 'button-royal': type == 2}" class="ion-ios-play start-stop start button button-block icon-left">Start</button>
+    <button ng-click="start()" ng-hide="running" ng-disabled="!connected || type == 3" ng-class="{'button-balanced': type == 1, 'button-royal': type == 2, 'button-energized': type == 3}" class="ion-ios-play start-stop start button button-block icon-left">
+      {{ type == 3 ? 'Coming soon' : 'Start' }}
+    </button>
     <button ng-click="stop()" ng-hide="!running" ng-disabled="!connected" class="ion-stop button-assertive start-stop stop button button-block button-large icon-left">End lesson</button>
 
-    <div class="button-bar" ng-hide="running">
-      <button ng-disabled="!connected" ng-click="changeType(1)" ng-class="{'button-outline button-dark': type != 1}" class="button button-balanced">jumping</button>
-      <button ng-disabled="!connected" ng-click="changeType(2)" ng-class="{'button-outline button-dark': type != 2}" class="button button-royal">running</button>
-    </div>
-
-    <button ng-click="showEvents($event)" ng-hide="running" ng-disabled="!connected" class="event button button-block icon-left ion-person-stalker" ng-class="{'button-outline button-dark': !event, 'button-balanced': type == 1, 'button-royal': type == 2}">
+    <button ng-click="showEvents($event)" ng-hide="running" ng-disabled="!connected" class="event button button-block icon-left ion-person-stalker" ng-class="{'button-outline button-dark': !event, 'button-balanced': type == 1, 'button-royal': type == 2, 'button-energized': type == 3}">
       {{ event ? event.name : 'Join event' }}
     </button>
 

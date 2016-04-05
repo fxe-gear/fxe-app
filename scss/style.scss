@@ -252,11 +252,11 @@ form {
       font-size: 2rem;
     }
     .type-jumping .item-content {
-      background: url("../img/jumping.png") white no-repeat 93% 50%;
+      background: url("../img/jumping-bg.png") white no-repeat 93% 50%;
       background-size: 2em;
     }
     .type-running .item-content {
-      background: url("../img/running.png") white no-repeat 93% 50%;
+      background: url("../img/running-bg.png") white no-repeat 93% 50%;
       background-size: 2em;
     }
   }
@@ -273,7 +273,7 @@ form {
   line-height: 1.4em;
   margin: 1em 0;
 }
-.logo {
+.logo, .illustration img {
   margin: 1.5em auto;
   max-width: 100%;
   height: auto;
