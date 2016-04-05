@@ -1,8 +1,8 @@
 <ion-view title="Settings">
   <ion-content padding="true" scroll="true" class="has-header settings">
 
-    <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-show="!paired">Connect your FXE</a>
-    <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-show="!loggedIn">Login</a>
+    <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-if="!paired">Connect your FXE</a>
+    <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-if="!loggedIn">Login</a>
 
     <div ng-show="loggedIn">
       <jump-account class="card" user="user" title="My profile" change="true">

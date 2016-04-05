@@ -1,16 +1,16 @@
 <ion-view title="Friends">
   <ion-content padding="true" class="friends">
 
-    <div class="row button-bar range-bar" ng-show="loggedIn">
+    <div class="row button-bar range-bar" ng-if="loggedIn">
       <button ng-click="changeRange('last')" ng-class="{'button-outline': range != 'last'}" class="col button button-small button-dark">last lesson</button>
       <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-small button-dark">week</button>
       <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-small button-dark">month</button>
     </div>
 
-    <p class="login-request" ng-show="!loggedIn">Please login to start competiting with friends.</p>
-    <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-show="!loggedIn">Login</a>
+    <p class="login-request" ng-if="!loggedIn">Please login to start competiting with friends.</p>
+    <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-if="!loggedIn">Login</a>
 
-    <div class="card list" ng-show="loggedIn">
+    <div class="card list" ng-if="loggedIn">
       <div class="item item-divider">
         Scoreboard
       </div>
@@ -29,7 +29,7 @@
           </span>
         </p>
       </div>
-      <p class="item no-result" ng-show="loggedIn && !hasFriends()">None of your friends is using FXE.</p>
+      <p class="item no-result" ng-if="loggedIn && !hasFriends()">None of your friends is using FXE.</p>
     </div>
 
 
