@@ -7,6 +7,7 @@ var FriendsController = function ($scope, $state, $ionicHistory, storeService) {
   $scope.friends = storeService.getFriends();
   $scope.range = null;
   $scope.loggedIn = null;
+  $scope.meID = storeService.getUser().id;
 
   var enter = function () {
     $scope.range = 'last';

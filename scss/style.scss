@@ -76,21 +76,28 @@ form {
     }
   }
 }
-
 // nvD3
 .nvd3 {
   .nv-axis line {
     stroke: rgba($dark, .1);
   }
   .nv-group.nv-series-0 .nv-bar,
-  .type-jumping & .nv-area {
+  .type-jumping & .nv-group.nv-series-0 .nv-area {
     stroke: $balanced !important;
     fill: $balanced !important;
   }
   .nv-group.nv-series-1 .nv-bar,
-  .type-running & .nv-area {
+  .type-running & .nv-group.nv-series-0 .nv-area {
     stroke: $royal !important;
     fill: $royal !important;
+  }
+  .lesson & .nv-group {
+    fill-opacity: .7 !important;
+  }
+  .lesson & .nv-area {
+    stroke: $dark !important;
+    fill: $dark !important;
+    opacity: 1;
   }
   & .nv-group .nv-line {
     display: none;
@@ -263,6 +270,19 @@ form {
 }
 .about .center {
   text-align: center;
+}
+.friends {
+  table {
+    font-size: 0.9em;
+    th {
+      font-weight: bold;
+      text-align: right;
+      padding-right: 0.3em;
+    }
+  }
+  .me {
+    background-color: rgba($balanced, .2);
+  }
 }
 .no-result {
   text-align: center;

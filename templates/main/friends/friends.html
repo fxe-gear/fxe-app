@@ -14,7 +14,7 @@
       <div class="item item-divider">
         Scoreboard
       </div>
-      <div class="item item-avatar" ng-repeat="(id, person) in friends | orderByScoreDesc:range">
+      <div class="item item-avatar" ng-repeat="(id, person) in friends | orderByScoreDesc:range" ng-class="{'me': person.id == meID}">
         <img ng-src="{{ ::person.picture }}" alt="avatar">
         <h2>{{ ::person.name }}</h2>
         <p>
