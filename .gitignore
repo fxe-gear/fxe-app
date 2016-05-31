@@ -8,5 +8,6 @@ plugins/
 /www/lib/
 /www/js/
 /www/css/
+/www/index.html
 
 .vagrant

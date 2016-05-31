@@ -2,12 +2,12 @@
 
 angular.module('fxe', [
   'ionic',
-  'talis.services.logging',
   'ngCordova',
   'ngStorage',
   'ngWebSocket',
   'nvd3',
 
+  'fxe.services.logging',
   'fxe.services.util',
   'fxe.services.user',
   'fxe.services.store',

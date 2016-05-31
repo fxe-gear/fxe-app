@@ -14,12 +14,13 @@ var git = require('git-rev-sync');
 var templateCache = require('gulp-angular-templatecache');
 
 var appPaths = {
-  styles: ['./scss/**/*.scss', './scss/**/*.css'],
-  scripts: ['./app/**/*.js', './app/*.js'],
+  styles: ['scss/**/*.scss', 'scss/**/*.css'],
+  scripts: ['app/**/*.js', 'app/*.js'],
   templates: 'templates/**/*.html',
+  index: 'templates/index.html',
 };
 
-var destRoot = './www/';
+var destRoot = 'www/';
 var destPaths = {
   css: destRoot + 'css/',
   js: destRoot + 'js/',
@@ -35,7 +36,8 @@ var injectSrcOptions = {
 };
 
 var injectOptions = {
-  relative: true,
+  addRootSlash: false,
+  ignorePath: destRoot,
 };
 
 templateCacheOptions = {
@@ -133,7 +135,7 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function (done) {
     destPaths.css + '**/*.css', // + CSS
   ], injectSrcOptions);
 
-  gulp.src(destRoot + 'index.html')
+  gulp.src(appPaths.index)
     .pipe(inject(series(libStream, appStream), injectOptions))
     .pipe(gulp.dest(destRoot));
 
