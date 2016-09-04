@@ -42,10 +42,7 @@
     "cordova-plugin-crosswalk-webview",
     "cordova-plugin-inappbrowser",
     "cordova-plugin-statusbar",
-    {
-      "locator": "../cordova-plugin-ble-central",
-      "id": "cordova-plugin-ble-central"
-    },
+    "cordova-plugin-ble-central",
     "cordova-plugin-datepicker",
     {
       "locator": "../cordova-plugin-googleplus",
