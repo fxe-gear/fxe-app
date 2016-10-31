@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.fxe.fxe" version="0.9.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>FXE</name>
   <description/>
@@ -8,15 +8,10 @@
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>
-  <preference name="android-minSdkVersion" value="19"/>
   <preference name="android-targetSdkVersion" value="22"/>
   <preference name="BackupWebStorage" value="none"/>
   <preference name="SplashScreen" value="screen"/>
-  <preference name="SplashScreenDelay" value="3000"/>
-  <preference name="xwalkVersion" value="16+"/>
-  <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect"/>
-  <preference name="xwalkMode" value="embedded"/>
-  <preference name="xwalkMultipleApk" value="false"/>
+  <preference name="SplashScreenDelay" value="2000"/>
   <hook src="hooks/010_gulp.js" type="before_build"/>
   <hook src="hooks/010_gulp.js" type="before_run"/>
   <feature name="StatusBar">
@@ -71,14 +66,23 @@
     <splash density="port-xxhdpi" src="resources/android/splash/drawable-port-xxhdpi-screen.png"/>
     <splash density="port-xxxhdpi" src="resources/android/splash/drawable-port-xxxhdpi-screen.png"/>
   </platform>
-  <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
-  <engine name="ios" spec="~4.2.1"/>
-  <engine name="android" spec="~5.2.2"/>
   <platform name="ios">
     <config-file parent="UIBackgroundModes" target="*-Info.plist">
       <array>
         <string>bluetooth-central</string>
       </array>
     </config-file>
+    <config-file parent="ITSAppUsesNonExemptEncryption" target="*-Info.plist">
+      <true/>
+    </config-file>
+    <config-file parent="ITSEncryptionExportComplianceCode" target="*-Info.plist">
+      <string>7a5fedfb-ec9f-4645-9a34-91c22102fd35</string>
+    </config-file>
+    <config-file parent="NSBluetoothPeripheralUsageDescription" target="*-Info.plist">
+      <string>Application communicates with a FXE device.</string>
+    </config-file>
   </platform>
+  <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
+  <engine name="android" spec="~5.2.2"/>
+  <engine name="ios" spec="~4.2.1"/>
 </widget>

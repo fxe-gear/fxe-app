@@ -14,6 +14,7 @@ angular.module('fxe.services.user', [])
   };
 
   var getFacebookToken = function () {
+    $log.debug('calling get fb token');
     return $ionicPlatform.ready()
       .then(function () {
         $log.debug('getting facebook token');

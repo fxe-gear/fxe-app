@@ -40,6 +40,8 @@ angular.module('fxe', [
 .run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, fxeService) {
 
   $ionicPlatform.ready(function () {
+    console.debug('platform ready fired');
+
     // keyboard setup
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);

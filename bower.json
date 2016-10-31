@@ -2,15 +2,16 @@
   "name": "fxe",
   "private": "true",
   "dependencies": {
-    "ionic": "git://github.com/tomasbedrich/ionic#a61912ffc7c1be434e5699946abea19a6979482f",
-    "ngCordova": "git://github.com/driftyco/ng-cordova#v0.1.24-alpha",
     "angular": "1.x",
-    "stacktrace-js": "1.x",
-    "angular-websocket": "1.x",
-    "angular-messages": "1.x",
-    "ngstorage": "*",
     "angular-animate": "1.x",
-    "angular-nvd3": "~1.0.5"
+    "angular-messages": "1.x",
+    "angular-nvd3": "1.x",
+    "angular-websocket": "1.x",
+    "ionic": "git://github.com/driftyco/ionic#v1.3.2",
+    "ngCordova": "git://github.com/driftyco/ng-cordova#v0.1.27-alpha",
+    "ngstorage": "*",
+    "stacktrace-js": "1.x",
+    "stacktrace-gps": "2.x"
   },
   "overrides": {
     "stacktrace-js": {
