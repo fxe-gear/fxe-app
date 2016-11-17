@@ -104,7 +104,7 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
       .then(function () {
         $interval.cancel(timer);
         $scope.running = false;
-        return syncService.syncLessons();
+        // return syncService.syncLessons();
       });
   };
 
@@ -176,9 +176,9 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
     }
 
     // sync data
-    if (storeService.isLoggedIn()) {
-      syncService.syncAll();
-    }
+    // if (storeService.isLoggedIn()) {
+    //   syncService.syncAll();
+    // }
   });
 };
 

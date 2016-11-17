@@ -129,10 +129,12 @@ angular.module('fxe.routes', [])
 
     if (storeService.isPaired())
       return '/main/jumping';
-    if (!storeService.isPaired() && storeService.isLoggedIn())
-      return '/scanning';
     else
-      return '/welcome';
+      return '/scanning';
+    // if (!storeService.isPaired() && storeService.isLoggedIn())
+    //   return '/scanning';
+    // else
+    //   return '/welcome';
   });
 
 });

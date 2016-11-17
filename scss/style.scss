@@ -235,6 +235,14 @@ form {
   .share {
     margin-bottom: 1rem;
   }
+  .tips {
+    h3 {
+      font-size: 1.3em;
+      text-transform: uppercase;
+    }
+    text-align: left;
+    line-height: 1.5em;
+  }
 }
 .history {
   .range-bar .button {
@@ -272,6 +280,14 @@ form {
   text-align: center;
 }
 .friends {
+  .coming-soon {
+    font-size: 1.2em;
+    margin: 3em auto;
+    text-align: center;
+    text-transform: uppercase;
+    color: #444;
+    animation: infinite pulse 4s;
+  }
   table {
     font-size: 0.9em;
     th {

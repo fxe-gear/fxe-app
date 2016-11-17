@@ -176,7 +176,7 @@ angular.module('fxe.services.fxe', [])
     return bleDevice.read(bls.fxe.uuid, bls.fxe.chrcs.control.uuid).then(function (data) {
       var dataView = new DataView(data);
       var controlValue = dataView.getUint8(0, true);
-      var res = controlValue == 0x01;
+      var res = (controlValue == 0x01 || controlValue == 0x02);
       $log.debug('measurement ' + (res ? 'is' : 'is not') + ' running');
       return res;
     }).catch(function (error) {

@@ -5,7 +5,25 @@ var module = angular.module('fxe.controllers.lesson', []);
 // interval used in diff graph (in miliseconds)
 module.constant('diffGraphInterval', 120 * 1e3);
 
-var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson) {
+var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle) {
+
+  var tips = {
+    jumping: [
+      'When you jump on a high intensity. Focus on impacting on flat foot. That way you will save you will put less stress on your calves and put it on your thighs. That way you will be able to perform better and longer.',
+      'With low intensity steps focus on impacting with your tip toe first. Your ankle will slow-down the impact on the trampoline and you will get more control over your movements.',
+      'When you\'re feeling unstable when jumping multiple times on single leg. Squeeze your abdominal muscles by pushing your belly-button towards your spine. This way you will engage your deep-core muscles, which will help you re-gain balance.',
+      'When you are using the handlebars keep in mind to not use the handlebars as a support for your body, neither to grab them. Remember that the correct position is to put your forearm around your elbow on the bars. Bend your knees and keep your center of gravity in the center of the trampoline.',
+      'High intensity exercises are all about abdominals. When you jump never forget to pull your lower-body high and push your upper-body down at the same time (work like a pump). This will make your exercise much more precise, stable and many more times effective!',
+      'Any time you jump with your legs apart, always keep them at the width of your shoulders. Check your position every once in a while and keep the right spread. Spreading your legs wider does not make jumping any more effective and it might cause a dull pain in your abductors.',
+      'Jumping® Fitness trampoline is designed to provide the best performance and most effective exercise, but you need to use it correctly. Keep yourself always in the center of the trampoline in order to maximize the effectiveness of Jumping®.',
+    ],
+    running: [
+      'When ever you run, always remember to mix cardio trots with fast pace sprints. It will ensure that your jogging sessions will always be effective fat burning exercise.',
+      'Correct technique while running is most essential. Always try to impact with your toes slightly sooner that the rest of your foot. It might slow you down from the start, but slapping the ground with your whole foot or your heel can damage your knees, causing you to be unable to run further.',
+      'When trotting try to keep yourself straight up. This way you will be able to control you balance and your run will be much lighter.',
+      'Control over your arms in a key component of the perfect run. Keep your elbows bend at all times and do not swing your arms around.',
+    ],
+  };
 
   var line = {
     values: [],
@@ -29,7 +47,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
     yAxis: {
       ticks: 5,
     },
-    forceY: [0, 50],
+    forceY: [0, 20],
     interactive: false,
     showLabels: false,
     showLegend: false,
@@ -76,6 +94,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
   $scope.lesson = lesson;
   $scope.$on('$ionicView.beforeEnter', function () {
     prepareChartData();
+    $scope.tip = lesson.type == 1 ? shuffle(tips.jumping)[0] : shuffle(tips.running)[0];
   });
 };
 

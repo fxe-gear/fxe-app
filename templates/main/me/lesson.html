@@ -10,7 +10,13 @@
 
     <nvd3 options="chartOptions" data="chartData"></nvd3>
 
-    <button class="button button-balanced icon ion-share share" ng-click="share()"> Share</button>
+    <div class="tips">
+      <h3>Quick tip</h3>
+      <p>{{ tip }}</p>
+    </div>
+
+    <!-- <button class="button button-balanced icon icon-left ion-share share" ng-click="share()">Share</button> -->
+    <!-- <button class="button button-dark button-outline" ng-click="toggleReference()"> {{ chartData.length > 1 ? 'Hide' : 'Show' }} ideal lesson</button> -->
 
   </ion-content>
 </ion-view>

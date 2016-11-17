@@ -207,7 +207,8 @@ angular.module('fxe.services.ble', [])
     // permanent callback and first time trigger
     _disableConnectionHolding = $rootScope.$on('fxeDisconnected', onDisconnect);
     isConnected().then(function (connected) {
-      if (!connected) onDisconnect();
+      if (connected) $rootScope.$broadcast('fxeConnected');
+      else onDisconnect();
     });
 
     return $q.resolve();
