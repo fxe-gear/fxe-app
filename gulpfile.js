@@ -58,44 +58,53 @@ var bowerJsFilter = [
   '!*.map.js',
 ];
 
-gulp.task('styles', function (done) {
-  // copy bower component styles
-  gulp.src(mainBowerFiles())
+// ------------------------------------------------------------------------
+
+// copy bower component styles
+gulp.task('lib-styles', function () {
+  return gulp.src(mainBowerFiles())
     .pipe(changed(destPaths.lib))
     .pipe(filter(bowerCssFilter))
     .pipe(gulp.dest(destPaths.lib));
+});
 
-  // compile and minify app styles
-  gulp.src(appPaths.styles)
+// compile and minify app styles
+gulp.task('app-styles', function () {
+  return gulp.src(appPaths.styles)
     .pipe(plumber())
     .pipe(sass())
     .pipe(minifyCss(minifyCssOptions))
     .pipe(concat('style.min.css'))
     .pipe(changed(destPaths.css))
     .pipe(gulp.dest(destPaths.css));
-
-  done();
 });
 
-gulp.task('scripts', function (done) {
+gulp.task('styles', ['lib-styles', 'app-styles']);
 
-  // copy bower component scripts
-  gulp.src(mainBowerFiles())
+// ------------------------------------------------------------------------
+
+// copy bower component scripts
+gulp.task('lib-scripts', function () {
+  return gulp.src(mainBowerFiles())
     .pipe(filter(bowerJsFilter))
     .pipe(changed(destPaths.lib))
     .pipe(gulp.dest(destPaths.lib));
+});
 
-  // copy app scripts
-  gulp.src(appPaths.scripts)
+// copy app scripts
+gulp.task('app-scripts', function () {
+  return gulp.src(appPaths.scripts)
     /*.pipe(concat('app.js'))*/
     .pipe(changed(destPaths.js))
     .pipe(gulp.dest(destPaths.js));
-
-  done();
 });
 
-gulp.task('templates', function (done) {
-  gulp.src(appPaths.templates)
+gulp.task('scripts', ['lib-scripts', 'app-scripts']);
+
+// ------------------------------------------------------------------------
+
+gulp.task('templates', function () {
+  return gulp.src(appPaths.templates)
     .pipe(templateCache(templateCacheOptions))
     .pipe(replace({
       'git-head-sha': git.long(),
@@ -105,11 +114,9 @@ gulp.task('templates', function (done) {
     }))
     .pipe(changed(destPaths.js))
     .pipe(gulp.dest(destPaths.js));
-
-  done();
 });
 
-gulp.task('inject', ['templates', 'scripts', 'styles'], function (done) {
+gulp.task('inject', ['templates', 'scripts', 'styles'], function () {
   var libStream = gulp.src([
     'd3.js',
     'nv.d3.js',
@@ -135,16 +142,16 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function (done) {
     destPaths.css + '**/*.css', // + CSS
   ], injectSrcOptions);
 
-  gulp.src(appPaths.index)
+  return gulp.src(appPaths.index)
     .pipe(inject(series(libStream, appStream), injectOptions))
     .pipe(gulp.dest(destRoot));
-
-  done();
 });
 
+// ------------------------------------------------------------------------
+
 gulp.task('watch', ['default'], function () {
-  gulp.watch(appPaths.styles, ['styles']);
-  gulp.watch(appPaths.scripts, ['scripts']);
+  gulp.watch(appPaths.styles, ['app-styles']);
+  gulp.watch(appPaths.scripts, ['app-scripts']);
   gulp.watch(appPaths.templates, ['templates']);
 });
 

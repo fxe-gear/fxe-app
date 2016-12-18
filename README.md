@@ -14,7 +14,7 @@ git clone https://github.com/tomasbedrich/fxe-app
 cd fxe-app
 npm install
 bower install
-gulp; gulp # really twice, don't know why
+gulp
 ```
 
 ## Running
