@@ -21,7 +21,7 @@
     "gulp-minify-css": "1.x",
     "gulp-plumber": "1.x",
     "gulp-rename": "1.x",
-    "gulp-sass": "2.x",
+    "gulp-sass": "^3.0.0",
     "gulp-sourcemaps": "^1.9.1",
     "gulp-util": "2.x",
     "main-bower-files": "2.x",

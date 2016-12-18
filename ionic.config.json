@@ -1,6 +1,8 @@
 {
   "name": "fxe",
   "app_id": "d4c682c6",
+  "v2": false,
+  "typescript": false,
   "gulpStartupTasks": [
     "watch"
   ],

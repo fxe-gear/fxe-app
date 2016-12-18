@@ -3,48 +3,27 @@
 // inspired by http://engineering.talis.com/articles/client-side-error-logging/
 
 var loggingModule = angular.module('fxe.services.logging', []);
+var LOG_URL = 'http://www.fxe-gear.com/api/v1/log';
 
-loggingModule.service('stackTraceService', function () {
-  return StackTrace;
-});
+loggingModule.factory('$exceptionHandler', function ($log) {
+  return function remoteExceptionLogger(exception, cause) {
+    // log to console
+    $log.error(exception, cause);
 
-loggingModule.service('stackTraceGPSService', function () {
-  return StackTraceGPS;
-});
+    var gps = new StackTraceGPS();
 
-loggingModule.provider('$exceptionHandler', {
-  $get: function (exceptionLoggingService) {
-    return (exceptionLoggingService);
-  },
-});
-
-loggingModule.factory('exceptionLoggingService', function ($log, $window, stackTraceService, stackTraceGPSService) {
-  function error(exception, cause) {
-    $log.error.apply($log, arguments);
-    var errorMessage = exception.toString();
-
-    stackTraceService.fromError(exception)
-      .then(stackTraceGPSService.pinpoint)
-      .then(function (stackframes) {
-        try {
-          // do NOT use angular service (it might fail and result in recursion)
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.open('POST', 'http://fxe.tbedrich.cz/api/v1/log');
-          xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-          xmlhttp.send(angular.toJson({
-            url: $window.location.href,
-            message: errorMessage,
-            type: 'exception',
-            stackTrace: stackframes,
-            cause: (cause || ''),
-          }));
-          $log.info('Error logged to remote server.');
-        } catch (loggingError) {
-          $log.warn('Logging error to remote server failed.');
-          $log.log(loggingError);
-        }
+    StackTrace.fromError(exception)
+      .then(function (frame) {
+        return gps.pinpoint(frame);
+      })
+      .then(function (gps_frame) {
+        return StackTrace.report(gps_frame, LOG_URL);
+      })
+      .then(function () {
+        $log.info('Error logged to remote server.');
+      })
+      .catch(function (error) {
+        $log.error('Logging error to remote server failed.');
       });
   };
-
-  return (error);
 });

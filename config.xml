@@ -23,6 +23,7 @@
   <allow-navigation href="file://*"/>
   <allow-navigation href="data:*"/>
   <allow-navigation href="http://0.0.0.0:8100"/>
+  <allow-navigation href="http://0.0.0.0:8000"/>
   <allow-intent href="http://*/*"/>
   <allow-intent href="https://*/*"/>
   <allow-intent href="tel:*"/>

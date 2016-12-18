@@ -21,6 +21,7 @@ angular.module('fxe', [
   'fxe.controllers.history',
   'fxe.controllers.friends',
   'fxe.controllers.jumping',
+
   'fxe.controllers.lesson',
   'fxe.controllers.login',
   'fxe.controllers.pairing',

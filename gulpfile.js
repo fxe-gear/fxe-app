@@ -10,12 +10,13 @@ var series = require('stream-series');
 var filter = require('gulp-filter');
 var plumber = require('gulp-plumber');
 var replace = require('gulp-html-replace');
+var sourcemaps = require('gulp-sourcemaps');
 var git = require('git-rev-sync');
 var templateCache = require('gulp-angular-templatecache');
 
 var appPaths = {
-  styles: ['scss/**/*.scss', 'scss/**/*.css'],
-  scripts: ['app/**/*.js', 'app/*.js'],
+  styles: 'scss/**/*.scss',
+  scripts: 'app/**/*.js',
   templates: 'templates/**/*.html',
   index: 'templates/index.html',
 };
@@ -72,10 +73,12 @@ gulp.task('lib-styles', function () {
 gulp.task('app-styles', function () {
   return gulp.src(appPaths.styles)
     .pipe(plumber())
+    .pipe(sourcemaps.init())
     .pipe(sass())
     .pipe(minifyCss(minifyCssOptions))
     .pipe(concat('style.min.css'))
     .pipe(changed(destPaths.css))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest(destPaths.css));
 });
 
@@ -94,8 +97,10 @@ gulp.task('lib-scripts', function () {
 // copy app scripts
 gulp.task('app-scripts', function () {
   return gulp.src(appPaths.scripts)
-    /*.pipe(concat('app.js'))*/
+    .pipe(sourcemaps.init())
+    .pipe(concat('app.js'))
     .pipe(changed(destPaths.js))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest(destPaths.js));
 });
 
@@ -135,6 +140,7 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function () {
 
   var appStream = gulp.src([
     destPaths.js + 'templates.js',
+
     destPaths.js + 'services/*.js',
     destPaths.js + 'controllers/*.js',
     destPaths.js + 'directives/*.js',
@@ -156,3 +162,8 @@ gulp.task('watch', ['default'], function () {
 });
 
 gulp.task('default', ['styles', 'scripts', 'templates', 'inject']);
+
+// https://forum.ionicframework.com/t/ionic2-cli-doesnt-run-gulp-tasks-on-ionic-serve/49085/7
+gulp.task('serve:before', ['watch']);
+gulp.task('run:before', ['watch']);
+gulp.task('build:before', ['default']);
