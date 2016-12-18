@@ -5,10 +5,10 @@
     "type": "git",
     "url": "git@github.com:tomasbedrich/fxe-app.git"
   },
-  "description": "",
+  "description": "Official companion app for FXE® sensor.",
+  "license": "Apache-2.0",
   "dependencies": {},
   "devDependencies": {
-    "bower": "1.x",
     "git-rev-sync": "1.x",
     "gulp": "3.x",
     "gulp-angular-templatecache": "1.x",
@@ -22,14 +22,15 @@
     "gulp-plumber": "1.x",
     "gulp-rename": "1.x",
     "gulp-sass": "2.x",
+    "gulp-sourcemaps": "^1.9.1",
     "gulp-util": "2.x",
     "main-bower-files": "2.x",
+    "node-sass": "^4.0.0",
     "shelljs": "0.x",
     "stream-series": "0.x"
   },
   "cordovaPlugins": [
     "cordova-plugin-device",
-    "cordova-custom-config",
     "cordova-plugin-console",
     "cordova-plugin-whitelist",
     "cordova-plugin-splashscreen",
@@ -52,13 +53,15 @@
       }
     },
     {
+      "locator": "cordova-plugin-facebook4",
+      "id": "cordova-plugin-facebook4",
       "variables": {
         "APP_ID": "471199706406826",
         "APP_NAME": "FXE"
-      },
-      "locator": "cordova-plugin-facebook4",
-      "id": "cordova-plugin-facebook4"
-    }
+      }
+    },
+    "cordova-plugin-compat",
+    "cordova-custom-config"
   ],
   "cordovaPlatforms": [
     "android",

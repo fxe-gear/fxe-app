@@ -1,0 +1,30 @@
+{
+  "android": {
+    "debug": {
+      "keystore": "../keys/debug.keystore",
+      "alias": "debug",
+      "storePassword": "android",
+      "password": "android"
+    },
+    "release": {
+      "keystore": "../keys/release.keystore",
+      "alias": "release",
+      "storePassword": "vsXMK6fvLB2EdrNX",
+      "password": "vsXMK6fvLB2EdrNX"
+    }
+  },
+  "ios": {
+    "debug": {
+      "codeSignIdentity": "iOS Development",
+      "provisioningProfile": "376f35e5-821f-4950-82cc-9edb754026e8",
+      "developmentTeam": "W352G48G68",
+      "packageType": "development"
+    },
+    "release": {
+      "codeSignIdentity": "iOS Distribution",
+      "provisioningProfile": "325b6d09-8030-4258-b27d-baabff73be5e",
+      "developmentTeam": "W352G48G68",
+      "packageType": "app-store"
+    }
+  }
+}

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.fxe.fxe" version="0.9.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.fxe.fxe" version="0.9.1" xmlns="http://www.w3.org/ns/widgets">
   <name>FXE</name>
-  <description/>
-  <author email="ja@tbedrich.cz" href="http://tbedrich.cz/">Tomáš Bedřich</author>
+  <description>Official companion app for FXE® sensor.</description>
+  <author email="info@fxe-gear.com" href="https://fxe-gear.com/">FXE</author>
   <content src="index.html"/>
-  <access origin="*"/>
   <preference name="webviewbounce" value="false"/>
   <preference name="UIWebViewBounce" value="false"/>
   <preference name="DisallowOverscroll" value="true"/>
@@ -17,7 +16,17 @@
   <feature name="StatusBar">
     <param name="ios-package" onload="true" value="CDVStatusBar"/>
   </feature>
-  <allow-navigation href="*"/>
+  <access origin="https://fxe-gear.com"/>
+  <access origin="https://*.fxe-gear.com/"/>
+  <access origin="content:///*"/>
+  <access origin="ws://*"/>
+  <allow-navigation href="file://*"/>
+  <allow-navigation href="data:*"/>
+  <allow-navigation href="http://0.0.0.0:8100"/>
+  <allow-intent href="http://*/*"/>
+  <allow-intent href="https://*/*"/>
+  <allow-intent href="tel:*"/>
+  <allow-intent href="geo:*"/>
   <platform name="ios">
     <icon height="57" src="resources/ios/icon/icon.png" width="57"/>
     <icon height="114" src="resources/ios/icon/icon@2x.png" width="114"/>
@@ -83,6 +92,6 @@
     </config-file>
   </platform>
   <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
-  <engine name="android" spec="~5.2.2"/>
-  <engine name="ios" spec="~4.2.1"/>
+  <engine name="android" spec="~6.1.0"/>
+  <engine name="ios" spec="~4.3.1"/>
 </widget>
