@@ -10,7 +10,7 @@ var series = require('stream-series');
 var filter = require('gulp-filter');
 var plumber = require('gulp-plumber');
 var replace = require('gulp-html-replace');
-var sourcemaps = require('gulp-sourcemaps');
+// var sourcemaps = require('gulp-sourcemaps');
 var git = require('git-rev-sync');
 var templateCache = require('gulp-angular-templatecache');
 
@@ -73,12 +73,12 @@ gulp.task('lib-styles', function () {
 gulp.task('app-styles', function () {
   return gulp.src(appPaths.styles)
     .pipe(plumber())
-    .pipe(sourcemaps.init())
+    // .pipe(sourcemaps.init())
     .pipe(sass())
     .pipe(minifyCss(minifyCssOptions))
-    .pipe(concat('style.min.css'))
+    // .pipe(concat('style.min.css'))
     .pipe(changed(destPaths.css))
-    .pipe(sourcemaps.write())
+    // .pipe(sourcemaps.write())
     .pipe(gulp.dest(destPaths.css));
 });
 
@@ -97,10 +97,10 @@ gulp.task('lib-scripts', function () {
 // copy app scripts
 gulp.task('app-scripts', function () {
   return gulp.src(appPaths.scripts)
-    .pipe(sourcemaps.init())
-    .pipe(concat('app.js'))
+    // .pipe(sourcemaps.init())
+    // .pipe(concat('app.js'))
     .pipe(changed(destPaths.js))
-    .pipe(sourcemaps.write())
+    // .pipe(sourcemaps.write())
     .pipe(gulp.dest(destPaths.js));
 });
 

@@ -1,6 +1,5 @@
-<ion-view title="FXE">
-  <ion-content padding="true" class="jumping" ng-class="running ? 'running' : 'not-running'">
-
+<ion-view title="Start">
+  <ion-content padding="true" class="start" ng-class="running ? 'running' : 'not-running'">
 
     <div ng-hide="running" class="illustration">
       <img src="img/jumping.png" alt="" ng-show="type == 1">
@@ -42,24 +41,3 @@
 
   </ion-content>
 </ion-view>
-
-<script id="events.html" type="text/ng-template">
-  <ion-popover-view>
-    <ion-header-bar class="bar-stable">
-      <h1 class="title">Join event</h1>
-      <div class="buttons">
-        <button class="button" ng-click="joinEvent(null)">Cancel</button>
-      </div>
-    </ion-header-bar>
-    <ion-content>
-      <ion-list>
-        <ion-item ng-click="joinEvent(event.id)" ng-repeat="event in events track by event.id">
-          {{ event.name }}
-        </ion-item>
-        <ion-item ng-hide="events.length" class="no-result">
-          No events found.
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ion-popover-view>
-</script>

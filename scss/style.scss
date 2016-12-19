@@ -1,4 +1,5 @@
 @import "variables";
+@import "../lib/ionic/scss/ionic";
 @import "animate.css";
 
 /*
@@ -6,24 +7,26 @@ Allow angular.js to be loaded in body, hiding cloaked elements until
 templates compile.  The !important is important given that there may be
 other selectors that are more specific or come later and might alter display.
 */
-.ng-cloak,
-[ng-cloak],
-[ng\:cloak] {
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
+
 // ionic components overrides ----------------------------------------------------------------------
 .pane {
   background: $base-background-color url("../img/background.jpg") no-repeat center fixed;
   background-size: cover;
 }
+
 // tabs
 .tabs {
   box-shadow: 0 0 10px rgba($dark, .4);
 }
+
 .tab-item {
   text-transform: uppercase;
   flex-basis: 100%;
 }
+
 .platform-android {
   .tab-item.me {
     flex-basis: 70%;
@@ -33,6 +36,7 @@ other selectors that are more specific or come later and might alter display.
     font-size: 0.7rem;
   }
 }
+
 // popup
 .popup,
 .popup-body,
@@ -40,22 +44,27 @@ other selectors that are more specific or come later and might alter display.
 .popup-title {
   color: #000;
 }
+
 .popup-head {
   border-bottom: 1px solid #ddd;
 }
+
 .popup-title {
   font-weight: bold;
 }
+
 // popover
 .popover {
   // top: 10% !important;
   width: 90%;
 }
+
 // button-bar inside list
 .list .item-input .button-bar {
   flex-basis: 65%;
   padding-right: $padding-large-horizontal;
 }
+
 form {
   .required .input-label::after {
     content: "*";
@@ -78,6 +87,7 @@ form {
     }
   }
 }
+
 // nvD3
 .nvd3 {
   .nv-axis line {
@@ -109,15 +119,18 @@ form {
     line-height: 15px;
   }
 }
+
 // animations
 .animated {
   -webkit-animation-duration: 0.2s;
   animation-duration: 0.2s;
 }
+
 // custom views ------------------------------------------------------------------------------------
 .shadow {
   text-shadow: 0 0 4px rgba(0, 0, 0, 1);
 }
+
 .welcome {
   width: 100%;
   height: 100%;
@@ -136,6 +149,7 @@ form {
     }
   }
 }
+
 .scanning {
   text-align: center;
   .status {
@@ -163,6 +177,7 @@ form {
     text-align: center;
   }
 }
+
 .pairing {
   text-align: center;
   .color {
@@ -175,7 +190,7 @@ form {
       height: 5em;
       border-radius: 5em;
       margin: 2em auto;
-      border: 1px solid rgba(0,0,0,0.4);
+      border: 1px solid rgba(0, 0, 0, 0.4);
       animation: infinite pulse 2s;
     }
     .question {
@@ -185,7 +200,8 @@ form {
     }
   }
 }
-.jumping,
+
+.start,
 .lesson {
   text-align: center;
   .reconnecting {
@@ -246,6 +262,7 @@ form {
     line-height: 1.5em;
   }
 }
+
 .history {
   .range-bar .button {
     border-bottom-left-radius: 0;
@@ -278,9 +295,11 @@ form {
     }
   }
 }
+
 .about .center {
   text-align: center;
 }
+
 .friends {
   .coming-soon {
     font-size: 1.2em;
@@ -302,15 +321,18 @@ form {
     background-color: rgba($balanced, .2);
   }
 }
+
 .no-result {
   text-align: center;
 }
+
 .login-request {
   text-align: center;
   font-size: 1.1em;
   line-height: 1.4em;
   margin: 1em 0;
 }
+
 .logo, .illustration img {
   margin: 1.5em auto;
   max-width: 100%;

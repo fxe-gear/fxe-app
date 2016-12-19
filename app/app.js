@@ -20,7 +20,7 @@ angular.module('fxe', [
   'fxe.controllers.account',
   'fxe.controllers.history',
   'fxe.controllers.friends',
-  'fxe.controllers.jumping',
+  'fxe.controllers.start',
 
   'fxe.controllers.lesson',
   'fxe.controllers.login',
@@ -38,80 +38,84 @@ angular.module('fxe', [
   'fxe.templates',
 ])
 
-.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, fxeService) {
+  .config(function ($qProvider) {
+    $qProvider.errorOnUnhandledRejections(false);
+  })
 
-  $ionicPlatform.ready(function () {
-    console.debug('platform ready fired');
+  .run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, bleDevice, fxeService) {
 
-    // keyboard setup
-    if (window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-      cordova.plugins.Keyboard.disableScroll(true);
-    }
+    $ionicPlatform.ready(function () {
+      console.debug('platform ready fired');
 
-    if (ionic.Platform.platform() == 'ios') {
-      $ionicConfig.scrolling.jsScrolling(true);
-
-    } else if (ionic.Platform.platform() == 'android') {
-      $ionicConfig.scrolling.jsScrolling(false);
-    }
-
-    // statusbar setup
-    if (window.StatusBar) {
-      StatusBar.styleLightContent();
-    }
-
-    // prepare DB
-    storeService.prepareDB();
-
-    // save "android" / "ios" variable to rootScope
-    $rootScope.platform = ionic.Platform.platform();
-  });
-
-  // disconnect device if needed
-  var disconnect = function () {
-    return bleDevice.isConnected().then(function (connected) {
-      if (connected) {
-        return fxeService.disableBatteryWarning().then(bleDevice.disconnect);
+      // keyboard setup
+      if (window.cordova && window.cordova.plugins.Keyboard) {
+        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+        cordova.plugins.Keyboard.disableScroll(true);
       }
+
+      if (ionic.Platform.platform() == 'ios') {
+        $ionicConfig.scrolling.jsScrolling(true);
+
+      } else if (ionic.Platform.platform() == 'android') {
+        $ionicConfig.scrolling.jsScrolling(false);
+      }
+
+      // statusbar setup
+      if (window.StatusBar) {
+        StatusBar.styleLightContent();
+      }
+
+      // prepare DB
+      storeService.prepareDB();
+
+      // save "android" / "ios" variable to rootScope
+      $rootScope.platform = ionic.Platform.platform();
     });
-  };
 
-  $ionicPlatform.registerBackButtonAction(function (e) {
-    e.preventDefault();
+    // disconnect device if needed
+    var disconnect = function () {
+      return bleDevice.isConnected().then(function (connected) {
+        if (connected) {
+          return fxeService.disableBatteryWarning().then(bleDevice.disconnect);
+        }
+      });
+    };
 
-    if ($ionicHistory.backView()) {
-      $ionicHistory.goBack();
+    $ionicPlatform.registerBackButtonAction(function (e) {
+      e.preventDefault();
 
-    } else {
-      // this is the history root: disconnect and exit
+      if ($ionicHistory.backView()) {
+        $ionicHistory.goBack();
+
+      } else {
+        // this is the history root: disconnect and exit
+        disconnect();
+        $rootScope.$broadcast('exit');
+        ionic.Platform.exitApp();
+      }
+
+    }, 101);
+
+    // app restored from background
+    document.addEventListener('resume', function (event) {
+      $rootScope.$broadcast('resume');
+    });
+
+    // app paused (to background)
+    document.addEventListener('pause', function (event) {
+      $rootScope.$broadcast('pause');
+    });
+
+    // related to live reload
+    window.onbeforeunload = function (e) {
       disconnect();
-      $rootScope.$broadcast('exit');
-      ionic.Platform.exitApp();
-    }
+      $rootScope.$broadcast('liveunload');
+      return; // must explicitly return
+    };
 
-  }, 101);
+    // related to live reload
+    window.onload = function (e) {
+      $rootScope.$broadcast('livereload');
+    };
 
-  // app restored from background
-  document.addEventListener('resume', function (event) {
-    $rootScope.$broadcast('resume');
   });
-
-  // app paused (to background)
-  document.addEventListener('pause', function (event) {
-    $rootScope.$broadcast('pause');
-  });
-
-  // related to live reload
-  window.onbeforeunload = function (e) {
-    disconnect();
-    $rootScope.$broadcast('liveunload');
-    return; // must explicitly return
-  };
-
-  // related to live reload
-  window.onload = function (e) {
-    $rootScope.$broadcast('livereload');
-  };
-
-});

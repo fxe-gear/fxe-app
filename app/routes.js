@@ -46,12 +46,12 @@ angular.module('fxe.routes', [])
     templateUrl: 'main/main.html',
   });
 
-  $stateProvider.state('main.jumping', {
-    url: '/jumping',
+  $stateProvider.state('main.start', {
+    url: '/start',
     views: {
-      jump: {
-        templateUrl: 'main/jumping.html',
-        controller: 'JumpingController',
+      start: {
+        templateUrl: 'main/start/start.html',
+        controller: 'StartController',
       },
     },
   });
@@ -128,7 +128,7 @@ angular.module('fxe.routes', [])
     var storeService = $injector.get('storeService');
 
     if (storeService.isPaired())
-      return '/main/jumping';
+      return '/main/start';
     else
       return '/scanning';
     // if (!storeService.isPaired() && storeService.isLoggedIn())

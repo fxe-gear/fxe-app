@@ -30,7 +30,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
         $ionicHistory.nextViewOptions({
           historyRoot: true,
         });
-        $state.go('main.jumping');
+        $state.go('main.start');
       });
     }
 

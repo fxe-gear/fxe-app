@@ -13,15 +13,15 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
     bleDevice.stopScan().then(enter);
   };
 
-  $scope.gotoJumping = function () {
+  $scope.gotoStart = function () {
     $ionicHistory.nextViewOptions({
       historyRoot: true,
     });
-    $state.go('main.jumping');
+    $state.go('main.start');
   };
 
   var enter = function () {
-    if (storeService.isPaired()) $scope.gotoJumping();
+    if (storeService.isPaired()) $scope.gotoStart();
 
     $scope.ignoredDevices = 0;
     $ionicPlatform.ready()

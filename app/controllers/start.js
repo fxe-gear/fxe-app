@@ -1,6 +1,6 @@
 'use strict';
 
-var module = angular.module('fxe.controllers.jumping', []);
+var module = angular.module('fxe.controllers.start', []);
 
 module.filter('sumScore', function () {
   return function (score) {
@@ -32,7 +32,7 @@ module.directive('animateOnChange', function ($animate, $timeout) {
 
 module.constant('eventLimit', 3);
 
-var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $ionicPopover, $interval, fxeService, bleDevice, apiService, storeService, syncService, eventLimit) {
+var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ionicPopup, $ionicPopover, $interval, fxeService, bleDevice, apiService, storeService, syncService, eventLimit) {
   var timer = null;
   var batteryPopup = null;
 
@@ -182,4 +182,4 @@ var JumpingController = function ($scope, $rootScope, $state, $ionicPlatform, $i
   });
 };
 
-module.controller('JumpingController', JumpingController);
+module.controller('StartController', StartController);
