@@ -9,6 +9,9 @@
   "license": "Apache-2.0",
   "dependencies": {},
   "devDependencies": {
+    "eslint": "^3.13.0",
+    "eslint-config-airbnb-base": "^11.0.0",
+    "eslint-plugin-import": "^2.2.0",
     "git-rev-sync": "1.x",
     "gulp": "3.x",
     "gulp-angular-templatecache": "1.x",

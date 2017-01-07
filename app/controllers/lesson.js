@@ -15,19 +15,19 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
       'When you are using the handlebars keep in mind to not use the handlebars as a support for your body, neither to grab them. Remember that the correct position is to put your forearm around your elbow on the bars. Bend your knees and keep your center of gravity in the center of the trampoline.',
       'High intensity exercises are all about abdominals. When you jump never forget to pull your lower-body high and push your upper-body down at the same time (work like a pump). This will make your exercise much more precise, stable and many more times effective!',
       'Any time you jump with your legs apart, always keep them at the width of your shoulders. Check your position every once in a while and keep the right spread. Spreading your legs wider does not make jumping any more effective and it might cause a dull pain in your abductors.',
-      'Jumping® Fitness trampoline is designed to provide the best performance and most effective exercise, but you need to use it correctly. Keep yourself always in the center of the trampoline in order to maximize the effectiveness of Jumping®.',
+      'Jumping® Fitness trampoline is designed to provide the best performance and most effective exercise, but you need to use it correctly. Keep yourself always in the center of the trampoline in order to maximize the effectiveness of Jumping®.'
     ],
     running: [
       'When ever you run, always remember to mix cardio trots with fast pace sprints. It will ensure that your jogging sessions will always be effective fat burning exercise.',
       'Correct technique while running is most essential. Always try to impact with your toes slightly sooner that the rest of your foot. It might slow you down from the start, but slapping the ground with your whole foot or your heel can damage your knees, causing you to be unable to run further.',
       'When trotting try to keep yourself straight up. This way you will be able to control you balance and your run will be much lighter.',
-      'Control over your arms in a key component of the perfect run. Keep your elbows bend at all times and do not swing your arms around.',
-    ],
+      'Control over your arms in a key component of the perfect run. Keep your elbows bend at all times and do not swing your arms around.'
+    ]
   };
 
   var line = {
     values: [],
-    key: 'score',
+    key: 'score'
   };
   var chart = {
     type: 'lineChart',
@@ -38,24 +38,24 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
       top: 20,
       right: 20,
       bottom: 40,
-      left: 20,
+      left: 20
     },
     xAxis: {
-      tickFormat: d3.time.format('%H:%M'),
+      tickFormat: d3.time.format('%H:%M')
     },
     xScale: d3.time.scale(),
     yAxis: {
-      ticks: 5,
+      ticks: 5
     },
     forceY: [0, 20],
     interactive: false,
     showLabels: false,
     showLegend: false,
-    interpolate: 'cardinal',
+    interpolate: 'cardinal'
   };
 
   $scope.chartOptions = {
-    chart: chart,
+    chart: chart
   };
   $scope.chartData = [line];
 
@@ -68,7 +68,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
       $ionicPopup.alert({
         title: 'Sharing failed.',
         template: 'Please try it again.',
-        okType: 'button-assertive',
+        okType: 'button-assertive'
       });
       throw error;
     });
@@ -83,7 +83,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
       for (var i = 0; i <= data.length; i++) {
         line.values.push({
           x: msToDateFilter(i * interval),
-          y: i == 0 ? 0 : data[i - 1],
+          y: i == 0 ? 0 : data[i - 1]
         });
       }
 

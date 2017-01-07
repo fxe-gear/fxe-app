@@ -2,7 +2,7 @@
 
 angular.module('fxe.directives.error', [
   'ngCordova',
-  'ngMessages',
+  'ngMessages'
 ])
 
 .directive('jumpFormError', function () {
@@ -12,7 +12,7 @@ angular.module('fxe.directives.error', [
     replace: false,
     templateUrl: 'directives/form-error.html',
     scope: {
-      input: '=',
-    },
+      input: '='
+    }
   };
 });

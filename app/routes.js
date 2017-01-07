@@ -7,43 +7,43 @@ angular.module('fxe.routes', [])
   $stateProvider.state('welcome', {
     url: '/welcome',
     templateUrl: 'welcome.html',
-    controller: 'WelcomeController',
+    controller: 'WelcomeController'
   });
 
   $stateProvider.state('create-account', {
     url: '/create-account',
     templateUrl: 'create-account.html',
-    controller: 'CreateAccountController',
+    controller: 'CreateAccountController'
   });
 
   $stateProvider.state('login', {
     url: '/login',
     templateUrl: 'login.html',
-    controller: 'LoginController',
+    controller: 'LoginController'
   });
 
   $stateProvider.state('password-reset', {
     url: '/password-reset',
     templateUrl: 'password-reset.html',
-    controller: 'PasswordResetController',
+    controller: 'PasswordResetController'
   });
 
   $stateProvider.state('scanning', {
     url: '/scanning',
     templateUrl: 'scanning.html',
-    controller: 'ScanningController',
+    controller: 'ScanningController'
   });
 
   $stateProvider.state('pairing', {
     url: '/pairing',
     templateUrl: 'pairing.html',
-    controller: 'PairingController',
+    controller: 'PairingController'
   });
 
   $stateProvider.state('main', {
     url: '/main',
     abstract: true,
-    templateUrl: 'main/main.html',
+    templateUrl: 'main/main.html'
   });
 
   $stateProvider.state('main.start', {
@@ -51,9 +51,9 @@ angular.module('fxe.routes', [])
     views: {
       start: {
         templateUrl: 'main/start/start.html',
-        controller: 'StartController',
-      },
-    },
+        controller: 'StartController'
+      }
+    }
   });
 
   $stateProvider.state('main.history', {
@@ -61,9 +61,9 @@ angular.module('fxe.routes', [])
     views: {
       me: {
         templateUrl: 'main/me/history.html',
-        controller: 'HistoryController',
-      },
-    },
+        controller: 'HistoryController'
+      }
+    }
   });
 
   $stateProvider.state('main.lesson', {
@@ -78,10 +78,10 @@ angular.module('fxe.routes', [])
               return storeService.getLesson($stateParams.start);
             else
               return storeService.getLastLesson();
-          },
-        },
-      },
-    },
+          }
+        }
+      }
+    }
   });
 
   $stateProvider.state('main.friends', {
@@ -89,9 +89,9 @@ angular.module('fxe.routes', [])
     views: {
       friends: {
         templateUrl: 'main/friends/friends.html',
-        controller: 'FriendsController',
-      },
-    },
+        controller: 'FriendsController'
+      }
+    }
   });
 
   $stateProvider.state('main.settings', {
@@ -99,9 +99,9 @@ angular.module('fxe.routes', [])
     views: {
       settings: {
         templateUrl: 'main/settings/settings.html',
-        controller: 'SettingsController',
-      },
-    },
+        controller: 'SettingsController'
+      }
+    }
   });
 
   $stateProvider.state('main.developer', {
@@ -109,9 +109,9 @@ angular.module('fxe.routes', [])
     views: {
       settings: {
         templateUrl: 'main/settings/developer.html',
-        controller: 'DeveloperController',
-      },
-    },
+        controller: 'DeveloperController'
+      }
+    }
   });
 
   $stateProvider.state('main.about', {
@@ -119,9 +119,9 @@ angular.module('fxe.routes', [])
     views: {
       settings: {
         templateUrl: 'main/settings/about.html',
-        controller: 'AboutController',
-      },
-    },
+        controller: 'AboutController'
+      }
+    }
   });
 
   $urlRouterProvider.otherwise(function ($injector, $location) {

@@ -85,7 +85,7 @@ module.factory('diffWatch', function () {
         count: removed.length + added.length,
         added: added,
         removed: removed,
-        updated: {},
+        updated: {}
       };
 
       union.forEach(function (k) {

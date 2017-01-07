@@ -75,8 +75,8 @@ angular.module('fxe.services.sync', [])
 
     // fill remoteNew
     var remoteNewPromise = apiService.getLessons({
-        from: lastSync,
-      })
+        from: lastSync
+    })
       .then(function (response) {
         remoteNew = response.data;
       });
@@ -89,8 +89,8 @@ angular.module('fxe.services.sync', [])
 
     // fill remoteAll
     var remoteAllPromise = apiService.getLessons({
-        fields: 'start',
-      })
+        fields: 'start'
+    })
       .then(function (response) {
         angular.forEach(response.data, function (l) {
           remoteAll[l.start] = true;

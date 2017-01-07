@@ -12,14 +12,14 @@ var PasswordResetController = function ($scope, $state, $ionicHistory, $ionicPop
         $ionicPopup.alert({
           title: 'Password reset requested.',
           template: 'Please check your inbox to finish the password reset process.',
-          okType: 'button-balanced',
+          okType: 'button-balanced'
         });
         $ionicHistory.goBack();
       }).catch(function (error) {
         $ionicPopup.alert({
           title: 'Password reset failed.',
           template: 'Please try again.',
-          okType: 'button-assertive',
+          okType: 'button-assertive'
         });
       });
   };

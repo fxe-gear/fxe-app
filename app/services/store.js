@@ -5,12 +5,12 @@ angular.module('fxe.services.store', [])
 .constant('scoreTypes', {
   amplitude: 1,
   rhythm: 2,
-  frequency: 3,
+  frequency: 3
 })
 
 .constant('lessonTypes', {
   jumping: 1,
-  running: 2,
+  running: 2
 })
 
 .service('storeService', function ($ionicPlatform, $cordovaSQLite, $localStorage, $q, $log, scoreTypes, lessonTypes) {
@@ -20,7 +20,7 @@ angular.module('fxe.services.store', [])
     start: null,
     type: null,
     event: null,
-    score: {},
+    score: {}
   };
   angular.forEach(scoreTypes, function (value, key) {
     emptyLesson.score[value] = 0;
@@ -51,21 +51,21 @@ angular.module('fxe.services.store', [])
       provider: {
         jumping: {
           token: null,
-          expiresAt: null,
+          expiresAt: null
         },
         facebook: {
           token: null,
-          expiresAt: null,
+          expiresAt: null
         },
         google: {
           token: null,
-          expiresAt: null,
-        },
-      },
+          expiresAt: null
+        }
+      }
     },
     userChanges: {},
 
-    friends: {},
+    friends: {}
   });
 
   var db;
@@ -84,7 +84,7 @@ angular.module('fxe.services.store', [])
             name: 'store.sqlite',
             bgType: true,
             version: '',
-            iosDatabaseLocation: 'default',
+            iosDatabaseLocation: 'default'
           });
 
         } else { // fallback to websql
@@ -120,7 +120,7 @@ angular.module('fxe.services.store', [])
     return execSQL('SELECT * FROM lesson', []).then(function (lesson) {
       var res = {
         lesson: [],
-        score: [],
+        score: []
       };
 
       for (var i = 0; i < lesson.rows.length; i++) res.lesson.push(lesson.rows.item(i));
@@ -283,7 +283,7 @@ angular.module('fxe.services.store', [])
             end: l.end,
             type: l.type,
             event: l.event,
-            score: [],
+            score: []
           };
         }
 
@@ -300,7 +300,7 @@ angular.module('fxe.services.store', [])
           res[s.start].score.push({
             time: s.time,
             score: s.score,
-            type: s.type,
+            type: s.type
           });
         }
 
@@ -392,7 +392,7 @@ angular.module('fxe.services.store', [])
       var lastScore = {
         1: 0,
         2: 0,
-        3: 0,
+        3: 0
       };
 
       var ret = [];

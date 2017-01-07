@@ -45,7 +45,7 @@ var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
         form.syncInProgress = false;
         $ionicPopup.alert({
           title: 'Account synchronization failed.',
-          okType: 'button-assertive',
+          okType: 'button-assertive'
         });
       });
   };
@@ -58,7 +58,7 @@ var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
   $scope.goto = function (target) {
     // handle "Login" and "Connect my FXE" buttons
     $ionicHistory.nextViewOptions({
-      historyRoot: true,
+      historyRoot: true
     });
     $state.go(target);
   };

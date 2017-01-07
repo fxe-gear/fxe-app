@@ -15,7 +15,7 @@ var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
         $ionicPopup.alert({
           title: 'Facebook login failed.',
           template: 'Please try again.',
-          okType: 'button-assertive',
+          okType: 'button-assertive'
         });
       });
   };
@@ -31,7 +31,7 @@ var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
         $ionicPopup.alert({
           title: 'Google login failed.',
           template: 'Please try again.',
-          okType: 'button-assertive',
+          okType: 'button-assertive'
         });
       });
   };

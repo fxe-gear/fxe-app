@@ -9,7 +9,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
     blue: '#0000ff',
     yellow: '#ffff00',
     white: '#ffffff',
-    cyan: '#00ffff',
+    cyan: '#00ffff'
   };
   var colorNamesShuffled;
 
@@ -28,7 +28,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
       bleDevice.pair();
       return fxeService.clearColor().then(function () {
         $ionicHistory.nextViewOptions({
-          historyRoot: true,
+          historyRoot: true
         });
         $state.go('main.start');
       });
@@ -39,7 +39,7 @@ var PairingController = function ($scope, $state, $ionicPlatform, $ionicHistory,
       $ionicPopup.alert({
         title: 'Pairing process failed.',
         template: 'Cannot communicate with FXE, please try it again.',
-        okType: 'button-assertive',
+        okType: 'button-assertive'
       }).then(function () {
         return $state.go('scanning');
       });

@@ -15,7 +15,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
 
   $scope.gotoStart = function () {
     $ionicHistory.nextViewOptions({
-      historyRoot: true,
+      historyRoot: true
     });
     $state.go('main.start');
   };

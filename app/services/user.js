@@ -35,7 +35,7 @@ angular.module('fxe.services.user', [])
         $log.info('got facebook token');
       })
       .catch(function (error) {
-        $log.error('getting facebook token failed:' + error)
+        $log.error('getting facebook token failed:' + error);
         throw error;
       });
   };
@@ -61,13 +61,13 @@ angular.module('fxe.services.user', [])
 
         // do the request
         window.plugins.googleplus.login({
-          scopes: scopes.join(' '),
+          scopes: scopes.join(' ')
         }, callback, q.reject);
 
         return q.promise;
       })
       .catch(function (error) {
-        $log.error('getting google token failed:' + error)
+        $log.error('getting google token failed:' + error);
         throw error;
       });
   };

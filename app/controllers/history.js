@@ -7,17 +7,17 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   $scope.lessons = [];
   $scope.summary = {
     score: 0,
-    duration: 0,
+    duration: 0
   };
   $scope.range = null;
 
   var jumpingBars = {
     values: [],
-    key: 'Jumping',
+    key: 'Jumping'
   };
   var runningBars = {
     values: [],
-    key: 'Running',
+    key: 'Running'
   };
   var chart = {
     type: 'multiBarChart',
@@ -26,13 +26,13 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
       top: 20,
       right: 20,
       bottom: 20,
-      left: 40,
+      left: 40
     },
     xAxis: {},
     yAxis: {
       tickFormat: function (num) {
         return num.toFixed(0);
-      },
+      }
     },
     forceY: [0, 100],
     reduceXTicks: false,
@@ -42,11 +42,11 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
     showControls: false,
     stacked: true,
     tooltip: {
-      enabled: false,
-    },
+      enabled: false
+    }
   };
   $scope.chartOptions = {
-    chart: chart,
+    chart: chart
   };
   $scope.chartData = [jumpingBars, runningBars];
 
@@ -85,13 +85,13 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
     month: function (d1, d2) {
       return (d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear());
-    },
+    }
   };
 
   var groupingFn = {
     week: isSame.day,
     month: isSame.day,
-    year: isSame.month,
+    year: isSame.month
   };
 
   // requires $scope.lessons to be set
@@ -121,12 +121,12 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
       jumpingBars.values.push({
         x: new Date(date),
-        y: sum[0],
+        y: sum[0]
       });
 
       runningBars.values.push({
         x: new Date(date),
-        y: sum[1],
+        y: sum[1]
       });
 
       // generate date group and add label
@@ -206,7 +206,7 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
     var options = {
       date: $scope.startDate,
       todayText: 'Today',
-      androidTheme: 5, // nice calendar widget
+      androidTheme: 5 // nice calendar widget
     };
     $cordovaDatePicker.show(options).then(function (date) {
       if (typeof date === 'undefined') {

@@ -134,8 +134,7 @@ angular.module('fxe.services.ble', [])
     if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
 
     return isConnected().then(function (connected) {
-      if (connected) return;
-      else return enable().then(function () {
+      if (!connected) return enable().then(function () {
         // empty list because we already have paired device so we don't have to filter them
         return scan([]);
       }).then(connect);

@@ -35,7 +35,7 @@ angular.module('fxe', [
   'fxe.directives.error',
 
   'fxe.routes',
-  'fxe.templates',
+  'fxe.templates'
 ])
 
   .config(function ($qProvider) {
@@ -110,7 +110,9 @@ angular.module('fxe', [
     window.onbeforeunload = function (e) {
       disconnect();
       $rootScope.$broadcast('liveunload');
-      return; // must explicitly return
+      // must explicitly return
+      // noinspection UnnecessaryReturnStatementJS
+      return;
     };
 
     // related to live reload

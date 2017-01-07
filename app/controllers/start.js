@@ -44,7 +44,7 @@ var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ion
   $scope.event = null;
 
   $ionicPopover.fromTemplateUrl('events.html', {
-    scope: $scope,
+    scope: $scope
   }).then(function (popover) {
     $scope.popover = popover;
   });
@@ -134,7 +134,7 @@ var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ion
     batteryPopup = $ionicPopup.alert({
       title: (level * 100).toFixed(0) + '% of battery remains',
       template: 'Please charge your FXE soon.',
-      okType: 'button-energized',
+      okType: 'button-energized'
     });
   };
 

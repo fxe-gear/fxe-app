@@ -80,27 +80,27 @@ angular.module('fxe.services.api', [])
   var loginJumping = function (email, password) {
     return post('/login/jumping', {
       email: email,
-      password: password,
+      password: password
     }, {
-      anonymous: true,
+      anonymous: true
     });
   };
 
   var loginFacebook = function (token, expiresAt) {
     return post('/login/facebook', {
       token: token,
-      expiresAt: expiresAt,
+      expiresAt: expiresAt
     }, {
-      anonymous: true,
+      anonymous: true
     });
   };
 
   var loginGoogle = function (token, expiresAt) {
     return post('/login/google', {
       token: token,
-      expiresAt: expiresAt,
+      expiresAt: expiresAt
     }, {
-      anonymous: true,
+      anonymous: true
     });
   };
 
@@ -111,7 +111,7 @@ angular.module('fxe.services.api', [])
   var createUser = function (user) {
     user = filterParams(user, ['email', 'password', 'name', 'weight', 'age', 'gender', 'units']);
     return post('/user', user, {
-      anonymous: true,
+      anonymous: true
     });
   };
 
@@ -125,7 +125,7 @@ angular.module('fxe.services.api', [])
 
   var resetPassword = function (email) {
     return post('/user/resetPassword', {
-      email: email,
+      email: email
     });
   };
 
@@ -133,7 +133,7 @@ angular.module('fxe.services.api', [])
 
   var getLessons = function (params) {
     return get('/lessons', {
-      params: filterParams(params, ['from', 'fields']),
+      params: filterParams(params, ['from', 'fields'])
     });
   };
 
@@ -152,7 +152,7 @@ angular.module('fxe.services.api', [])
     params.limit = limit;
 
     return get('/events', {
-      params: params,
+      params: params
     });
   };
 
@@ -164,7 +164,7 @@ angular.module('fxe.services.api', [])
 
   var getFriends = function (params) {
     return get('/friends', {
-      params: filterParams(params, ['fields', 'scores']),
+      params: filterParams(params, ['fields', 'scores'])
     });
   };
 
@@ -226,7 +226,7 @@ angular.module('fxe.services.api', [])
     return userPromise.then(function () {
       // 'data' envelope is needed
       return {
-        data: user,
+        data: user
       };
     });
   };
@@ -271,7 +271,7 @@ angular.module('fxe.services.api', [])
             // filter lessons if needed
             if (params &&  params.from && params.from > 0) return lesson.start > params.from;
             else return true;
-          }),
+          })
         };
       });
   };
@@ -313,7 +313,7 @@ angular.module('fxe.services.api', [])
     return eventsPromise.then(function () {
       // 'data' envelope is needed
       return {
-        data: events,
+        data: events
       };
     });
   };

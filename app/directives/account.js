@@ -12,7 +12,7 @@ angular.module('fxe.directives.account', [])
       user: '=',
       title: '@',
       change: '@',
-      class: '@',
+      class: '@'
     },
     link: function ($scope, elem, attr, ctrl, $transclude) {
 
@@ -21,6 +21,6 @@ angular.module('fxe.directives.account', [])
         $scope.hasTranscluded = clone.length;
       });
 
-    },
+    }
   };
 });

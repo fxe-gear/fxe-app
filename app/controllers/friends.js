@@ -25,7 +25,7 @@ var FriendsController = function ($scope, $state, $ionicHistory, storeService) {
   $scope.goto = function (target) {
     // handle "Login" button
     $ionicHistory.nextViewOptions({
-      historyRoot: true,
+      historyRoot: true
     });
     $state.go(target);
   };

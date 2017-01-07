@@ -1,60 +1,71 @@
 'use strict';
 
-angular.module('fxe.services.fxe', [])
+var module = angular.module('fxe.services.fxe', []);
 
 // naming note: "chrcs" stands for "characteristics"
-.constant('bleServices', {
+module.constant('bleServices', {
   fxe: {
     uuid: '6b00',
     chrcs: {
       extreme: {
-        uuid: '6b01',
+        uuid: '6b01'
       },
       sleep: {
-        uuid: '6b03',
+        uuid: '6b03'
       },
       control: {
-        uuid: '6bff',
+        uuid: '6bff'
       },
       amplitude: {
-        uuid: '6b04',
+        uuid: '6b04'
       },
       rhythm: {
-        uuid: '6b05',
+        uuid: '6b05'
       },
       frequency: {
-        uuid: '6b06',
-      },
-    },
+        uuid: '6b06'
+      }
+    }
   },
   led: {
     uuid: '6c00',
     chrcs: {
       led: {
-        uuid: '6c01',
-      },
-    },
+        uuid: '6c01'
+      }
+    }
   },
   battery: {
     uuid: '180f',
     chrcs: {
       level: {
-        uuid: '2a19',
-      },
-    },
+        uuid: '2a19'
+      }
+    }
   },
-})
+  dfu: {
+    uuid: '1530',
+    chrcs: {
+      control: {
+        uuid: '1531'
+      },
+      data: {
+        uuid: '1532'
+      }
+    }
+  }
+});
 
-.constant('lowBatteryLevel', 0.1) // in percent
+module.constant('lowBatteryLevel', 0.1); // in percent
 
-.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevice, storeService, bleServices, scoreTypes, lowBatteryLevel) {
+module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevice, storeService, bleServices, scoreTypes, lowBatteryLevel) {
 
   // some shortcuts
   var bls = bleServices;
   var scoreUUIDs = [
     bls.fxe.chrcs.amplitude.uuid,
     bls.fxe.chrcs.rhythm.uuid,
-    bls.fxe.chrcs.frequency.uuid,
+    bls.fxe.chrcs.frequency.uuid
   ];
 
   var scan = function () {

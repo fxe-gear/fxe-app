@@ -18,45 +18,45 @@ var appPaths = {
   styles: 'scss/**/*.scss',
   scripts: 'app/**/*.js',
   templates: 'templates/**/*.html',
-  index: 'templates/index.html',
+  index: 'templates/index.html'
 };
 
 var destRoot = 'www/';
 var destPaths = {
   css: destRoot + 'css/',
   js: destRoot + 'js/',
-  lib: destRoot + 'lib/',
+  lib: destRoot + 'lib/'
 };
 
 var minifyCssOptions = {
-  keepSpecialComments: 0,
+  keepSpecialComments: 0
 };
 
 var injectSrcOptions = {
-  read: false,
+  read: false
 };
 
 var injectOptions = {
   addRootSlash: false,
-  ignorePath: destRoot,
+  ignorePath: destRoot
 };
 
 templateCacheOptions = {
   standalone: true,
-  module: 'fxe.templates',
+  module: 'fxe.templates'
 };
 
 var bowerCssFilter = [
   '*.css',
   '!*.map.css',
-  '!ionic.css',
+  '!ionic.css'
 ];
 
 var bowerJsFilter = [
   '*',
   '!*.css',
   '!source-map.js',
-  '!*.map.js',
+  '!*.map.js'
 ];
 
 // ------------------------------------------------------------------------
@@ -115,7 +115,7 @@ gulp.task('templates', function () {
       'git-head-sha': git.long(),
       'git-tag': git.tag(),
       'git-branch': git.branch(),
-      date: new Date().toString(),
+      date: new Date().toString()
     }))
     .pipe(changed(destPaths.js))
     .pipe(gulp.dest(destPaths.js));
@@ -133,7 +133,7 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function () {
     'stacktrace.min.js',
     'stack*.js',
     '*.js',
-    '**/*.css', // + CSS
+    '**/*.css' // + CSS
   ].map(function (filename) {
     return destPaths.lib + filename;
   }), injectSrcOptions);
@@ -145,7 +145,7 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function () {
     destPaths.js + 'controllers/*.js',
     destPaths.js + 'directives/*.js',
     destPaths.js + '**/*.js',
-    destPaths.css + '**/*.css', // + CSS
+    destPaths.css + '**/*.css' // + CSS
   ], injectSrcOptions);
 
   return gulp.src(appPaths.index)

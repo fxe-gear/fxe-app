@@ -12,7 +12,7 @@ var CreateAccountController = function ($scope, $state, $cordovaToast, $ionicHis
         return $cordovaToast.showShortBottom('Account created.');
       }).then(function () {
         $ionicHistory.nextViewOptions({
-          historyRoot: true,
+          historyRoot: true
         });
         $state.go('scanning');
       }).then(function () {
@@ -22,7 +22,7 @@ var CreateAccountController = function ($scope, $state, $cordovaToast, $ionicHis
         $ionicPopup.alert({
           title: 'Creating account failed.',
           template: 'Please try again.',
-          okType: 'button-assertive',
+          okType: 'button-assertive'
         });
       });
   };

@@ -7,8 +7,8 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
   $localStorage.$default({
     websocket: {
       ip: '127.0.0.1',
-      port: 8237,
-    },
+      port: 8237
+    }
   });
   $scope.extremesSubscribed = false;
   $scope.websocket = $localStorage.websocket;
@@ -31,7 +31,7 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
     fxeService.getBatteryLevel().then(function (level) {
       $ionicPopup.alert({
         title: 'Battery level',
-        template: (level * 100).toFixed(0) + '%',
+        template: (level * 100).toFixed(0) + '%'
       });
     });
   };
@@ -57,7 +57,7 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
       $localStorage.$reset();
       $cordovaSQLite.deleteDB({
         name: 'store.sqlite',
-        iosDatabaseLocation: 'default',
+        iosDatabaseLocation: 'default'
       });
       ionic.Platform.exitApp();
     });

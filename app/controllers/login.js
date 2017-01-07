@@ -12,7 +12,7 @@ var LoginController = function ($scope, $state, $cordovaToast, $ionicHistory, $i
         return $cordovaToast.showShortBottom('Logged in.');
       }).then(function () {
         $ionicHistory.nextViewOptions({
-          historyRoot: true,
+          historyRoot: true
         });
         $state.go('scanning');
       }).then(function () {
@@ -21,7 +21,7 @@ var LoginController = function ($scope, $state, $cordovaToast, $ionicHistory, $i
         $ionicPopup.alert({
           title: 'Jumping login failed.',
           template: 'Please try again.',
-          okType: 'button-assertive',
+          okType: 'button-assertive'
         });
       });
   };
