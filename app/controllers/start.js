@@ -43,6 +43,10 @@ var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ion
   $scope.type = 1;
   $scope.event = null;
 
+  $scope.connectedWatcher = angular.noop;
+  $scope.disconnectedWatcher = angular.noop;
+  $scope.batteryWatcher = angular.noop;
+
   $ionicPopover.fromTemplateUrl('events.html', {
     scope: $scope
   }).then(function (popover) {
@@ -145,16 +149,26 @@ var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ion
         if (connected) onFxeConnected();
         else onFxeDisconnected();
       });
+
+    // watch for state changes
+    $scope.connectedWatcher = $rootScope.$on('fxeConnected', onFxeConnected);
+    $scope.disconnectedWatcher = $rootScope.$on('fxeDisconnected', onFxeDisconnected);
+    $scope.batteryWatcher = $rootScope.$on('fxeBatteryLow', onBatteryLow);
+  });
+
+  $scope.$on('$ionicView.afterLeave', function () {
+    // disable watchers
+    $scope.connectedWatcher();
+    $scope.connectedWatcher = angular.noop;
+    $scope.disconnectedWatcher();
+    $scope.disconnectedWatcher = angular.noop;
+    $scope.batteryWatcher();
+    $scope.batteryWatcher = angular.noop;
   });
 
   $scope.$on('$destroy', function () {
     $scope.popover.remove();
   });
-
-  // listen for future state changes
-  $rootScope.$on('fxeConnected', onFxeConnected);
-  $rootScope.$on('fxeDisconnected', onFxeDisconnected);
-  $rootScope.$on('fxeBatteryLow', onBatteryLow);
 
   // update text in overlay
   $rootScope.$on('fxeEnablingStarted', function () {
