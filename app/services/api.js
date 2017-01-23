@@ -1,24 +1,11 @@
 'use strict';
 
-angular.module('fxe.services.api', [])
+var module = angular.module('fxe.services.api', []);
 
-.constant('baseURL', 'http://private-855a4-fxe.apiary-mock.com')
+module.constant('baseURL', 'http://dev17.nexgen.cz/api/v1');
+// module.constant('baseURL', 'http://private-855a4-fxe.apiary-mock.com');
 
-.constant('useMockApiService', true)
-
-.constant('mockLessonOffset', 3623000000)
-
-/**
- * Wrap apiService in a factory to be able to mock it by changing the useMockApiService constant.
- */
-.factory('apiService', function (useMockApiService, realApiService, mockApiService) {
-  return useMockApiService ? mockApiService : realApiService;
-})
-
-/**
- * Thin wrapper around the FXE API: https://app.apiary.io/fxe
- */
-.service('realApiService', function ($http, storeService, baseURL) {
+module.service('apiService', function ($http, storeService, baseURL) {
 
   var user = storeService.getUser();
 
@@ -26,7 +13,7 @@ angular.module('fxe.services.api', [])
     // add auth token if not explicitly requested to be anonymous
     config.headers = config.headers || {};
     if (config.anonymous !== true) {
-      config.headers.Authorization = 'Token ' + user.provider.jumping.token;
+      config.headers.Authorization = 'Bearer ' + user.provider.jumping.token;
     }
 
     // prefix with baseURL
@@ -50,9 +37,9 @@ angular.module('fxe.services.api', [])
     return request(config);
   };
 
-  var put = function (path, data, config) {
+  var patch = function (path, data, config) {
     config = config || {};
-    config.method = 'PUT';
+    config.method = 'PATCH';
     config.url = path;
     config = data;
     return request(config);
@@ -68,7 +55,7 @@ angular.module('fxe.services.api', [])
   var filterParams = function (params, possibleParams) {
     params = params || {};
 
-    angular.forEach(params, function (key, val) {
+    angular.forEach(params, function (key) {
       if (possibleParams.indexOf(key) == -1) delete params[key];
     });
 
@@ -86,19 +73,19 @@ angular.module('fxe.services.api', [])
     });
   };
 
-  var loginFacebook = function (token, expiresAt) {
+  var loginFacebook = function (accessToken, expiresAt) {
     return post('/login/facebook', {
-      token: token,
+      accessToken: accessToken,
       expiresAt: expiresAt
     }, {
       anonymous: true
     });
   };
 
-  var loginGoogle = function (token, expiresAt) {
+  var loginGoogle = function (idToken, serverAuthCode) {
     return post('/login/google', {
-      token: token,
-      expiresAt: expiresAt
+      idToken: idToken,
+      serverAuthCode: serverAuthCode
     }, {
       anonymous: true
     });
@@ -109,7 +96,7 @@ angular.module('fxe.services.api', [])
   };
 
   var createUser = function (user) {
-    user = filterParams(user, ['email', 'password', 'name', 'weight', 'age', 'gender', 'units']);
+    user = filterParams(user, ['email', 'password', 'name', 'weight', 'age', 'gender', 'units', 'language']);
     return post('/user', user, {
       anonymous: true
     });
@@ -120,12 +107,14 @@ angular.module('fxe.services.api', [])
   };
 
   var updateUser = function (partialUserObj) {
-    return put('/user', partialUserObj);
+    return patch('/user', partialUserObj);
   };
 
   var resetPassword = function (email) {
     return post('/user/resetPassword', {
       email: email
+    }, {
+      anonymous: true
     });
   };
 
@@ -133,12 +122,16 @@ angular.module('fxe.services.api', [])
 
   var getLessons = function (params) {
     return get('/lessons', {
-      params: filterParams(params, ['from', 'fields'])
+      params: filterParams(params, ['maxResults', 'syncToken', 'pageToken', 'fields'])
     });
   };
 
-  var uploadLessons = function (lessons) {
-    return post('/lessons', lessons);
+  var uploadLesson = function (lesson) {
+    return post('/lesson', lesson);
+  };
+
+  var getLesson = function (start) {
+    return get('/lesson/' + start);
   };
 
   var deleteLesson = function (start) {
@@ -147,9 +140,10 @@ angular.module('fxe.services.api', [])
 
   // events =============================================
 
-  var getEvents = function (limit, params) {
-    params = filterParams(params, ['name', 'lat', 'lon', 'from']);
-    params.limit = limit;
+  var getEvents = function (sport, params) {
+    var possible = ['maxResults', 'name', 'locationName', 'latitude', 'longitude', 'accuracy', 'pageToken'];
+    params = filterParams(params, possible);
+    params.sport = sport;
 
     return get('/events', {
       params: params
@@ -162,10 +156,31 @@ angular.module('fxe.services.api', [])
 
   // friends =============================================
 
-  var getFriends = function (params) {
+  var getFriends = function (sport, params) {
+    params = filterParams(params, ['fields', 'pageToken']);
+    params.sport = sport;
+
     return get('/friends', {
-      params: filterParams(params, ['fields', 'scores'])
+      params: params
     });
+  };
+
+  // firmwares =============================================
+
+  var getLatestFirmware = function (device) {
+    device = device.toLowerCase().replace(':', '-');
+
+    return get('/firmware/latest', {
+      params: {
+        device: device
+      }
+    });
+  };
+
+  // logging =============================================
+
+  var log = function (data) {
+    return post('/log', data);
   };
 
   // service public API =============================================
@@ -179,176 +194,14 @@ angular.module('fxe.services.api', [])
   this.updateUser = updateUser;
   this.resetPassword = resetPassword;
   this.getLessons = getLessons;
-  this.uploadLessons = uploadLessons;
+  this.getLesson = getLesson;
+  this.uploadLesson = uploadLesson;
   this.deleteLesson = deleteLesson;
   this.getEvents = getEvents;
   this.getEvent = getEvent;
   this.getFriends = getFriends;
-
-})
-
-.service('mockApiService', function ($q, $http, mockLessonOffset) {
-
-  var user = null;
-  var lessons = null;
-  var events = null;
-
-  var userPromise = null;
-  var lessonsPromise = null;
-  var eventsPromise = null;
-
-  var loginJumping = function () {
-    return $http.get('mock_resources/token.json');
-  };
-
-  var loginFacebook = loginJumping;
-
-  var loginGoogle = loginJumping;
-
-  var logout = $q.resolve;
-
-  var createUser = function (userData) {
-    return getUser()
-      .then(function () {
-        angular.merge(user, partialUserObj);
-        return loginJumping();
-      });
-  };
-
-  var getUser = function () {
-    if (!userPromise) {
-      userPromise = $http.get('mock_resources/user.json').then(function (response) {
-        user = response.data;
-        return response;
-      });
-    }
-
-    return userPromise.then(function () {
-      // 'data' envelope is needed
-      return {
-        data: user
-      };
-    });
-  };
-
-  var updateUser = function (partialUserObj) {
-    return getUser()
-      .then(function () {
-        angular.merge(user, partialUserObj);
-      });
-  };
-
-  var resetPassword = $q.resolve;
-
-  var getLessons = function (params) {
-    // 'data' envelope is needed
-
-    if (!lessonsPromise) {
-      lessonsPromise = $http.get('mock_resources/lessons.json')
-        .then(function (response) {
-          // offset lessons if needed
-          lessons = response.data.map(function (l) {
-            l.start += mockLessonOffset;
-            l.end += mockLessonOffset;
-
-            l.score = l.score.map(function (s) {
-              s.time += mockLessonOffset;
-              return s;
-            });
-
-            return l;
-          }).filter(function (l) {
-            // remove lessons from future
-            return l.start <= Date.now();
-          });
-        });
-    }
-
-    return lessonsPromise
-      .then(function () {
-        return {
-          data: lessons.filter(function (lesson) {
-            // filter lessons if needed
-            if (params &&  params.from && params.from > 0) return lesson.start > params.from;
-            else return true;
-          })
-        };
-      });
-  };
-
-  var uploadLessons = function (data) {
-    // ensure lessons are prepared
-    return getLessons()
-      .then(function () {
-        angular.forEach(data, function (l) {
-          lessons.push(l);
-        });
-      });
-  };
-
-  var deleteLesson = function (start) {
-    // ensure lessons are prepared
-    return getLessons()
-      .then(function () {
-        for (var i = 0; i < lessons.length; i++) {
-          var l = lessons[i];
-          if (l.start == start) {
-            delete lessons[i];
-            return $q.resolve();
-          }
-        }
-
-        return $q.reject();
-      });
-  };
-
-  var getEvents = function (limit, params) {
-    if (!eventsPromise) {
-      eventsPromise = $http.get('mock_resources/events.json').then(function (response) {
-        events = response.data;
-        return response;
-      });
-    }
-
-    return eventsPromise.then(function () {
-      // 'data' envelope is needed
-      return {
-        data: events
-      };
-    });
-  };
-
-  var getEvent = function (id) {
-    return getEvents()
-      .then(function () {
-        for (var i = 0; i < events.length; i++) {
-          var e = events[i];
-          if (e.id == id) return $q.resolve(e);
-        }
-
-        return $q.reject();
-      });
-  };
-
-  var getFriends = function (params) {
-    return $http.get('mock_resources/friends.json');
-  };
-
-  // service public API =============================================
-
-  this.loginJumping = loginJumping;
-  this.loginFacebook = loginFacebook;
-  this.loginGoogle = loginGoogle;
-  this.logout = logout;
-  this.createUser = createUser;
-  this.getUser = getUser;
-  this.updateUser = updateUser;
-  this.resetPassword = resetPassword;
-  this.getLessons = getLessons;
-  this.uploadLessons = uploadLessons;
-  this.deleteLesson = deleteLesson;
-  this.getEvents = getEvents;
-  this.getEvent = getEvent;
-  this.getFriends = getFriends;
+  this.getLatestFirmware = getLatestFirmware;
+  this.log = log;
 
 });
+
