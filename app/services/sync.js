@@ -1,21 +1,21 @@
 'use strict';
 
-angular.module('fxe.services.sync', [])
+var module = angular.module('fxe.services.sync', []);
 
-.service('syncService', function ($log, $q, storeService, apiService) {
-
+module.service('syncService', function ($log, $q, storeService, apiService, $localStorage) {
   // User and lesson syncing step order is based on this post:
   // http://programmers.stackexchange.com/questions/135412/how-best-do-you-represent-a-bi-directional-sync-in-a-rest-api
 
-  var user = storeService.getUser();
-  var friends = storeService.getFriends();
+  var $storage = $localStorage;
 
   // change object (should be "clean" when all data is synced)
   var userChanges = storeService.getUserChanges();
 
-  // Called when link state change to online, user object change or settings tab is visited.
+  // called when link state change to online, user object change or settings tab is visited.
   var syncUser = function () {
     $log.debug('syncing user account');
+
+    var user = storeService.getUser();
 
     // get user changes from API
     var remoteUser;
@@ -38,138 +38,155 @@ angular.module('fxe.services.sync', [])
       });
   };
 
-  // Called when link state change to online or friends tab is visited.
-  // Get friend from API and store them to friends object.
+  // ===================================================================================================
+
+  // called when link state change to online or friends tab is visited.
   var syncFriends = function () {
-    $log.debug('syncing friends data');
-    return apiService.getFriends().then(function (response) {
-      // copy friends to storeService's friends object by its IDs
-      angular.forEach(response.data, function (person) {
-        if (friends.hasOwnProperty(person.id)) {
-          // we already know this person, just update its data and score
-          angular.merge(friends[person.id], person);
-        } else {
-          // otherwise add a new friend
-          friends[person.id] = person;
-        }
-        // fake average
-        friends[person.id].score.average = friends[person.id].score.last - (Math.random() * 25);
+
+    // sync target
+    var friends = storeService.getFriends();
+
+    // API call params
+    var params = {};
+
+    var getPage = function () {
+      $log.debug('syncing friends data');
+      // FIXME multiple sports
+      return apiService.getFriends(1, params).then(handlePage);
+    };
+
+    var handlePage = function (response) {
+      // copy friends data by their IDs
+      angular.forEach(response.data.data, function (person) {
+        // create a new friend if it doesn't exist yet
+        friends[person.id] = friends[person.id] || {};
+        // update its data
+        angular.merge(friends[person.id], person);
       });
 
-      $log.info('friends data synced');
-    });
+      if (response.data.nextPageToken !== null) {
+        // handle next page
+        params.pageToken = response.data.nextPageToken;
+        return getPage();
+
+      } else {
+        $log.info('friends data synced');
+      }
+    };
+
+    // kick off sync
+    return getPage();
   };
 
-  // Called when link state change to online or lesson tab is visited.
-  var syncLessons = function () {
-    $log.debug('syncing lessons');
+  // ===================================================================================================
 
-    var lastSync = storeService.getLessonLastSync();
+  // called when link state change to online or lesson tab is visited.
+  var syncLessons = function (forceFullSync) {
 
-    var remoteNew; // an array of lesson objects
-    var localNew; // an array of lesson objects
-    var remoteAll = {}; // a set of start times (AS STRING!)
-    var localAll = {}; // a set of start times (AS STRING!)
-    var remoteDeleted; // an array of start times
-    var localDeleted; // an array of start times
+    // API call params
+    var params = {};
 
-    // fill remoteNew
-    var remoteNewPromise = apiService.getLessons({
-        from: lastSync
-    })
-      .then(function (response) {
-        remoteNew = response.data;
-      });
+    // add sync token only if we have it and full sync is not forced
+    if ($storage.lessonSyncToken !== null && forceFullSync !== true) {
+      params.syncToken = $storage.lessonSyncToken;
+    }
 
-    // fill localNew
-    var localNewPromise = storeService.getVerboseLessonsBetween(lastSync, Date.now())
-      .then(function (lessons) {
-        localNew = lessons;
-      });
+    // tmp storage for server and local data
+    var remoteAdded = []; // whole lessons
+    var remoteDeleted = []; // lesson IDs
+    var locallyAdded = storeService.getNewLessons(); // lesson IDs
+    var locallyDeleted = storeService.getDeletedLessons(); // lesson IDs
 
-    // fill remoteAll
-    var remoteAllPromise = apiService.getLessons({
-        fields: 'start'
-    })
-      .then(function (response) {
-        angular.forEach(response.data, function (l) {
-          remoteAll[l.start] = true;
-        });
-      });
+    var getPage = function () {
+      $log.debug('syncing lessons');
+      return apiService.getLessons(params).then(handlePage);
+    };
 
-    // fill localAll
-    var localAllPromise = storeService.getAllLessons()
-      .then(function (lessons) {
-        angular.forEach(lessons, function (l) {
-          localAll[l.start] = true;
-        });
-      });
+    var handlePage = function (response) {
+      // collect server data into local variables
+      remoteAdded.push.apply(remoteAdded, response.data.added);
+      remoteDeleted.push.apply(remoteDeleted, response.data.deleted);
 
-    // fill remoteDeleted
-    // uses localAll and remoteAll => wait for them resolve
-    var remoteDeletedPromise = $q.all([localAllPromise, remoteAllPromise])
+      // save next sync token
+      if (response.data.nextSyncToken !== null) {
+        $storage.lessonSyncToken = response.data.nextSyncToken;
+      }
+
+      if (response.data.nextPageToken !== null) {
+        // handle next page
+        params.pageToken = response.data.nextPageToken;
+        return getPage();
+      } else {
+        $log.info('lessons synced');
+      }
+    };
+
+    // ----------------------------------------------------------------------------
+    // get all remote lessons
+
+    return getPage()
       .then(function () {
-        remoteDeleted = [];
-        Object.keys(localAll).forEach(function (start) {
-          // do not forget the parseInt() type conversion! localAll is a set of strings!
-          var intStart = parseInt(start);
-          if (!(start in remoteAll) && storeService.getNewLessons().indexOf(intStart) == -1) {
-            // in localAll, not in remoteAll and not a new lesson => must be remoteDeleted
-            remoteDeleted.push(intStart);
-          }
-        });
-      });
+        var start, task, promises = [];
 
-    // fill localDeleted
-    localDeleted = storeService.getDeletedLessons();
+        // now we have all the data locally, lets do the changes!
 
-    // when we have all the data, do the changes
-    return $q.all([remoteNewPromise, localNewPromise, remoteAllPromise, localAllPromise, remoteDeletedPromise])
-      .then(function () {
-        var promises = [];
+        // ----------------------------------------------
+        // push locally added lessons
 
-        // push local new
-        if (localNew.length) {
-          var uploadLocalNewPromise = apiService.uploadLessons(localNew)
-            .then(function () {
-              storeService.getNewLessons().length = 0;
+        while (start = locallyAdded.pop()) {
+          task = storeService.getLesson(start).then(function (lesson) {
+            return apiService.uploadLesson(lesson).catch(function () {
+              // push back on error
+              locallyAdded.push(lesson.start);
             });
-          promises.push(uploadLocalNewPromise);
+          });
+          promises.push(task);
         }
 
-        // store remote new
-        angular.forEach(remoteNew, function (lesson) {
-          promises.push(storeService.addLesson(lesson));
+        // ----------------------------------------------
+        // store remote added
+
+        angular.forEach(remoteAdded, function (lesson) {
+          task = storeService.addLesson(lesson);
+          promises.push(task);
         });
 
-        // push local deleted
-        for (var start; start = localDeleted.pop();) {
+        // ----------------------------------------------
+        // push locally deleted lessons
+
+        while (start = locallyDeleted.pop()) {
+
           // avoid request if lesson has been already deleted from another device
           if (remoteDeleted.indexOf(start) != -1) continue;
 
-          // API allows to delete only one lesson per query
-          var pushLocalDeletedPromise = apiService.deleteLesson(start)
-            .catch(function () {
+          // need to wrap to IIFE to protect start from mutating
+          task = function (start) {
+            return apiService.deleteLesson(start).catch(function () {
               // push back on error
-              localDeleted.push(start);
+              locallyDeleted.push(start);
             });
-
-          promises.push(pushLocalDeletedPromise);
+          }(start);
+          promises.push(task);
         }
 
+        // ----------------------------------------------
         // store remote deleted
+
         angular.forEach(remoteDeleted, function (start) {
-          promises.push(storeService.deleteLesson(start, true));
+          task = storeService.deleteLesson(start, true);
+          promises.push(task);
         });
 
+        // ----------------------------------------------
         // wait for all operations to finish
         return $q.all(promises);
       })
       .then(function () {
-        storeService.touchLessonLastSync();
         $log.info('lessons synced');
       });
   };
+
+  // ===================================================================================================
 
   var syncAll = function () {
     return $q.all([syncUser(), syncFriends(), syncLessons()]);

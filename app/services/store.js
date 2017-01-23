@@ -13,7 +13,7 @@ angular.module('fxe.services.store', [])
   running: 2
 })
 
-.service('storeService', function ($ionicPlatform, $cordovaSQLite, $localStorage, $q, $log, scoreTypes, lessonTypes) {
+.service('storeService', function ($ionicPlatform, $cordovaSQLite, $localStorage, $q, $log, scoreTypes) {
 
   // prepare default (empty) lesson object
   var emptyLesson = {
@@ -36,7 +36,6 @@ angular.module('fxe.services.store', [])
     currentLesson: emptyLesson,
     deletedLessons: [],
     newLessons: [],
-    lessonLastSync: null,
 
     // user related
     user: {
@@ -262,55 +261,6 @@ angular.module('fxe.services.store', [])
     return getLesson(Infinity);
   };
 
-  var getVerboseLessonsBetween = function (date1, date2) {
-
-    // select lessons data
-    var query = [];
-    query.push('SELECT start_time AS start, end_time AS end, type, event FROM lesson');
-    query.push('WHERE end_time IS NOT NULL');
-    query.push('AND start_time BETWEEN ? AND ?');
-    query.push('ORDER BY start_time DESC');
-
-    var res = {};
-
-    return execSQL(query.join(' '), [date1, date2])
-      .then(function (lessons) {
-        // fill result
-        for (var i = 0; i < lessons.rows.length; i++) {
-          var l = lessons.rows.item(i);
-          res[l.start] = {
-            start: l.start,
-            end: l.end,
-            type: l.type,
-            event: l.event,
-            score: []
-          };
-        }
-
-        // select score for ALL lessons
-        query.length = 0;
-        query.push('SELECT start_time AS start, time, type, score FROM score');
-        query.push('WHERE start_time BETWEEN ? AND ?');
-        return execSQL(query.join(' '), [date1, date2]);
-      })
-      .then(function (scores) {
-        // fill result scores for ALL selected lessons
-        for (var i = 0; i < scores.rows.length; i++) {
-          var s = scores.rows.item(i);
-          res[s.start].score.push({
-            time: s.time,
-            score: s.score,
-            type: s.type
-          });
-        }
-
-        // return result without lesson keys (only lesson objects)
-        return Object.keys(res).map(function (key) {
-          return res[key];
-        });
-      });
-  };
-
   var getLessonsBetween = function (date1, date2) {
     var q = $q.defer();
 
@@ -485,14 +435,6 @@ angular.module('fxe.services.store', [])
     return $localStorage.deletedLessons;
   };
 
-  var getLessonLastSync = function () {
-    return $localStorage.lessonLastSync;
-  };
-
-  var touchLessonLastSync = function () {
-    $localStorage.lessonLastSync = Date.now();
-  };
-
   // sqlite related service API
   this.prepareDB = prepareDB;
   this._dumpDB = _dumpDB;
@@ -506,7 +448,6 @@ angular.module('fxe.services.store', [])
   this.getLastLesson = getLastLesson;
   this.getAllLessons = getAllLessons;
   this.getLessonsBetween = getLessonsBetween;
-  this.getVerboseLessonsBetween = getVerboseLessonsBetween;
   this.getLesson = getLesson;
   this.getLessonDiffData = getLessonDiffData;
 
@@ -526,6 +467,4 @@ angular.module('fxe.services.store', [])
   this.getUserChanges = getUserChanges;
   this.getDeletedLessons = getDeletedLessons;
   this.getNewLessons = getNewLessons;
-  this.getLessonLastSync = getLessonLastSync;
-  this.touchLessonLastSync = touchLessonLastSync;
 });
