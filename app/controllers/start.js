@@ -108,7 +108,7 @@ var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ion
       .then(function () {
         $interval.cancel(timer);
         $scope.running = false;
-        // return syncService.syncLessons();
+        return syncService.syncLessons();
       });
   };
 
@@ -190,9 +190,9 @@ var StartController = function ($scope, $rootScope, $state, $ionicPlatform, $ion
     }
 
     // sync data
-    // if (storeService.isLoggedIn()) {
-    //   syncService.syncAll();
-    // }
+    if (storeService.isLoggedIn()) {
+      syncService.syncAll();
+    }
   });
 };
 

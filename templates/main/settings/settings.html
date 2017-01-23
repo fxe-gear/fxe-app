@@ -2,15 +2,15 @@
   <ion-content padding="true" scroll="true" class="has-header settings">
 
     <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-if="!paired">Connect your FXE</a>
-    <!-- <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-if="!loggedIn">Login</a> -->
+     <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-if="!loggedIn">Login</a>
 
-    <!-- <div ng-show="loggedIn">
+    <div ng-show="loggedIn">
       <jump-account class="card" user="user" title="My profile" change="true">
         <button class="button button-block button-balanced" ng-disabled="$parent.f.$invalid || $parent.f.syncInProgress" ng-hide="$parent.f.$pristine" ng-click="sync($parent.f); $parent.f.showEmailField = false; $parent.f.showPasswordField = false">
           {{ !$parent.f.syncInProgress ? 'Save changes' : 'Saving...' }}
         </button>
       </jump-account>
-    </div> -->
+    </div>
 
     <div class="card list">
       <a class="item" onclick="window.open('http://www.jumpingshop.cz/?lang=en', '_system')">E-shop</a>
