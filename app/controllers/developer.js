@@ -4,29 +4,6 @@ var module = angular.module('fxe.controllers.developer', []);
 
 var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, fxeService, bleDevice, storeService) {
 
-  $localStorage.$default({
-    websocket: {
-      ip: '127.0.0.1',
-      port: 8237
-    }
-  });
-  $scope.extremesSubscribed = false;
-  $scope.websocket = $localStorage.websocket;
-
-  $scope.toggleSubscribeExtremes = function () {
-    var action;
-
-    if (!$scope.extremesSubscribed) {
-      action = fxeService.subscribeExtremes($scope.websocket.ip, $scope.websocket.port);
-    } else {
-      action = fxeService.unsubscribeExtremes();
-    }
-
-    action.then(function () {
-      $scope.extremesSubscribed = !$scope.extremesSubscribed;
-    });
-  };
-
   $scope.getBatteryLevel = function () {
     fxeService.getBatteryLevel().then(function (level) {
       $ionicPopup.alert({

@@ -47,7 +47,7 @@ module.constant('bleServices', {
 
 module.constant('lowBatteryLevel', 0.1); // in percent
 
-module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevice, storeService, bleServices, scoreTypes, lowBatteryLevel) {
+module.service('fxeService', function ($rootScope, $q, $log, bleDevice, storeService, bleServices, lessonTypes, lowBatteryLevel) {
 
   // some shortcuts
   var bls = bleServices;
@@ -225,65 +225,13 @@ module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevi
     $log.debug('disabling battery warning');
 
     // stop notification
-    return bleDevice.stopNotification(bls.battery.uuid, bls.battery.chrcs.level.uuid).then(function () {
-      $log.info('battery warning disabled');
-    }).catch(function (error) {
-      $log.error('disabling battery warning failed');
-      throw error;
-    });
-  };
-
-  // DEV function -----------------------------------------------------------------------------
-
-  var websocket = null;
-
-  var onExtremeReceived = function (data) {
-    var dataView = new DataView(data);
-    var t = dataView.getUint32(0, true);
-    var x = dataView.getInt16(4, true);
-    var y = dataView.getInt16(6, true);
-    var z = dataView.getInt16(8, true);
-    var et = dataView.getUint8(10, true); // extreme type: 1=TOP, 2=BOTTOM, 3=OTHER
-    var message = [t, x, y, z, et].join('\t');
-    $log.debug('sending WS message: ' + message);
-    websocket.send(message);
-  };
-
-  var subscribeExtremes = function (websocketIP, websocketPort) {
-    var q = $q.defer();
-
-    var address = 'ws://' + [websocketIP, websocketPort].join(':');
-    $log.debug('openning websocket ' + address);
-
-    websocket = $websocket(address);
-
-    websocket.onOpen(function () {
-      $log.info('websocket opened');
-      $log.debug('subscribing extremes');
-
-      bleDevice.startNotification(bls.fxe.uuid, bls.fxe.chrcs.extreme.uuid, onExtremeReceived).then(function () {
-        $log.info('extremes subscribed');
-        q.resolve();
+    return bleDevice.stopNotification(bls.battery.uuid, bls.battery.chrcs.level.uuid)
+      .then(function () {
+        $log.info('battery warning disabled');
       }).catch(function (error) {
-        $log.error('extreme subscribing failed');
-        q.reject(error);
+        $log.error('disabling battery warning failed');
+        throw error;
       });
-    });
-
-    return q.promise;
-  };
-
-  var unsubscribeExtremes = function () {
-    $log.debug('unsubscribing extremes');
-
-    return bleDevice.stopNotification(bls.fxe.uuid, bls.fxe.chrcs.extreme.uuid).then(function () {
-      $log.info('extremes unsubscribed');
-      websocket.close();
-      $log.info('websocket closed');
-    }).catch(function (error) {
-      $log.error('extreme unsubscribing failed');
-      throw error;
-    });
   };
 
   var disableConnectionHolding = function () {
@@ -291,7 +239,6 @@ module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevi
   };
 
   this.scan = scan;
-
   this.setColor = setColor;
   this.clearColor = clearColor;
   this.startMeasurement = startMeasurement;
@@ -299,10 +246,6 @@ module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevi
   this.isMeasuring = isMeasuring;
   this.enableBatteryWarning = enableBatteryWarning;
   this.disableBatteryWarning = disableBatteryWarning;
-  this.disableConnectionHolding = disableConnectionHolding;
-
-  // DEV functions
   this.getBatteryLevel = getBatteryLevel;
-  this.subscribeExtremes = subscribeExtremes;
-  this.unsubscribeExtremes = unsubscribeExtremes;
+  this.disableConnectionHolding = disableConnectionHolding;
 });

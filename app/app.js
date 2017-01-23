@@ -4,7 +4,6 @@ angular.module('fxe', [
   'ionic',
   'ngCordova',
   'ngStorage',
-  'ngWebSocket',
   'nvd3',
 
   'fxe.services.logging',
