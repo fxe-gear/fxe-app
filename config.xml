@@ -17,7 +17,7 @@
     <param name="ios-package" onload="true" value="CDVStatusBar"/>
   </feature>
   <access origin="https://fxe-gear.com"/>
-  <access origin="https://*.fxe-gear.com/"/>
+  <access origin="https://*.fxe-gear.com"/>
   <access origin="content:///*"/>
   <access origin="ws://*"/>
   <allow-navigation href="file://*"/>

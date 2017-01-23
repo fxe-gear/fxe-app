@@ -215,9 +215,10 @@ angular.module('fxe.services.ble', [])
 
   var disableConnectionHolding = function () {
     if (_disableConnectionHolding) {
-      $log.info('disabling connection holding');
+      $log.debug('disabling connection holding');
       _disableConnectionHolding();
       _disableConnectionHolding = null;
+      $log.info('connection holding disabled');
     }
 
     return $q.resolve();
@@ -240,6 +241,15 @@ angular.module('fxe.services.ble', [])
 
       $log.debug('writing data ' + data + ' to ' + service + '-' + chrcs);
       return $cordovaBLE.write(storeService.getDeviceID(), service, chrcs, data.buffer);
+    });
+  };
+
+  var writeWithoutResponse = function (service, chrcs, data) {
+    return isConnected().then(function (connected) {
+      if (!connected) throw 'fxe not connected';
+
+      $log.debug('writing (without response) data ' + data + ' to ' + service + '-' + chrcs);
+      return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), service, chrcs, data.buffer);
     });
   };
 
@@ -297,8 +307,10 @@ angular.module('fxe.services.ble', [])
   this.ignore = ignore;
   this.clearIgnored = clearIgnored;
   this.holdConnection = holdConnection;
+  this.disableConnectionHolding = disableConnectionHolding;
   this.read = read;
   this.write = write;
+  this.writeWithoutResponse = writeWithoutResponse;
   this.startNotification = startNotification;
   this.stopNotification = stopNotification;
   this.isConnected = isConnected;

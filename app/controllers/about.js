@@ -2,15 +2,21 @@
 
 var module = angular.module('fxe.controllers.about', []);
 
-var AboutController = function ($scope) {
+var AboutController = function ($scope, $localStorage) {
 
   var clickCount = 0;
-  $scope.isDeveloper = false;
+  $localStorage.$default({
+    about: {
+      isDeveloper: false
+    }
+  });
+
+  $scope.persistent = $localStorage.about;
 
   $scope.becomeDeveloper = function () {
     clickCount++;
     if (clickCount >= 5) {
-      $scope.isDeveloper = true;
+      $scope.persistent.isDeveloper = true;
     }
   };
 

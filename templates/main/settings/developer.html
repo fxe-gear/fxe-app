@@ -2,9 +2,8 @@
   <ion-content padding="true" class="settings">
 
     <div class="card">
-      <div class="item item-divider">
-        Websocket extreme publishing
-      </div>
+
+      <div class="item item-divider">Websocket extreme publishing</div>
       <label class="item item-input">
         <span class="input-label">IP</span>
         <input type="text" ng-model="websocket.ip">
@@ -14,16 +13,20 @@
         <input type="number" ng-model="websocket.port">
       </label>
       <a ng-click="toggleSubscribeExtremes()" class="item {{ extremesSubscribed ? 'assertive' : 'balanced' }}">{{ extremesSubscribed ? 'Stop' : 'Start' }} publishing</a>
-    </div>
 
-    <button ng-click="getBatteryLevel()" class="button button-block button-outline button-dark">Get battery level</button>
+      <div class="item item-divider">Device</div>
+      <a ng-click="getBatteryLevel()" class="item">Get battery level</a>
+      <a ng-click="disconnect()" class="item">Disconnect</a>
+      <a ng-click="reconnect()" class="item">Reconnect</a>
+      <a ng-click="disableConnectionHolding()" class="item">Disable connection holding</a>
+      <!--<a ng-click="upgradeFirmware()" class="item">Upgrade firmware</a>-->
+    </div>
 
     <button ng-click="dumpDB()" class="button button-block button-outline button-dark">Dump DB to remote server</button>
 
     <p><strong>Warning</strong>, no confirmation!</p>
 
     <button ng-click="unpair()" class="button assertive button-block button-outline button-dark">Unpair device</button>
-
     <button ng-click="clearAll()" class="button button-assertive button-block">Clear all &amp; reset application</button>
 
   </ion-content>

@@ -36,9 +36,11 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
     });
   };
 
-  $scope.dumpDB = function () {
-    storeService._dumpDB();
-  };
+  $scope.disconnect = bleDevice.disconnect;
+  $scope.reconnect = bleDevice.reconnect;
+  $scope.disableConnectionHolding = fxeService.disableConnectionHolding;
+
+  $scope.dumpDB = storeService._dumpDB();
 
   $scope.unpair = function () {
     bleDevice.unpair()

@@ -42,17 +42,6 @@ module.constant('bleServices', {
         uuid: '2a19'
       }
     }
-  },
-  dfu: {
-    uuid: '1530',
-    chrcs: {
-      control: {
-        uuid: '1531'
-      },
-      data: {
-        uuid: '1532'
-      }
-    }
   }
 });
 
@@ -297,6 +286,10 @@ module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevi
     });
   };
 
+  var disableConnectionHolding = function () {
+    return $q.all([disableBatteryWarning(), bleDevice.disableConnectionHolding()])
+  };
+
   this.scan = scan;
 
   this.setColor = setColor;
@@ -306,6 +299,7 @@ module.service('fxeService', function ($rootScope, $websocket, $q, $log, bleDevi
   this.isMeasuring = isMeasuring;
   this.enableBatteryWarning = enableBatteryWarning;
   this.disableBatteryWarning = disableBatteryWarning;
+  this.disableConnectionHolding = disableConnectionHolding;
 
   // DEV functions
   this.getBatteryLevel = getBatteryLevel;
