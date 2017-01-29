@@ -47,7 +47,7 @@ module.config(function ($qProvider) {
 });
 
 // TODO make automatic from package.json or config.xml
-module.constant('appVersion', '1.0.0');
+module.constant('appVersion', '1.0.1');
 
 module.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, lessonService, fxeService, syncService) {
 
