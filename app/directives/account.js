@@ -1,8 +1,9 @@
 'use strict';
 
-angular.module('fxe.directives.account', [])
+var module = angular.module('fxe.directives.account', []);
 
-.directive('jumpAccount', function ($ionicPopover) {
+module.directive('jumpAccount', function () {
+  //noinspection JSUnusedGlobalSymbols
   return {
     restrict: 'E',
     transclude: true,

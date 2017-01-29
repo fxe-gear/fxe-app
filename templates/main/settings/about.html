@@ -7,11 +7,17 @@
 
     <div class="card">
       <div class="item item-divider">
-        App version
+        Application version
       </div>
       <div class="item item-text-wrap">
         <!-- build:git-tag -->
         <!-- endbuild -->
+      </div>
+      <div class="item item-divider">
+        Device firmware version
+      </div>
+      <div class="item item-text-wrap" ng-click="getFirmwareVersion()">
+        {{ firmwareVersion || 'click to get' }}
       </div>
       <div class="item item-divider">
         GIT branch
@@ -36,7 +42,7 @@
       </div>
     </div>
 
-    <a ng-if="persistent.isDeveloper" class="button button-block button-outline button-dark" ui-sref="main.developer">Developer tools</a>
+    <a ng-if="isDeveloper()" class="button button-block button-outline button-dark" ui-sref="main.developer">Developer tools</a>
 
   </ion-content>
 </ion-view>

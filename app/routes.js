@@ -40,6 +40,12 @@ angular.module('fxe.routes', [])
     controller: 'PairingController'
   });
 
+  $stateProvider.state('firmware-upgrade', {
+    url: '/firmware-upgrade',
+    templateUrl: 'firmware-upgrade.html',
+    controller: 'FirmwareUpgradeController'
+  });
+
   $stateProvider.state('main', {
     url: '/main',
     abstract: true,
@@ -74,10 +80,7 @@ angular.module('fxe.routes', [])
         controller: 'LessonController',
         resolve: {
           lesson: function ($stateParams, storeService) {
-            if ($stateParams.start)
-              return storeService.getLesson($stateParams.start);
-            else
-              return storeService.getLastLesson();
+            return storeService.getLesson($stateParams.start);
           }
         }
       }
@@ -124,12 +127,13 @@ angular.module('fxe.routes', [])
     }
   });
 
-  $urlRouterProvider.otherwise(function ($injector, $location) {
-    var storeService = $injector.get('storeService');
+  $urlRouterProvider.otherwise(function ($injector) {
+    var fxeService = $injector.get('fxeService');
+    var userService = $injector.get('userService');
 
-    if (storeService.isPaired())
+    if (fxeService.isPaired())
       return '/main/start';
-    if (!storeService.isPaired() && storeService.isLoggedIn())
+    if (!fxeService.isPaired() && userService.isLoggedIn())
       return '/scanning';
     else
       return '/welcome';

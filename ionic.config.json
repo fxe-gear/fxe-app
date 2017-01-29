@@ -12,5 +12,11 @@
     "www/js/**/*",
     "www/lib/*"
   ],
-  "browsers": []
+  "browsers": [],
+  "proxies": [
+    {
+      "path": "/api",
+      "proxyUrl": "http://dev17.nexgen.cz/api/v2"
+    }
+  ]
 }

@@ -30,4 +30,6 @@ $font-family-sans-serif:          "Roboto", "Helvetica Neue", "Segoe UI", sans-s
 $spinner-width:                   50px !default;
 $spinner-height:                  50px !default;
 
+$progress-bar-color:              $balanced;
+
 @import "../lib/ionic/scss/_variables";

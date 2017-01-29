@@ -1,127 +1,175 @@
 'use strict';
 
-angular.module('fxe.services.ble', [])
+var module = angular.module('fxe.services.ble', []);
 
-.constant('reconnectTimeout', 3000) // in milliseconds
+module.constant('reconnectTimeout', 3000); // in milliseconds
 
-.service('bleDevice', function ($rootScope, $ionicPlatform, $cordovaBLE, $q, $log, $timeout, storeService, reconnectTimeout) {
+module.service('bleService', function ($rootScope, $ionicPlatform, $cordovaBLE, $q, $log, $timeout, $localStorage, reconnectTimeout) {
+
+  // try if a mobile phone has BLE support
+  $ionicPlatform.ready()
+    .then(function () {
+      try {
+        ble.isEnabled();
+      } catch (e) {
+        $log.error('no ble, no fun');
+      }
+    });
 
   var scanning = false;
+  var stoppingScan = false;
   var _disableConnectionHolding = null;
 
-  $ionicPlatform.ready().then(function () {
-    try {
-      ble.isEnabled;
-    } catch (e) {
-      $log.error('no ble, no fun');
-    }
+  var $storage = $localStorage.$default({
+    // MAC addresses of devices in various states
+    connected: null,
+    paired: null,
+    ignored: [],
+    filter: []
   });
 
+  var setDeviceFilter = function (filter) {
+    $storage.filter.push.apply($storage.filter, filter);
+  };
+
+  var getConnected = function () {
+    return $storage.connected;
+  };
+
+  var isPaired = function () {
+    return $storage.paired != null;
+  };
+
+  var isIgnored = function (device) {
+    return $storage.ignored.indexOf(device) != -1;
+  };
+
   var enable = function () {
-    var q = $q.defer();
     $log.debug('enabling bluetooth');
 
-    $ionicPlatform.ready()
+    return $ionicPlatform.ready()
       .then($cordovaBLE.isEnabled)
-      .then(q.resolve) // already enabled
-      .catch(function (error) { // not enabled
+      .then(function () {
+        $log.warn('bluetooth already enabled');
+      })
+      .catch(function () {
+        // if bluetooth not enabled
         if (typeof ble.enable === 'undefined') {
           // iOS doesn't have ble.enable
-          q.reject('cannot enable bluetooth, probably on iOS');
+          $log.error('cannot enable bluetooth, probably on iOS');
+          throw 'ble.enable is undefined';
+          // TODO show alert to enable manually
+
         } else {
           // Android
-          $rootScope.$broadcast('fxeEnablingStarted');
+          $rootScope.$broadcast('bleEnablingStarted');
 
-          $cordovaBLE.enable()
+          return $cordovaBLE.enable()
             .then(function () {
               $log.info('bluetooth enabled');
-              q.resolve();
             })
             .catch(function (error) {
               $log.warn('bluetooth not enabled');
-              q.reject(error);
+              throw error
             });
         }
       });
-
-    return q.promise;
   };
 
-  var scan = function (services) {
+  var scan = function () {
+    $log.debug('starting ble scan for ' + $storage.filter);
+
     return $ionicPlatform.ready().then(function () {
       var q = $q.defer();
-      $log.debug('starting ble scan for ' + services);
 
       var onDeviceFound = function (device) {
-        var deviceID = device.id;
-        if (storeService.isPaired()) { // paired
-          if (storeService.getPairedID() == deviceID) { // found paired device
-            $log.info('found paired ' + deviceID);
+        if (stoppingScan) {
+          // ignore found devices during stopping scan
+          return;
+        }
+
+        device = device.id;
+        if (isPaired()) {
+          // if paired device is stored
+
+          if ($storage.paired == device) {
+            // found the paired device
+            $log.debug('found paired ' + device);
             stopScan().then(function () {
-              q.resolve(deviceID);
+              q.resolve(device);
             });
-          } else { // found another (not paired) device
-            $log.info('found not paired ' + deviceID);
+          } else {
+            // found another (not paired) device
+            $log.debug('found not paired ' + device);
           }
 
-        } else { // not paired yet
-          if (!storeService.isIgnored(deviceID)) { // found new (not ignored) device
-            $log.info('found ' + deviceID);
+        } else {
+          // else, if no paired device is stored
+
+          if (!isIgnored(device)) {
+            // found new (not ignored) device
+            $log.info('found new ' + device);
             stopScan().then(function () {
-              q.resolve(deviceID);
+              q.resolve(device);
             });
-          } else { // found ignored
-            $log.info('found ignored ' + deviceID);
-            q.notify(deviceID);
+
+          } else {
+            // found ignored device
+            $log.debug('found ignored ' + device);
+            q.notify(device);
           }
         }
       };
 
-      $ionicPlatform.ready().then(function () {
-        scanning = true;
-        $cordovaBLE.startScan(services, onDeviceFound, q.reject);
-        $rootScope.$broadcast('fxeScanningStarted');
-        $log.info('scanning started');
-      });
+      ble.startScanWithOptions($storage.filter, {reportDuplicates: false}, onDeviceFound, q.reject);
+      scanning = true;
+      $rootScope.$broadcast('bleScanningStarted');
+      $log.info('scanning started');
 
       return q.promise;
     });
   };
 
   var stopScan = function () {
-    if (!scanning) return $q.resolve();
+    if (!scanning) {
+      $log.warn('ignoring stop ble scan request - no scan in progress');
+      return $q.resolve();
+    }
+    stoppingScan = true;
     $log.debug('stopping ble scan');
 
     return $ionicPlatform.ready()
       .then($cordovaBLE.stopScan)
       .then(function (result) {
         scanning = false;
+        stoppingScan = false;
         $log.info('scanning stopped');
         return result;
       })
       .catch(function (error) {
-        $log.error('scanning stop failed');
+        $log.error('stopping ble scan failed', error);
         throw error;
       });
   };
 
-  var connect = function (deviceID) {
+  var connect = function (device) {
     return $ionicPlatform.ready().then(function () {
       var q = $q.defer();
-      $log.debug('connecting to ' + deviceID);
-      $rootScope.$broadcast('fxeConnectingStarted');
+      $log.debug('connecting to ' + device);
+      $rootScope.$broadcast('bleConnectingStarted');
 
-      ble.connect(deviceID,
-        function (device) {
-          $log.info('connected to ' + deviceID);
-          storeService.setDeviceID(deviceID);
-          $rootScope.$broadcast('fxeConnected');
-          q.resolve(deviceID);
+      ble.connect(device,
+        function () {
+          $log.info('connected to ' + device);
+          setConnected(device);
+          $rootScope.$broadcast('bleConnected');
+          q.resolve(device);
         },
 
         function (error) {
-          $log.error('connecting to ' + deviceID + ' failed / device disconnected later');
-          $rootScope.$broadcast('fxeDisconnected');
+          $log.error('connecting to ' + device + ' failed / device disconnected later', error);
+          setConnected(null);
+          $rootScope.$broadcast('bleDisconnected');
           q.reject(error);
         });
 
@@ -131,63 +179,87 @@ angular.module('fxe.services.ble', [])
   };
 
   var reconnect = function () {
-    if (!storeService.isPaired()) return $q.reject('unable to reconnect, no device is paired');
+    if (!isPaired()) {
+      $log.error('unable to reconnect, no device is paired');
+      return $q.reject();
+    }
 
-    return isConnected().then(function (connected) {
-      if (!connected) return enable().then(function () {
-        // empty list because we already have paired device so we don't have to filter them
-        return scan([]);
-      }).then(connect);
-    });
+    return isConnected()
+      .then(function (connected) {
+        if (connected) return;
+        return enable()
+          .then(scan)
+          .then(connect);
+      });
   };
 
   var disconnect = function () {
     return isConnected().then(function (connected) {
-      if (!connected) throw 'fxe not connected';
+      if (!connected) {
+        $log.warn('ignoring disconnect request - no device is connected');
+        return $q.resolve();
+      }
 
-      var deviceID = storeService.getDeviceID();
-      $log.debug('disconnecting from ' + deviceID);
+      var device = $storage.connected;
+      $log.debug('disconnecting from ' + device);
 
       return disableConnectionHolding()
         .then(function () {
-          return $cordovaBLE.disconnect(deviceID);
+          return $cordovaBLE.disconnect(device);
         }).then(function (result) {
-          storeService.setDeviceID(null);
-          $rootScope.$broadcast('fxeDisconnected');
-          $log.info('disconnected from ' + deviceID);
+          setConnected(null);
+          $rootScope.$broadcast('bleDisconnected');
+          $log.info('disconnected from ' + device);
           return result;
         }).catch(function (error) {
-          $log.error('disconnecting from ' + deviceID + ' failed');
+          $log.error('disconnecting from ' + device + ' failed', error);
           throw error;
         });
     });
   };
 
+  var setConnected = function (device) {
+    $storage.connected = device;
+    $localStorage.$apply(); // see https://github.com/gsklee/ngStorage/pull/145
+  };
+
   var pair = function () {
-    $log.info('device ' + storeService.getDeviceID() + ' paired');
-    storeService.setPairedID(storeService.getDeviceID());
-    return $q.resolve();
+    $storage.paired = $storage.connected;
+    $log.info('device ' + $storage.paired + ' paired');
+    $localStorage.$apply(); // see https://github.com/gsklee/ngStorage/pull/145
   };
 
   var unpair = function () {
-    storeService.setPairedID(null);
-    $log.info('device ' + storeService.getDeviceID() + ' unpaired');
-    return $q.resolve();
+    $storage.paired = null;
+    $log.info('device ' + $storage.connected + ' unpaired');
   };
 
   var ignore = function () {
-    if (!storeService.getDeviceID()) return $q.reject('unable to ignore, no device is connected');
-    storeService.ignore(storeService.getDeviceID());
-    $log.info(storeService.getDeviceID() + ' added to ignore list');
+    // TODO refactor
+    var device = $storage.connected;
+    if (!device) {
+      $log.warn('ignoring ignore request - no device is connected');
+      return $q.resolve();
+    }
+    if (!isIgnored(device)) {
+      $storage.ignored.push(device);
+      $log.info(device + ' added to ignore list');
+    } else {
+      $log.warn('ignoring ignore request - device ' + device + ' already ignored');
+    }
     return $q.resolve();
   };
 
   var clearIgnored = function () {
-    storeService.clearIgnored();
+    $storage.ignored = [];
     return $q.resolve();
   };
 
   var holdConnection = function () {
+    if (!isPaired()) {
+      return $q.reject('unable to hold connection, no device is paired');
+    }
+
     // disable previsously held state if needed
     disableConnectionHolding();
 
@@ -196,7 +268,7 @@ angular.module('fxe.services.ble', [])
       // if not connected but should be
       reconnect().catch(function (error) {
         // if connecting failed, try again in 3 sec
-        $log.error('reconnecting error during connection holding: ' + error + ', trying again in ' + reconnectTimeout);
+        $log.error('reconnecting error during connection holding, trying again in ' + reconnectTimeout, error);
         $timeout(function () {
           onDisconnect();
         }, reconnectTimeout);
@@ -204,9 +276,9 @@ angular.module('fxe.services.ble', [])
     };
 
     // permanent callback and first time trigger
-    _disableConnectionHolding = $rootScope.$on('fxeDisconnected', onDisconnect);
+    _disableConnectionHolding = $rootScope.$on('bleDisconnected', onDisconnect);
     isConnected().then(function (connected) {
-      if (connected) $rootScope.$broadcast('fxeConnected');
+      if (connected) $rootScope.$broadcast('bleConnected');
       else onDisconnect();
     });
 
@@ -231,7 +303,7 @@ angular.module('fxe.services.ble', [])
       if (!connected) throw 'fxe not connected';
 
       $log.debug('reading ' + service + '-' + chrcs);
-      return $cordovaBLE.read(storeService.getDeviceID(), service, chrcs);
+      return $cordovaBLE.read($storage.connected, service, chrcs);
     });
   };
 
@@ -240,7 +312,7 @@ angular.module('fxe.services.ble', [])
       if (!connected) throw 'fxe not connected';
 
       $log.debug('writing data ' + data + ' to ' + service + '-' + chrcs);
-      return $cordovaBLE.write(storeService.getDeviceID(), service, chrcs, data.buffer);
+      return $cordovaBLE.write($storage.connected, service, chrcs, data.buffer);
     });
   };
 
@@ -249,7 +321,7 @@ angular.module('fxe.services.ble', [])
       if (!connected) throw 'fxe not connected';
 
       $log.debug('writing (without response) data ' + data + ' to ' + service + '-' + chrcs);
-      return $cordovaBLE.writeWithoutResponse(storeService.getDeviceID(), service, chrcs, data.buffer);
+      return $cordovaBLE.writeWithoutResponse($storage.connected, service, chrcs, data.buffer);
     });
   };
 
@@ -258,7 +330,7 @@ angular.module('fxe.services.ble', [])
       if (!connected) throw 'fxe not connected';
 
       $log.debug('starting notifications for ' + service + '-' + chrcs);
-      return $cordovaBLE.startNotification(storeService.getDeviceID(), service, chrcs, handler);
+      return $cordovaBLE.startNotification($storage.connected, service, chrcs, handler);
     });
   };
 
@@ -267,32 +339,40 @@ angular.module('fxe.services.ble', [])
       if (!connected) throw 'fxe not connected';
 
       $log.debug('stopping notifications for ' + service + '-' + chrcs);
-      return $cordovaBLE.stopNotification(storeService.getDeviceID(), service, chrcs);
+      return $cordovaBLE.stopNotification($storage.connected, service, chrcs);
     });
   };
 
   var isConnected = function () {
-    return $ionicPlatform.ready().then(function () {
-      var q = $q.defer();
-      var deviceID = storeService.getDeviceID();
+    var device = $storage.connected;
+    $log.debug('checking connection status');
 
-      // no deviceID = not connected
-      if (!deviceID) {
-        q.resolve(false);
-        return q.promise;
-      }
+    // if (device !== null) {
+    //   $log.debug(device + ' is connected');
+    //   return $q.resolve(true);
+    // } else {
+    //   $log.debug('no device is connected');
+    //   return $q.resolve(false);
+    // }
 
-      $log.debug('checking connection status for ' + deviceID);
-      $cordovaBLE.isConnected(deviceID).then(function () {
-        $log.debug(deviceID + ' is connected');
-        q.resolve(true);
-      }).catch(function () {
-        $log.debug(deviceID + ' is not connected');
-        q.resolve(false);
+    if (device === null) {
+      $log.debug('no device is connected');
+      return $q.resolve(false);
+    }
+
+    return $ionicPlatform.ready()
+      .then(function () {
+        return $cordovaBLE.isConnected(device);
+      })
+      .then(function () {
+        $log.debug(device + ' is connected');
+        return true;
+      })
+      .catch(function () {
+        $log.debug(device + ' is not connected');
+        $log.warn('inconsistency between stored connection status and actual status');
+        return false;
       });
-
-      return q.promise;
-    });
   };
 
   // service public API
@@ -314,4 +394,7 @@ angular.module('fxe.services.ble', [])
   this.startNotification = startNotification;
   this.stopNotification = stopNotification;
   this.isConnected = isConnected;
+  this.getConnected = getConnected;
+  this.isPaired = isPaired;
+  this.setDeviceFilter = setDeviceFilter;
 });

@@ -1,6 +1,6 @@
 {
   "name": "fxe",
-  "version": "0.9.2",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:tomasbedrich/fxe-app.git"
@@ -31,43 +31,5 @@
     "node-sass": "^4.0.0",
     "shelljs": "0.x",
     "stream-series": "0.x"
-  },
-  "cordovaPlugins": [
-    "cordova-plugin-device",
-    "cordova-plugin-console",
-    "cordova-plugin-whitelist",
-    "cordova-plugin-splashscreen",
-    "ionic-plugin-keyboard",
-    {
-      "locator": "git://github.com/litehelpers/Cordova-sqlite-storage#1.4.8",
-      "id": "cordova-sqlite-storage"
-    },
-    "cordova-plugin-x-socialsharing",
-    "cordova-plugin-x-toast",
-    "cordova-plugin-inappbrowser",
-    "cordova-plugin-statusbar",
-    "cordova-plugin-ble-central",
-    "cordova-plugin-datepicker",
-    {
-      "locator": "git://github.com/EddyVerbruggen/cordova-plugin-googleplus#5.1.1",
-      "id": "cordova-plugin-googleplus",
-      "variables": {
-        "REVERSED_CLIENT_ID": "com.googleusercontent.apps.939774376004-cpreiaeop21e43t5b15nleha6p2n4stv"
-      }
-    },
-    {
-      "locator": "cordova-plugin-facebook4",
-      "id": "cordova-plugin-facebook4",
-      "variables": {
-        "APP_ID": "471199706406826",
-        "APP_NAME": "FXE"
-      }
-    },
-    "cordova-plugin-compat",
-    "cordova-custom-config"
-  ],
-  "cordovaPlatforms": [
-    "android",
-    "ios"
-  ]
+  }
 }

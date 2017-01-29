@@ -1,6 +1,7 @@
 @import "variables";
 @import "../lib/ionic/scss/ionic";
 @import "animate.css";
+@import "progressbar";
 
 /*
 Allow angular.js to be loaded in body, hiding cloaked elements until
@@ -13,8 +14,12 @@ other selectors that are more specific or come later and might alter display.
 
 // ionic components overrides ----------------------------------------------------------------------
 .pane {
-  background: $base-background-color url("../img/background.jpg") no-repeat center fixed;
-  background-size: cover;
+  background: $base-background-color url("../img/background.jpg") no-repeat 20% 0;
+
+  @media (min-width: 1920px), (min-height: 1228px) {
+    // stretch background image only if it is smaller, than a viewport
+    background-size: cover;
+  }
 }
 
 // tabs
@@ -88,18 +93,32 @@ form {
   }
 }
 
+.button-bar.button-bar-top .button {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.button-bar.button-bar-bottom .button {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.button-bar + .button-bar {
+  margin-top: -6px;
+}
+
 // nvD3
 .nvd3 {
   .nv-axis line {
     stroke: rgba($dark, .1);
   }
   .nv-group.nv-series-0 .nv-bar,
-  .type-jumping & .nv-group.nv-series-0 .nv-area {
+  .sport-jumping & .nv-group.nv-series-0 .nv-area {
     stroke: $balanced !important;
     fill: $balanced !important;
   }
   .nv-group.nv-series-1 .nv-bar,
-  .type-running & .nv-group.nv-series-0 .nv-area {
+  .sport-running & .nv-group.nv-series-0 .nv-area {
     stroke: $royal !important;
     fill: $royal !important;
   }
@@ -153,9 +172,10 @@ form {
 .scanning {
   text-align: center;
   .status {
-    margin-top: 2rem;
+    margin-top: 4rem;
     .text {
-      font-size: 2rem;
+      font-size: 1.6rem;
+      text-transform: uppercase;
       line-height: 1.4em;
       margin: 1em 0;
     }
@@ -169,13 +189,13 @@ form {
       animation: fadeOut 0.5s;
     }
   }
-  .demo {
-    position: absolute;
-    bottom: 10%;
-    left: 0;
-    width: 100%;
-    text-align: center;
-  }
+  //.demo {
+  //  position: absolute;
+  //  bottom: 10%;
+  //  left: 0;
+  //  width: 100%;
+  //  text-align: center;
+  //}
 }
 
 .pairing {
@@ -186,15 +206,15 @@ form {
       margin: 1em 0;
     }
     .led {
-      width: 5em;
-      height: 5em;
-      border-radius: 5em;
+      width: 8em;
+      height: 8em;
+      border-radius: 8em;
       margin: 2em auto;
       border: 1px solid rgba(0, 0, 0, 0.4);
       animation: infinite pulse 2s;
     }
     .question {
-      font-size: 2rem;
+      font-size: 1.6rem;
       line-height: 1.4em;
       margin: 1em 0;
     }
@@ -250,9 +270,9 @@ form {
       transform: scale(1.4);
     }
   }
-  .share {
-    margin-bottom: 1rem;
-  }
+  //.share {
+  //  margin-bottom: 1rem;
+  //}
   .tips {
     h3 {
       font-size: 1.3em;
@@ -264,17 +284,6 @@ form {
 }
 
 .history {
-  .range-bar .button {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  .date-bar {
-    margin-top: -6px;
-    .button {
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
-    }
-  }
   .data {
     .row {
       padding: 0;
@@ -285,14 +294,30 @@ form {
     .values {
       font-size: 2rem;
     }
-    .type-jumping .item-content {
+    .sport-jumping .item-content {
       background: url("../img/jumping-bg.png") white no-repeat 93% 50%;
       background-size: 2em;
     }
-    .type-running .item-content {
+    .sport-running .item-content {
       background: url("../img/running-bg.png") white no-repeat 93% 50%;
       background-size: 2em;
     }
+  }
+}
+
+.firmware-upgrade {
+  line-height: 2em;
+  .status {
+    margin-top: 4rem;
+    .text {
+      text-align: center;
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      margin: 1em 0;
+    }
+  }
+  p {
+    font-size: 1.2em;
   }
 }
 
@@ -301,12 +326,24 @@ form {
 }
 
 .friends {
+  .item img, .item .icon {
+    vertical-align: top;
+  }
   table {
-    font-size: 0.9em;
+    font-size: .9em;
+    border-collapse: separate;
+    border-spacing: .2em;
+    th, td {
+      padding: 0 .2em 0 .3em;
+      border-left: 1px solid #eee;
+    }
+    tr :first-child {
+      padding-left: 0;
+      border-left: none;
+    }
     th {
       font-weight: bold;
       text-align: right;
-      padding-right: 0.3em;
     }
   }
   .me {

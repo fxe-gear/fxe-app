@@ -1,11 +1,22 @@
-<ion-view title="Scanning" hide-nav-bar="true">
+<ion-view title="Connect your FXE">
   <ion-content padding="true" scroll="false" class="scanning">
 
     <div class="status">
-      <div class="text">{{ status }}</div>
-      <ion-spinner ng-hide="!working" icon="lines" class="spinner-balanced"></ion-spinner>
-      <button ng-hide="working" ng-click="tryAgain()" class="button button-balanced button-block">Try again</button>
+      <div ng-switch on="status" class="text">
+        <div ng-switch-when="starting">Starting...</div>
+        <div ng-switch-when="enablingBluetooth">Enabling bluetooth...</div>
+        <div ng-switch-when="disconnecting">Disconnecting previous...</div>
+        <div ng-switch-when="scanning">Scanning...</div>
+        <div ng-switch-when="connecting">Connecting...</div>
+        <div ng-switch-when="failed">Failed</div>
+      </div>
     </div>
+
+    <div class="progress" ng-show="working">
+      <div class="indeterminate"></div>
+    </div>
+
+    <button ng-hide="working" ng-click="tryAgain()" class="button button-balanced button-block">Try again</button>
 
     <div ng-if="ignoredDevices" class="ignored">
       <p>

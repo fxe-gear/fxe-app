@@ -2,44 +2,45 @@
 
 var module = angular.module('fxe.controllers.developer', []);
 
-var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, $ionicPopup, fxeService, bleDevice, storeService) {
+var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLite, fxeService) {
 
   $scope.getBatteryLevel = function () {
-    fxeService.getBatteryLevel().then(function (level) {
-      $ionicPopup.alert({
-        title: 'Battery level',
-        template: (level * 100).toFixed(0) + '%'
+    fxeService.getBatteryLevel()
+      .then(function (level) {
+        alert('Battery level is ' + (level * 100).toFixed(0) + '%');
       });
-    });
   };
 
-  $scope.disconnect = bleDevice.disconnect;
-  $scope.reconnect = bleDevice.reconnect;
+  $scope.disconnect = fxeService.disconnect;
+  $scope.reconnect = fxeService.reconnect;
   $scope.disableConnectionHolding = fxeService.disableConnectionHolding;
 
-  $scope.dumpDB = storeService._dumpDB();
+  $scope.upgradeFirmware = function () {
+    $state.go('firmware-upgrade');
+  };
 
   $scope.unpair = function () {
-    bleDevice.unpair()
-      .then(bleDevice.isConnected)
-      .then(function (connected) {
-        if (connected) return bleDevice.disconnect();
-      }).then(function () {
-        $state.go('scanning');
+    if (!confirm('Really?')) return;
+
+    fxeService.unpair();
+    return fxeService.disconnect()
+      .finally(function () {
+        return $state.go('scanning');
       });
   };
 
   $scope.clearAll = function () {
-    bleDevice.isConnected().then(function (connected) {
-      if (connected) return bleDevice.disconnect();
-    }).then(function () {
-      $localStorage.$reset();
-      $cordovaSQLite.deleteDB({
-        name: 'store.sqlite',
-        iosDatabaseLocation: 'default'
+    if (!confirm('Really?')) return;
+
+    return fxeService.disconnect()
+      .finally(function () {
+        $localStorage.$reset();
+        $cordovaSQLite.deleteDB({
+          name: 'store.sqlite',
+          iosDatabaseLocation: 'default'
+        });
+        ionic.Platform.exitApp();
       });
-      ionic.Platform.exitApp();
-    });
   };
 
 };

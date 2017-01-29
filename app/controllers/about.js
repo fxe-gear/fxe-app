@@ -2,22 +2,29 @@
 
 var module = angular.module('fxe.controllers.about', []);
 
-var AboutController = function ($scope, $localStorage) {
+var AboutController = function ($scope, $localStorage, fxeService) {
 
   var clickCount = 0;
-  $localStorage.$default({
-    about: {
-      isDeveloper: false
-    }
-  });
-
-  $scope.persistent = $localStorage.about;
+  var $storage = $localStorage;
+  $scope.firmwareVersion = null;
 
   $scope.becomeDeveloper = function () {
     clickCount++;
-    if (clickCount >= 5) {
-      $scope.persistent.isDeveloper = true;
-    }
+    $storage.isDeveloper = $storage.isDeveloper || clickCount >= 5;
+  };
+
+  $scope.isDeveloper = function () {
+    return $storage.isDeveloper;
+  };
+
+  $scope.getFirmwareVersion = function () {
+    fxeService.getFirmwareVersion()
+      .then(function (version) {
+        $scope.firmwareVersion = version;
+      })
+      .catch(function () {
+        $scope.firmwareVersion = 'unable to get version';
+      });
   };
 
 };

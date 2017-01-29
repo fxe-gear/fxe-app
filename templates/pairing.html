@@ -1,10 +1,10 @@
-<ion-view title="Pairing" hide-nav-bar="true">
+<ion-view title="Verify ownership">
   <ion-content padding="true" scroll="false" class="pairing">
 
     <div class="color">
       <div class="step">step {{ step + 1 }} of {{ stepCount }}</div>
-      <div class="led" style="background-color: {{ color }}; box-shadow: 0 0 8px 1px {{ color }};"></div>
-      <div class="question">Do you see <br> a <span class="color">{{ colorName }}</span> light?</div>
+      <div class="led" ng-style="{'background-color': color, 'box-shadow': '0 0 8px 1px ' + color};"></div>
+      <div class="question">Do you see <br> a {{ colorName }} light?</div>
     </div>
 
     <div class="buttons">

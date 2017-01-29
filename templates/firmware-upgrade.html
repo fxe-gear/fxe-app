@@ -1,0 +1,33 @@
+<ion-view title="Firmware upgrade">
+  <ion-content padding="true" scroll="false" class="firmware-upgrade">
+
+    <div class="status">
+      <div ng-switch on="status" class="text">
+        <div ng-switch-when="starting">Starting...</div>
+        <div ng-switch-when="downloadingFirmware">Downloading firmware...</div>
+        <div ng-switch-when="deviceConnecting">Connecting...</div>
+        <div ng-switch-when="deviceConnected">Connected</div>
+        <div ng-switch-when="enablingDfuMode">Enabling DFU mode...</div>
+        <div ng-switch-when="dfuProcessStarting">Starting DFU...</div>
+        <div ng-switch-when="dfuProcessStarted">DFU started</div>
+        <div ng-switch-when="firmwareUploading">Uploading firmware...</div>
+        <div ng-switch-when="progressChanged">Uploading firmware...</div>
+        <div ng-switch-when="firmwareValidating">Validating firmware...</div>
+        <div ng-switch-when="dfuCompleted">DFU process completed</div>
+        <div ng-switch-when="deviceDisconnecting">Disconnecting...</div>
+        <div ng-switch-when="deviceDisconnected">Disconnected</div>
+        <div ng-switch-when="reconnecting">Reconnecting...</div>
+        <div ng-switch-when="dfuAborted">Aborted</div>
+        <div ng-switch-when="failed">Failed</div>
+      </div>
+
+      <div class="progress" ng-show="working">
+        <div ng-class="progress ? 'determinate' : 'indeterminate'" ng-style="{'width': progress + '%'}"></div>
+      </div>
+
+      <p>Unfortunately, the FXE is not compatible with this version of application. A firmware upgrade is required.</p>
+      <p><span class="assertive">Please do not interrupt the process!</span> It will take about 2 minutes. Until then, please keep your FXE near the phone and <span class="assertive">do not plug nor unplug it from a charger</span>.</p>
+    </div>
+
+  </ion-content>
+</ion-view>

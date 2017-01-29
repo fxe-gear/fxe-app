@@ -7,14 +7,10 @@
       <a ng-click="disconnect()" class="item">Disconnect</a>
       <a ng-click="reconnect()" class="item">Reconnect</a>
       <a ng-click="disableConnectionHolding()" class="item">Disable connection holding</a>
-      <!--<a ng-click="upgradeFirmware()" class="item">Upgrade firmware</a>-->
+      <a ng-click="upgradeFirmware()" class="item">Upgrade firmware</a>
+      <a ng-click="unpair()" class="item assertive">Unpair</a>
     </div>
 
-    <button ng-click="dumpDB()" class="button button-block button-outline button-dark">Dump DB to remote server</button>
-
-    <p><strong>Warning</strong>, no confirmation!</p>
-
-    <button ng-click="unpair()" class="button assertive button-block button-outline button-dark">Unpair device</button>
     <button ng-click="clearAll()" class="button button-assertive button-block">Clear all &amp; reset application</button>
 
   </ion-content>

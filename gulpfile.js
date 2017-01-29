@@ -48,6 +48,7 @@ templateCacheOptions = {
 
 var bowerCssFilter = [
   '*.css',
+  '_*',
   '!*.map.css',
   '!ionic.css'
 ];

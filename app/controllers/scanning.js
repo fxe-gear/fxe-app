@@ -2,15 +2,95 @@
 
 var module = angular.module('fxe.controllers.scanning', []);
 
-var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory, $ionicPopup, bleDevice, fxeService, storeService) {
+var ScanningController = function ($scope, $state, $log, $ionicHistory, $ionicPopup, $q, fxeService, apiService, appVersion) {
 
-  $scope.status = 'Starting...';
-  $scope.working = true;
+  $scope.status = null;
+  $scope.working = false;
   $scope.ignoredDevices = 0;
 
+  var upgradeOrPair = function (device) {
+    return $q.all([apiService.getLatestFirmware(device, appVersion), fxeService.getFirmwareVersion()])
+      .then(function (promises) {
+        var apiVersion = promises[0].data.application.version;
+        var deviceVersion = promises[1];
+        $log.debug('comparing device firmware ' + deviceVersion + ' and API firmware ' + apiVersion);
+
+        if (apiVersion == deviceVersion) {
+          // device firmware and API firmware match => device has latest firmware
+          return $state.go('pairing');
+
+        } else {
+          // new firmware available
+          $ionicHistory.nextViewOptions({
+            historyRoot: true
+          });
+          return $state.go('firmware-upgrade');
+        }
+      })
+      .catch(onFail);
+  };
+
+  var enter = function () {
+    if (fxeService.isPaired()) $scope.gotoStart();
+
+    $scope.status = 'starting';
+    $scope.working = true;
+    $scope.ignoredDevices = 0;
+
+    enableBluetooth()
+      .then(disconnect)
+      .then(scan)
+      .then(connect)
+      .then(upgradeOrPair, null, function () {
+        // ignored device found
+        $scope.ignoredDevices++;
+      });
+  };
+
+  var onFail = function (error) {
+    $scope.working = false;
+    $scope.status = 'failed';
+
+    return $ionicPopup.alert({
+      title: 'Scanning failed.',
+      template: 'Please try again.<br><br>' + error,
+      okType: 'button-assertive'
+    }).then(function () {
+      throw error;
+    });
+  };
+
+  var enableBluetooth = function () {
+    $scope.status = 'enablingBluetooth';
+    return fxeService.enable().catch(onFail);
+  };
+
+  var disconnect = function () {
+    $scope.status = 'disconnecting';
+    return fxeService.disconnect().catch(onFail);
+  };
+
+  var scan = function () {
+    $scope.status = 'scanning';
+    return fxeService.scan().catch(onFail);
+  };
+
+  var connect = function (device) {
+    $scope.status = 'connecting';
+    // automatically stops scanning
+    return fxeService.connect(device).catch(onFail);
+  };
+
+  var leave = function () {
+    $scope.working = false;
+    $scope.status = null;
+    $scope.ignoredDevices = 0;
+    return fxeService.stopScan().catch(onFail);
+  };
+
   $scope.clearIgnored = function () {
-    bleDevice.clearIgnored();
-    bleDevice.stopScan().then(enter);
+    fxeService.clearIgnored();
+    fxeService.stopScan().then(enter);
   };
 
   $scope.gotoStart = function () {
@@ -20,74 +100,7 @@ var ScanningController = function ($scope, $state, $ionicPlatform, $ionicHistory
     $state.go('main.start');
   };
 
-  var enter = function () {
-    if (storeService.isPaired()) $scope.gotoStart();
-
-    $scope.ignoredDevices = 0;
-    $ionicPlatform.ready()
-      .then(enableBluetooth)
-      .then(disconnect)
-      .then(scan)
-      .then(connect)
-      .then(function () {
-        // prevent changing state when the process has aleready been canceled
-        if ($state.current.controller != 'ScanningController') return disconnect();
-        $state.go('pairing');
-      }, null, function (device) {
-        // ignored device found
-        $scope.ignoredDevices++;
-      });
-  };
-
   $scope.tryAgain = enter;
-
-  var enableBluetooth = function () {
-    $scope.working = true;
-    $scope.status = 'Enabling bluetooth...';
-    return bleDevice.enable().catch(function (error) {
-      $scope.working = false;
-      $scope.status = 'Cannot enable bluetooth. Please enable it manually.';
-      throw error;
-    });
-  };
-
-  var disconnect = function () {
-    $scope.working = true;
-    $scope.status = 'Disconnecting previously connected devices...';
-    return bleDevice.isConnected().then(function (connected) {
-      if (connected) bleDevice.disconnect();
-    }).catch(function (error) {
-      $scope.working = false;
-      $scope.status = 'Disconnecting failed';
-      throw error;
-    });
-  };
-
-  var scan = function () {
-    $scope.working = true;
-    $scope.status = 'Scanning...';
-    return fxeService.scan().catch(function (error) {
-      $scope.working = false;
-      $scope.status = 'Scanning failed';
-      throw error;
-    });
-  };
-
-  var connect = function (device) {
-    $scope.working = true;
-    $scope.status = 'Connecting...';
-    return bleDevice.connect(device).catch(function (error) {
-      $scope.working = false;
-      $scope.status = 'Connecting failed';
-      throw error;
-    });
-  };
-
-  var leave = function () {
-    $scope.working = false;
-    $scope.status = 'Ready';
-    return bleDevice.stopScan();
-  };
 
   $scope.$on('$ionicView.beforeEnter', enter);
   $scope.$on('$ionicView.afterLeave', leave);
