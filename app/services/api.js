@@ -2,55 +2,29 @@
 
 var module = angular.module('fxe.services.api', []);
 
-module.constant('baseURL', 'http://dev17.nexgen.cz/api/v1');
+// module.constant('baseURL', 'http://0.0.0.0:8000/api');
+module.constant('baseURL', 'http://dev17.nexgen.cz/api/v2');
 // module.constant('baseURL', 'http://private-855a4-fxe.apiary-mock.com');
+// module.constant('baseURL', 'http://www.fxe-gear.com/api/v1');
 
-module.service('apiService', function ($http, storeService, baseURL) {
+module.config(function ($httpProvider) {
 
-  var user = storeService.getUser();
+  // add auth token if not explicitly requested to be anonymous
+  $httpProvider.interceptors.push(function(tokenService) {
+    return {
+      'request': function(config) {
+        var token = tokenService.getJumpingToken();
+        if (config.anonymous !== true && token.token) {
+          config.headers.Authorization = 'Bearer ' + token.token;
+        }
+        return config;
+      }
+    };
+  });
 
-  var request = function (config) {
-    // add auth token if not explicitly requested to be anonymous
-    config.headers = config.headers || {};
-    if (config.anonymous !== true) {
-      config.headers.Authorization = 'Bearer ' + user.provider.jumping.token;
-    }
+});
 
-    // prefix with baseURL
-    config.url = baseURL + config.url;
-
-    return $http(config);
-  };
-
-  var get = function (path, config) {
-    config = config || {};
-    config.method = 'GET';
-    config.url = path;
-    return request(config);
-  };
-
-  var post = function (path, data, config) {
-    config = config || {};
-    config.method = 'POST';
-    config.url = path;
-    config = data;
-    return request(config);
-  };
-
-  var patch = function (path, data, config) {
-    config = config || {};
-    config.method = 'PATCH';
-    config.url = path;
-    config = data;
-    return request(config);
-  };
-
-  var del = function (path, config) {
-    config = config || {};
-    config.method = 'DELETE';
-    config.url = path;
-    return request(config);
-  };
+module.service('apiService', function ($http, baseURL) {
 
   var filterParams = function (params, possibleParams) {
     params = params || {};
@@ -65,7 +39,7 @@ module.service('apiService', function ($http, storeService, baseURL) {
   // users =============================================
 
   var loginJumping = function (email, password) {
-    return post('/login/jumping', {
+    return $http.post(baseURL + '/login/jumping', {
       email: email,
       password: password
     }, {
@@ -73,17 +47,17 @@ module.service('apiService', function ($http, storeService, baseURL) {
     });
   };
 
-  var loginFacebook = function (accessToken, expiresAt) {
-    return post('/login/facebook', {
+  var loginFacebook = function (accessToken, expiresIn) {
+    return $http.post(baseURL + '/login/facebook', {
       accessToken: accessToken,
-      expiresAt: expiresAt
+      expiresIn: expiresIn
     }, {
       anonymous: true
     });
   };
 
   var loginGoogle = function (idToken, serverAuthCode) {
-    return post('/login/google', {
+    return $http.post(baseURL + '/login/google', {
       idToken: idToken,
       serverAuthCode: serverAuthCode
     }, {
@@ -92,26 +66,26 @@ module.service('apiService', function ($http, storeService, baseURL) {
   };
 
   var logout = function () {
-    return post('/logout');
+    return $http.post(baseURL + '/logout');
   };
 
   var createUser = function (user) {
     user = filterParams(user, ['email', 'password', 'name', 'weight', 'age', 'gender', 'units', 'language']);
-    return post('/user', user, {
+    return $http.post(baseURL + '/user', user, {
       anonymous: true
     });
   };
 
   var getUser = function () {
-    return get('/user');
+    return $http.get(baseURL + '/user');
   };
 
   var updateUser = function (partialUserObj) {
-    return patch('/user', partialUserObj);
+    return $http.patch(baseURL + '/user', partialUserObj);
   };
 
   var resetPassword = function (email) {
-    return post('/user/resetPassword', {
+    return $http.post(baseURL + '/user/resetPassword', {
       email: email
     }, {
       anonymous: true
@@ -121,21 +95,21 @@ module.service('apiService', function ($http, storeService, baseURL) {
   // lessons =============================================
 
   var getLessons = function (params) {
-    return get('/lessons', {
+    return $http.get(baseURL + '/lessons', {
       params: filterParams(params, ['maxResults', 'syncToken', 'pageToken', 'fields'])
     });
   };
 
   var uploadLesson = function (lesson) {
-    return post('/lesson', lesson);
+    return $http.post(baseURL + '/lesson', lesson);
   };
 
   var getLesson = function (start) {
-    return get('/lesson/' + start);
+    return $http.get(baseURL + '/lesson/' + start);
   };
 
   var deleteLesson = function (start) {
-    return del('/lesson/' + start);
+    return $http.delete(baseURL + '/lesson/' + start);
   };
 
   // events =============================================
@@ -145,13 +119,13 @@ module.service('apiService', function ($http, storeService, baseURL) {
     params = filterParams(params, possible);
     params.sport = sport;
 
-    return get('/events', {
+    return $http.get(baseURL + '/events', {
       params: params
     });
   };
 
   var getEvent = function (id) {
-    return get('/event/' + id);
+    return $http.get(baseURL + '/event/' + id);
   };
 
   // friends =============================================
@@ -160,19 +134,20 @@ module.service('apiService', function ($http, storeService, baseURL) {
     params = filterParams(params, ['fields', 'pageToken']);
     params.sport = sport;
 
-    return get('/friends', {
+    return $http.get(baseURL + '/friends', {
       params: params
     });
   };
 
   // firmwares =============================================
 
-  var getLatestFirmware = function (device) {
-    device = device.toLowerCase().replace(':', '-');
+  var getLatestFirmware = function (device, app) {
+    device = device.toLowerCase().replace(/:/g, '-');
 
-    return get('/firmware/latest', {
+    return $http.get(baseURL + '/firmware/latest', {
       params: {
-        device: device
+        device: device,
+        app: app
       }
     });
   };
@@ -180,7 +155,7 @@ module.service('apiService', function ($http, storeService, baseURL) {
   // logging =============================================
 
   var log = function (data) {
-    return post('/log', data);
+    return $http.post(baseURL + '/log', data);
   };
 
   // service public API =============================================
