@@ -45,7 +45,8 @@ var FirmwareUpgradeController = function ($scope, $state, $log, $ionicHistory, $
     return apiService.getLatestFirmware(device)
       .then(function (response) {
         var app = response.data.application;
-        var target = 'cdvfile://localhost/persistent/firmwares/' + app.version;
+        // ZIP extension required because of Nordic-iOS-DFU library check
+        var target = 'cdvfile://localhost/persistent/firmwares/' + app.version + '.zip';
         return downloadFirmware(app.url, target);
       })
       .then(function (firmware) {
