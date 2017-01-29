@@ -1,10 +1,10 @@
 <ion-view title="Settings">
   <ion-content padding="true" scroll="true" class="has-header settings">
 
-    <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-if="!paired">Connect your FXE</a>
-     <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-if="!loggedIn">Login</a>
+    <a ng-click="goto('scanning')" class="button button-block button-balanced" ng-if="!isPaired()">Connect your FXE</a>
+     <a ng-click="goto('welcome')" class="button button-block button-balanced" ng-if="!isLoggedIn()">Login</a>
 
-    <div ng-show="loggedIn">
+    <div ng-show="isLoggedIn()">
       <jump-account class="card" user="user" title="My profile" change="true">
         <button class="button button-block button-balanced" ng-disabled="$parent.f.$invalid || $parent.f.syncInProgress" ng-hide="$parent.f.$pristine" ng-click="sync($parent.f); $parent.f.showEmailField = false; $parent.f.showPasswordField = false">
           {{ !$parent.f.syncInProgress ? 'Save changes' : 'Saving...' }}
@@ -14,7 +14,8 @@
 
     <div class="card list">
       <a class="item" onclick="window.open('http://www.jumpingshop.cz/?lang=en', '_system')">E-shop</a>
-      <a class="item" onclick="window.open('http://www.jumping-fitness.com/contacts', '_system')">Support</a>
+      <a class="item" onclick="window.open('http://www.fxe-gear.com/en/contact', '_system')">Support</a>
+      <a class="item" onclick="window.open('http://www.fxe-gear.com/en/privacy-policy', '_system')">Privacy policy</a>
       <a class="item" ui-sref="main.about">About</a>
     </div>
 

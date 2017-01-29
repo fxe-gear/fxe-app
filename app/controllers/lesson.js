@@ -2,10 +2,10 @@
 
 var module = angular.module('fxe.controllers.lesson', []);
 
-// interval used in diff graph (in miliseconds)
+// interval used in diff graph (in milliseconds)
 module.constant('diffGraphInterval', 120 * 1e3);
 
-var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, storeService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle) {
+var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, lessonService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle) {
 
   var tips = {
     jumping: [
@@ -59,27 +59,27 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
   };
   $scope.chartData = [line];
 
-  var share = function () {
-    // TODO Facebook for Android not working! http://ngcordova.com/docs/plugins/socialSharing/
-    // share image instead
-    var message = 'My jumping score in last lesson was ' + $scope.lesson.score.toFixed(0) + '!';
-    $cordovaSocialSharing.share(message).catch(function (error) {
-      // sharing result is nonsense boolean (see https://goo.gl/XYpqiQ) so we only catch errors
-      $ionicPopup.alert({
-        title: 'Sharing failed.',
-        template: 'Please try it again.',
-        okType: 'button-assertive'
-      });
-      throw error;
-    });
-  };
+  // var share = function () {
+  //   // TODO Facebook for Android not working! http://ngcordova.com/docs/plugins/socialSharing/
+  //   // share image instead
+  //   var message = 'My jumping score in last lesson was ' + $scope.lesson.score.toFixed(0) + '!';
+  //   $cordovaSocialSharing.share(message).catch(function (error) {
+  //     // sharing result is nonsense boolean (see https://goo.gl/XYpqiQ) so we only catch errors
+  //     $ionicPopup.alert({
+  //       title: 'Sharing failed.',
+  //       template: 'Please try it again.',
+  //       okType: 'button-assertive'
+  //     });
+  //     throw error;
+  //   });
+  // };
 
   var prepareChartData = function () {
     // limit number of intervals for lessons longer than two hours
     var limitLessonLength = 3600 * 1e3;
     var interval = (lesson.duration < limitLessonLength) ? diffGraphInterval : (diffGraphInterval * lesson.duration / limitLessonLength);
 
-    storeService.getLessonDiffData(lesson.start, interval).then(function (data) {
+    lessonService.getLessonDiffData(lesson.start, interval).then(function (data) {
       for (var i = 0; i <= data.length; i++) {
         line.values.push({
           x: msToDateFilter(i * interval),
@@ -90,11 +90,10 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, sto
     });
   };
 
-  $scope.share = share;
   $scope.lesson = lesson;
   $scope.$on('$ionicView.beforeEnter', function () {
     prepareChartData();
-    $scope.tip = lesson.type == 1 ? shuffle(tips.jumping)[0] : shuffle(tips.running)[0];
+    $scope.tip = lesson.sport == 1 ? shuffle(tips.jumping)[0] : shuffle(tips.running)[0];
   });
 };
 

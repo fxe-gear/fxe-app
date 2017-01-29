@@ -2,22 +2,33 @@
 
 var module = angular.module('fxe.controllers.settings', []);
 
-var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, $cordovaToast, $ionicHistory, storeService, syncService, diffWatch) {
+var SettingsController = function ($scope, $state, $ionicPopup, $cordovaToast, $ionicHistory, userService, fxeService, syncService, diffWatch) {
 
   $scope.user = {};
+  $scope.isLoggedIn = userService.isLoggedIn;
+  $scope.isPaired = fxeService.isPaired;
 
   var disableUserWatcher = angular.noop;
 
-  var enter = function () {
-    // copy store user to $scope.user
-    angular.merge($scope.user, storeService.getUser());
-
+  var enableUserWatcher = function () {
     // add $scope.user watcher
     disableUserWatcher = diffWatch($scope, 'user', onUserChange);
+  };
 
-    // load loggedIn and paired
-    $scope.loggedIn = storeService.isLoggedIn();
-    $scope.paired = storeService.isPaired();
+  var onUserChange = function (changes) {
+    // pass the changes to userService
+    angular.merge(userService.getUserChanges(), changes.updated);
+  };
+
+  var reloadUser = function () {
+    // copy fresh user data to $scope.user
+    angular.merge($scope.user, userService.getUser());
+  };
+
+  var enter = function () {
+    reloadUser();
+    enableUserWatcher();
+    syncService.syncUser();
   };
 
   var leave = function () {
@@ -25,34 +36,26 @@ var SettingsController = function ($scope, $state, $ionicPlatform, $ionicPopup, 
   };
 
   $scope.sync = function (form) {
-    // TODO show progress
-    // console.log(storeService.getUserChanges());
-    if (!$scope.loggedIn) return;
-
     form.syncInProgress = true;
 
     return syncService.syncUser()
       .then(function () {
-        disableUserWatcher(); // disable
-        angular.merge($scope.user, storeService.getUser()); // copy changes
-        disableUserWatcher = diffWatch($scope, 'user', onUserChange); // enable
-        form.syncInProgress = false;
+        disableUserWatcher();
+        reloadUser();
+        enableUserWatcher();
         form.$setPristine();
         return $cordovaToast.showShortBottom('Saved.');
       })
-      .catch(function (error) {
+      .catch(function () {
         // TODO handle server side validation errors
-        form.syncInProgress = false;
         $ionicPopup.alert({
           title: 'Account synchronization failed.',
           okType: 'button-assertive'
         });
-      });
-  };
-
-  var onUserChange = function (changes) {
-    // pass the changes to storeService
-    angular.merge(storeService.getUserChanges(), changes.updated);
+      })
+      .finally(function () {
+        form.syncInProgress = false;
+      })
   };
 
   $scope.goto = function (target) {

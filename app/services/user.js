@@ -3,14 +3,33 @@
 // because of facebook "access_token":
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 
-angular.module('fxe.services.user', [])
+var module = angular.module('fxe.services.user', []);
 
-.service('userService', function ($rootScope, $http, $log, $ionicPlatform, $cordovaFacebook, storeService, apiService, $q) {
+module.service('userService', function ($rootScope, $log, $q, $localStorage, $ionicPlatform, $cordovaFacebook, apiService, tokenService) {
 
-  var user = storeService.getUser();
+  var $storage = $localStorage.$default({
+    user: {
+      email: null,
+      password: null,
+      name: null,
+      weight: null,
+      age: null,
+      gender: null,
+      units: null
+    },
+    userChanges: {}
+  });
 
-  var getAge = function (ISOdate) {
-    return Math.floor((Date.now() - Date.parse(ISOdate)) / (1000 * 60 * 60 * 24 * 365));
+  var getUser = function () {
+    return $storage.user;
+  };
+
+  var isLoggedIn = function () {
+    return tokenService.getJumpingToken().token != null;
+  };
+
+  var getUserChanges = function () {
+    return $storage.userChanges;
   };
 
   var getFacebookToken = function () {
@@ -22,20 +41,12 @@ angular.module('fxe.services.user', [])
         return $cordovaFacebook.login(fields);
       })
       .then(function (response) {
-        return $cordovaFacebook.getAccessToken();
-      })
-      .then(function (token) {
-        // convert expiresIn (relative seconds) to expiresAt (milliseconds timestamp)
-        // var expiresAt = new Date();
-        // expiresAt.setSeconds(expiresAt.getSeconds() + response.authResponse.expiresIn);
-        // expiresAt = expiresAt.getTime();
-
-        // store token
-        storeService.setToken('facebook', token, 0);
+        // see https://github.com/jeduan/cordova-plugin-facebook4#login
+        tokenService.setFacebookToken(response.authResponse);
         $log.info('got facebook token');
       })
       .catch(function (error) {
-        $log.error('getting facebook token failed:' + error);
+        $log.error('getting facebook token failed', error);
         throw error;
       });
   };
@@ -43,8 +54,15 @@ angular.module('fxe.services.user', [])
   var getGoogleToken = function () {
     var q = $q.defer();
 
+    // see https://developers.google.com/android/reference/com/google/android/gms/common/Scopes
+    var scopes = ['profile', 'email'];
+    scopes.push('https://www.googleapis.com/auth/fitness.activity.write');
+    scopes.push('https://www.googleapis.com/auth/fitness.body.read');
+    scopes.push('https://www.googleapis.com/auth/plus.login');
+
     var callback = function (response) {
-      storeService.setToken('google', response.oauthToken, 0);
+      // see https://github.com/EddyVerbruggen/cordova-plugin-googleplus#login
+      tokenService.setGoogleToken(response);
       $log.info('got google token');
       q.resolve(response);
     };
@@ -53,83 +71,72 @@ angular.module('fxe.services.user', [])
       .then(function () {
         $log.debug('getting google token');
 
-        // see https://developers.google.com/android/reference/com/google/android/gms/common/Scopes
-        var scopes = ['profile', 'email'];
-        scopes.push('https://www.googleapis.com/auth/fitness.activity.write');
-        scopes.push('https://www.googleapis.com/auth/fitness.body.read');
-        scopes.push('https://www.googleapis.com/auth/plus.login');
-
         // do the request
         window.plugins.googleplus.login({
-          scopes: scopes.join(' ')
+          scopes: scopes.join(' '),
+          webClientId: '939774376004-bm94sgchalcr3ai0on6eac0u0sjhels1.apps.googleusercontent.com',
+          offline: true
         }, callback, q.reject);
 
         return q.promise;
       })
       .catch(function (error) {
-        $log.error('getting google token failed:' + error);
+        $log.error('getting google token failed', error);
         throw error;
       });
   };
 
   var loginCallback = function (response) {
-    storeService.setToken('jumping', response.data.token, response.data.expiresAt);
+    tokenService.setJumpingToken(response.data);
     $log.info('logged in (got jumping token)');
   };
 
   var loginFacebook = function () {
     $log.debug('logging in using facebook provider');
-    var provider = user.provider.facebook;
-    return apiService.loginFacebook(provider.token, provider.expiresAt)
+    var provider = tokenService.getFacebookToken();
+    return apiService.loginFacebook(provider.accessToken, parseInt(provider.expiresIn, 10))
       .then(loginCallback);
   };
 
   var loginGoogle = function () {
     $log.debug('logging in using google provider');
-    var provider = user.provider.google;
-    return apiService.loginGoogle(provider.token, provider.expiresAt)
+    var provider = tokenService.getGoogleToken();
+    return apiService.loginGoogle(provider.idToken, provider.serverAuthCode)
       .then(loginCallback);
   };
 
   var loginJumping = function () {
     $log.debug('logging in using jumping provider');
-    return apiService.loginJumping(user.email, user.password)
+    return apiService.loginJumping($storage.user.email, $storage.user.password)
       .then(loginCallback);
   };
 
   var createAccount = function () {
     $log.debug('creating user account');
-    return apiService.createUser(user)
+    return apiService.createUser($storage.user)
       .then(function (response) {
         $log.info('user account created');
         loginCallback(response);
       });
   };
 
-  var loadDetails = function () {
-    $log.debug('loading user details');
-    return apiService.getUser()
-      .then(function (response) {
-        angular.merge(user, response.data);
-        $log.info('user details loaded');
-      });
-  };
-
   var resetPassword = function () {
     $log.debug('requesting user password reset');
-    return apiService.resetPassword(user.email)
-      .then(function (response) {
+    return apiService.resetPassword($storage.user.email)
+      .then(function () {
         $log.info('user password reset requested');
       });
   };
 
   // service public API
+  this.getUser = getUser;
+  this.isLoggedIn = isLoggedIn;
+  this.getUserChanges = getUserChanges;
   this.getFacebookToken = getFacebookToken;
   this.getGoogleToken = getGoogleToken;
   this.loginFacebook = loginFacebook;
   this.loginGoogle = loginGoogle;
   this.loginJumping = loginJumping;
-  this.loadDetails = loadDetails;
   this.resetPassword = resetPassword;
   this.createAccount = createAccount;
 });

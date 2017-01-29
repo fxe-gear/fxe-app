@@ -2,14 +2,14 @@
 
 var module = angular.module('fxe.controllers.history', []);
 
-var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $cordovaDatePicker, storeService, dateFilter, ordinalFilter) {
-  $scope.user = storeService.getUser();
+var HistoryController = function ($scope, $ionicListDelegate, $cordovaDatePicker, lessonService, userService, syncService) {
+  $scope.user = userService.getUser();
   $scope.lessons = [];
   $scope.summary = {
     score: 0,
     duration: 0
   };
-  $scope.range = null;
+  $scope.range = 'week';
 
   var jumpingBars = {
     values: [],
@@ -52,7 +52,6 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   $scope.startDate = null;
   $scope.endDate = null;
-  var allLessonCount = 0;
 
   // requires $scope.range to be set
   var computeDateRange = function (base) {
@@ -96,7 +95,6 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   // requires $scope.lessons to be set
   var fillChart = function () {
-    var label;
 
     jumpingBars.values.length = 0;
     runningBars.values.length = 0;
@@ -116,7 +114,7 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
       var sum = [0, 0]; // first index = jumping, second index = running
       for (; currentLesson >= 0 && groupingFn[$scope.range](date, new Date($scope.lessons[currentLesson].start)); currentLesson--) {
         var l = $scope.lessons[currentLesson];
-        sum[l.type == 1 ? 0 : 1] += l.score;
+        sum[l.sport == 1 ? 0 : 1] += l.score;
       }
 
       jumpingBars.values.push({
@@ -157,7 +155,8 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
   };
 
   var enter = function () {
-    $ionicPlatform.ready().then(reloadLessons);
+    computeDateRange(new Date());
+    return syncService.syncLessons().finally(reloadLessons);
   };
 
   var leave = function () {
@@ -166,7 +165,7 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   var reloadLessons = function () {
     // load lessons for current date interval
-    return storeService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime())
+    return lessonService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime())
       .then(function (lessons) {
         $scope.lessons.length = 0;
         for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
@@ -236,16 +235,10 @@ var HistoryController = function ($scope, $ionicPlatform, $ionicListDelegate, $c
 
   $scope.delete = function (index, start) {
     $scope.lessons.splice(index, 1);
-    storeService.deleteLesson(start)
-      .then(function () {
-        reloadLessons();
-      });
+    lessonService.deleteLesson(start)
+      .then(syncService.syncLessons)
+      .finally(reloadLessons);
   };
-
-  $ionicPlatform.ready(function () {
-    $scope.range = 'week';
-    computeDateRange(new Date());
-  });
 
   $scope.$on('$ionicView.beforeEnter', enter);
   $scope.$on('$ionicView.afterLeave', leave);

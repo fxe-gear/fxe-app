@@ -79,8 +79,8 @@ angular.module('fxe.routes', [])
         templateUrl: 'main/me/lesson.html',
         controller: 'LessonController',
         resolve: {
-          lesson: function ($stateParams, storeService) {
-            return storeService.getLesson($stateParams.start);
+          lesson: function ($stateParams, lessonService) {
+            return lessonService.getLesson($stateParams.start);
           }
         }
       }

@@ -1,12 +1,12 @@
 <ion-view title="{{ user.name || 'Me' }}">
   <ion-content padding="true" class="history">
 
-    <div class="row button-bar range-bar">
+    <div class="row button-bar button-bar-top">
       <button ng-click="changeRange('week')" ng-class="{'button-outline': range != 'week'}" class="col button button-small button-dark">week</button>
       <button ng-click="changeRange('month')" ng-class="{'button-outline': range != 'month'}" class="col button button-small button-dark">month</button>
       <button ng-click="changeRange('year')" ng-class="{'button-outline': range != 'year'}" class="col button button-small button-dark">year</button>
     </div>
-    <div class="row button-bar date-bar">
+    <div class="row button-bar button-bar-bottom">
       <button ng-click="shiftRange(-1)" class="col button button-outline button-small button-dark icon ion-chevron-left"></button>
       <button ng-click="changeDate()" style="flex-basis:75%;" class="col button button-outline button-small button-dark">{{ startDate | date:'shortDate' }} – {{ endDate | date:'shortDate' }}</button>
       <button ng-click="shiftRange(1)" class="col button button-outline button-small button-dark icon ion-chevron-right"></button>
@@ -49,8 +49,8 @@
       <div class="item item-divider">
         History
       </div>
-      <ion-item ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start" ng-class="lesson.type == 1 ? 'type-jumping' : 'type-running'">
-        <h2>{{ ::lesson.type == 1 ? 'Jumping' : 'Running' }} {{ ::lesson.start | date:'short' }}</h2>
+      <ion-item ui-sref="main.lesson({start: lesson.start})" ng-repeat="lesson in lessons track by lesson.start" ng-class="lesson.sport == 1 ? 'sport-jumping' : 'sport-running'">
+        <h2>{{ ::lesson.sport == 1 ? 'Jumping' : 'Running' }} {{ ::lesson.start | date:'short' }}</h2>
         <strong>{{ ::lesson.score | number:0 }} points</strong>, {{ ::lesson.duration | msToDate | date:'HH:mm' }}
         <ion-option-button class="button-assertive" ng-click="delete($index, lesson.start)">Delete</ion-option-button>
       </ion-item>

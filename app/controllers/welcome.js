@@ -2,16 +2,14 @@
 
 var module = angular.module('fxe.controllers.welcome', []);
 
-var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
+var WelcomeController = function ($scope, $state, $ionicPopup, $ionicHistory, userService, syncService) {
 
   $scope.loginFacebook = function () {
     userService.getFacebookToken()
-      .then(function () {
-        return $state.go('scanning');
-      })
       .then(userService.loginFacebook)
-      .then(userService.loadDetails)
-      .catch(function (error) {
+      .then($scope.gotoScanning)
+      .then(syncService.syncUser)
+      .catch(function () {
         $ionicPopup.alert({
           title: 'Facebook login failed.',
           template: 'Please try again.',
@@ -22,18 +20,23 @@ var WelcomeController = function ($scope, $state, $ionicPopup, userService) {
 
   $scope.loginGoogle = function () {
     userService.getGoogleToken()
-      .then(function () {
-        return $state.go('scanning');
-      })
       .then(userService.loginGoogle)
-      .then(userService.loadDetails)
-      .catch(function (error) {
+      .then($scope.gotoScanning)
+      .then(syncService.syncUser)
+      .catch(function () {
         $ionicPopup.alert({
           title: 'Google login failed.',
           template: 'Please try again.',
           okType: 'button-assertive'
         });
       });
+  };
+
+  $scope.gotoScanning = function () {
+    $ionicHistory.nextViewOptions({
+      historyRoot: true
+    });
+    return $state.go('scanning');
   };
 };
 

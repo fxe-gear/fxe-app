@@ -9,17 +9,18 @@ var module = angular.module('fxe', [
   'fxe.services.logging',
   'fxe.services.util',
   'fxe.services.user',
-  'fxe.services.store',
+  'fxe.services.lesson',
   'fxe.services.api',
   'fxe.services.sync',
   'fxe.services.event',
+  'fxe.services.friend',
   'fxe.services.token',
   'fxe.services.bleApi',
   'fxe.services.ble',
   'fxe.services.fxe',
 
   'fxe.controllers.welcome',
-  'fxe.controllers.account',
+  'fxe.controllers.createAccount',
   'fxe.controllers.history',
   'fxe.controllers.friends',
   'fxe.controllers.start',
@@ -31,7 +32,7 @@ var module = angular.module('fxe', [
   'fxe.controllers.settings',
   'fxe.controllers.developer',
   'fxe.controllers.about',
-  'fxe.controllers.reset',
+  'fxe.controllers.passwordReset',
   'fxe.controllers.firmwareUpgrade',
 
   'fxe.directives.account',
@@ -48,7 +49,7 @@ module.config(function ($qProvider) {
 // TODO make automatic from package.json or config.xml
 module.constant('appVersion', '1.0.0');
 
-module.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, storeService, fxeService, syncService) {
+module.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, lessonService, fxeService, syncService) {
 
   $ionicPlatform.ready().then(function () {
     console.debug('platform ready fired');
@@ -72,7 +73,7 @@ module.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, st
     }
 
     // prepare DB
-    storeService.prepareDB();
+    lessonService.prepareDB();
 
     // sync data
     syncService.syncAll();

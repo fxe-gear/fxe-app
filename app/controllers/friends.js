@@ -2,20 +2,26 @@
 
 var module = angular.module('fxe.controllers.friends', []);
 
-var FriendsController = function ($scope, $state, $ionicHistory, storeService) {
+var FriendsController = function ($scope, $state, $ionicHistory, userService, friendService, syncService) {
 
-  $scope.friends = storeService.getFriends();
+  $scope.friends = friendService.getFriends();
+  $scope.user = userService.getUser();
   $scope.range = null;
-  $scope.loggedIn = null;
-  $scope.meID = storeService.getUser().id;
+  $scope.sport = null;
+  $scope.isLoggedIn = userService.isLoggedIn;
 
   var enter = function () {
     $scope.range = 'last';
-    $scope.loggedIn = storeService.isLoggedIn();
+    $scope.changeSport(1);
   };
 
   $scope.changeRange = function (range) {
     $scope.range = range;
+  };
+
+  $scope.changeSport = function (sport) {
+    $scope.sport = sport;
+    syncService.syncFriends($scope.sport);
   };
 
   $scope.hasFriends = function () {
@@ -42,7 +48,11 @@ module.filter('orderByScoreDesc', function () {
     });
 
     filtered.sort(function (a, b) {
-      return b.score[range] - a.score[range];
+      if (range == 'last') {
+        return b.score.last - a.score.last;
+      } else {
+        return b.score.sum[range] - a.score.sum[range];
+      }
     });
 
     return filtered;

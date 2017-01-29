@@ -14,7 +14,7 @@ other selectors that are more specific or come later and might alter display.
 
 // ionic components overrides ----------------------------------------------------------------------
 .pane {
-  background: $base-background-color url("../img/background.jpg") no-repeat 20% 0;
+  background: $base-background-color url("../img/background.jpg") no-repeat 50% 0;
 
   @media (min-width: 1920px), (min-height: 1228px) {
     // stretch background image only if it is smaller, than a viewport

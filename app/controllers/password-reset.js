@@ -1,10 +1,10 @@
 'use strict';
 
-var module = angular.module('fxe.controllers.reset', []);
+var module = angular.module('fxe.controllers.passwordReset', []);
 
-var PasswordResetController = function ($scope, $state, $ionicHistory, $ionicPopup, userService, storeService) {
+var PasswordResetController = function ($scope, $ionicHistory, $ionicPopup, userService) {
 
-  $scope.user = storeService.getUser();
+  $scope.user = userService.getUser();
 
   $scope.reset = function () {
     userService.resetPassword()
@@ -15,7 +15,8 @@ var PasswordResetController = function ($scope, $state, $ionicHistory, $ionicPop
           okType: 'button-balanced'
         });
         $ionicHistory.goBack();
-      }).catch(function (error) {
+      })
+      .catch(function () {
         $ionicPopup.alert({
           title: 'Password reset failed.',
           template: 'Please try again.',
