@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.fxe.fxe" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
+<widget id="com.fxe.fxe" version="1.0.3" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
   <name>FXE</name>
   <description>Official companion app for FXE® sensor.</description>
   <author email="info@fxe-gear.com" href="https://fxe-gear.com/">FXE</author>
