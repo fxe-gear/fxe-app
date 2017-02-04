@@ -101,7 +101,7 @@
     <variable name="BLUETOOTH_USAGE_DESCRIPTION" value="Application needs to communicate with a FXE device."/>
   </plugin>
   <plugin name="cordova-plugin-googleplus" spec="git://github.com/EddyVerbruggen/cordova-plugin-googleplus#5.1.1">
-    <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.939774376004-bm94sgchalcr3ai0on6eac0u0sjhels1"/>
+    <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.939774376004-cpreiaeop21e43t5b15nleha6p2n4stv"/>
   </plugin>
   <plugin name="cordova-plugin-facebook4" spec="~1.7.4">
     <variable name="APP_ID" value="471199706406826"/>
