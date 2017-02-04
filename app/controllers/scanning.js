@@ -9,7 +9,32 @@ var ScanningController = function ($scope, $state, $log, $ionicHistory, $ionicPo
   $scope.ignoredDevices = 0;
 
   var upgradeOrPair = function (device) {
-    return $q.all([apiService.getLatestFirmware(device, appVersion), fxeService.getFirmwareVersion()])
+
+    // get latest firmware from API
+    var latestFirmwarePromise = apiService.getLatestFirmware(device, appVersion)
+      .catch(function (error) {
+        return $ionicPopup.alert({
+          title: 'Cannot get the latest firmware.',
+          template: 'The internet connection is required to verify your FXE compatibility.<br><br>' + error.statusText,
+          okType: 'button-assertive'
+        }).then(function () {
+          throw error;
+        });
+      });
+
+    // get the current firmware from device
+    var firmwareVersionPromise = fxeService.getFirmwareVersion()
+      .catch(function (error) {
+        return $ionicPopup.alert({
+          title: 'Cannot read current firmware version.',
+          template: 'Cannot read the current firmware version from your FXE. Please try again<br><br>' + error,
+          okType: 'button-assertive'
+        }).then(function () {
+          throw error;
+        });
+      });
+
+    return $q.all([latestFirmwarePromise, firmwareVersionPromise])
       .then(function (promises) {
         var apiVersion = promises[0].data.application.version;
         var deviceVersion = promises[1];
