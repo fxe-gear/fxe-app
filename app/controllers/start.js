@@ -126,7 +126,8 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
         $scope.lesson.sport = null;
         $scope.lesson.event = null;
         $scope.lesson.end = null;
-        $scope.lesson.score = [];
+        $scope.lesson.score.length = 0;
+        $localStorage.$apply();
         return $state.go('main.history');
       });
   };

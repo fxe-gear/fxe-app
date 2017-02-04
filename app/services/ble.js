@@ -29,7 +29,9 @@ module.service('bleService', function ($rootScope, $ionicPlatform, $cordovaBLE, 
   });
 
   var setDeviceFilter = function (filter) {
+    $storage.filter.length = 0;
     $storage.filter.push.apply($storage.filter, filter);
+    $localStorage.$apply(); // see https://github.com/gsklee/ngStorage/pull/145
   };
 
   var getConnected = function () {
@@ -232,6 +234,7 @@ module.service('bleService', function ($rootScope, $ionicPlatform, $cordovaBLE, 
   var unpair = function () {
     $storage.paired = null;
     $log.info('device ' + $storage.connected + ' unpaired');
+    $localStorage.$apply(); // see https://github.com/gsklee/ngStorage/pull/145
   };
 
   var ignore = function () {
@@ -243,6 +246,7 @@ module.service('bleService', function ($rootScope, $ionicPlatform, $cordovaBLE, 
     }
     if (!isIgnored(device)) {
       $storage.ignored.push(device);
+      $localStorage.$apply(); // see https://github.com/gsklee/ngStorage/pull/145
       $log.info(device + ' added to ignore list');
     } else {
       $log.warn('ignoring ignore request - device ' + device + ' already ignored');
@@ -251,7 +255,8 @@ module.service('bleService', function ($rootScope, $ionicPlatform, $cordovaBLE, 
   };
 
   var clearIgnored = function () {
-    $storage.ignored = [];
+    $storage.ignored.length = 0;
+    $localStorage.$apply(); // see https://github.com/gsklee/ngStorage/pull/145
     return $q.resolve();
   };
 
