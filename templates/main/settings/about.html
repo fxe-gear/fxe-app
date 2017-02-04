@@ -6,36 +6,25 @@
     </div>
 
     <div class="card">
-      <div class="item item-divider">
-        Application version
-      </div>
+      <div class="item item-divider">Application version</div>
       <div class="item item-text-wrap">
-        <!-- build:git-tag -->
-        <!-- endbuild -->
+        {{ appVersion }}
       </div>
-      <div class="item item-divider">
-        Device firmware version
-      </div>
+      <div class="item item-divider">Device firmware version</div>
       <div class="item item-text-wrap" ng-click="getFirmwareVersion()">
         {{ firmwareVersion || 'click to get' }}
       </div>
-      <div class="item item-divider">
-        GIT branch
-      </div>
+      <div class="item item-divider">GIT branch</div>
       <div class="item item-text-wrap">
         <!-- build:git-branch -->
         <!-- endbuild -->
       </div>
-      <div class="item item-divider">
-        GIT SHA
-      </div>
+      <div class="item item-divider">GIT SHA</div>
       <div class="item item-text-wrap" ng-click="becomeDeveloper()">
         <!-- build:git-head-sha -->
         <!-- endbuild -->
       </div>
-      <div class="item item-divider">
-        Build date
-      </div>
+      <div class="item item-divider">Build date</div>
       <div class="item item-text-wrap">
         <!-- build:date -->
         <!-- endbuild -->

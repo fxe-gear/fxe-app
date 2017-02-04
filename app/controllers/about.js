@@ -2,11 +2,12 @@
 
 var module = angular.module('fxe.controllers.about', []);
 
-var AboutController = function ($scope, $localStorage, fxeService) {
+var AboutController = function ($scope, $localStorage, fxeService, appVersion) {
 
   var clickCount = 0;
   var $storage = $localStorage;
   $scope.firmwareVersion = null;
+  $scope.appVersion = appVersion;
 
   $scope.becomeDeveloper = function () {
     clickCount++;
