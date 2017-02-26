@@ -4,14 +4,14 @@
 
 The system-wide prerequisites are:
 
-- [NodeJS with npm](https://nodejs.org/en/download/) - JS runtime and package manager `npm`
-- [Ionic framework](http://ionicframework.com/getting-started/) - hybrid framework
+- [NodeJS 6.x with npm](https://nodejs.org/en/download/) - JS runtime and package manager `npm`
+- [Ionic framework 1.x](http://ionicframework.com/getting-started/) - hybrid framework
 - [Gulp](http://gulpjs.com/) - asset builder
 
 #### Installation
 
 ```bash
-git clone https://github.com/tomasbedrich/fxe-app
+git clone https://github.com/fxe-gear/fxe-app
 cd fxe-app
 npm install
 bower install
