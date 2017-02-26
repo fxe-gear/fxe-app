@@ -42,10 +42,6 @@ var module = angular.module('fxe', [
   'fxe.templates'
 ]);
 
-module.config(function ($qProvider) {
-  $qProvider.errorOnUnhandledRejections(false);
-});
-
 // TODO make automatic from package.json or config.xml
 module.constant('appVersion', '1.0.3');
 
@@ -68,7 +64,7 @@ module.run(function ($ionicConfig, $ionicPlatform, $ionicHistory, $rootScope, le
     }
 
     // statusbar setup
-    if (StatusBar) {
+    if (window.StatusBar) {
       StatusBar.styleLightContent();
     }
 
