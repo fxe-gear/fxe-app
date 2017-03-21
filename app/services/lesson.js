@@ -164,7 +164,29 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
       };
 
       // add derived duration
-      lesson.duration = row.end_time - row.start_time;
+       lesson.duration = row.end_time - row.start_time;
+
+      getScore(start).then(function (score) {
+            var s = (score[score.length - 1].time - score[0].time);
+
+            var ms = s % 1000;
+            s = (s - ms) / 1000;
+            var secs = s % 60;
+            s = (s - secs) / 60;
+            var mins = s % 60;
+            var hrs = (s - mins) / 60;
+
+            if (hrs === 0)
+              hrs = "00";
+
+            if (mins === 0)
+                mins = "00";
+
+            if (secs === 0)
+                secs = "00";
+
+            lesson.duration_real  = hrs + ':' + mins + ':' + secs ;
+      });
 
       if (withCompleteScore) {
         // select complete score if required
@@ -252,6 +274,7 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
   this.getLessonCount = getLessonCount;
   this.getLessonsBetween = getLessonsBetween;
   this.getLesson = getLesson;
+  this.getScore = getScore;
   this.getLessonDiffData = getLessonDiffData;
   this.getDeletedLessons = getDeletedLessons;
   this.getNewLessons = getNewLessons;

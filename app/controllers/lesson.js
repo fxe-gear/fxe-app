@@ -77,16 +77,36 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
   var prepareChartData = function () {
     // limit number of intervals for lessons longer than two hours
     var limitLessonLength = 3600 * 1e3;
+
     var interval = (lesson.duration < limitLessonLength) ? diffGraphInterval : (diffGraphInterval * lesson.duration / limitLessonLength);
 
     lessonService.getLessonDiffData(lesson.start, interval).then(function (data) {
-      for (var i = 0; i <= data.length; i++) {
-        line.values.push({
-          x: msToDateFilter(i * interval),
-          y: i == 0 ? 0 : data[i - 1]
-        });
-      }
+        data = data.filter(function (val, i, a) {
+            var numbefore = false;
+            var numAfter = false;
+            (a.slice(0, i)).forEach(function (val) {
+               if (val > 0)
+                 numbefore = true;
+            });
 
+            (a.slice(i, a.length - 1)).forEach(function (val) {
+                if (val > 0)
+                    numAfter = true;
+            });
+
+            if (numbefore && numAfter) {
+                return true;
+            } else {
+                return val > 0;
+            }
+        });
+
+        for (var i = 0; i <= data.length; i++) {
+            line.values.push({
+                x: msToDateFilter(i * interval),
+                y: i == 0 ? 0 : data[i - 1]
+            });
+        }
     });
   };
 

@@ -5,7 +5,7 @@
       <div class="label">Your score:</div>
       <div class="score">{{ ::lesson.score | number:0 }}</div>
       <div class="label">Time:</div>
-      <div class="time">{{ ::lesson.duration | msToTimeSpan }}</div>
+      <div class="time">{{ ::lesson.duration_real }}</div>
     </div>
 
     <nvd3 options="chartOptions" data="chartData"></nvd3>
