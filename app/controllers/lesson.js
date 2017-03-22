@@ -73,7 +73,12 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
   //     throw error;
   //   });
   // };
-
+    var message = 'My jumping score in last lesson was ' + lesson.score.toFixed(0) + '!';
+    var link = "http://fxe-gear.com";
+    $scope.share = function () {
+        console.log(message);
+        $cordovaSocialSharing.shareViaFacebook(message, null, link);
+    };
   var prepareChartData = function () {
     // limit number of intervals for lessons longer than two hours
     var limitLessonLength = 3600 * 1e3;
