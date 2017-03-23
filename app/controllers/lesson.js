@@ -5,7 +5,7 @@ var module = angular.module('fxe.controllers.lesson', []);
 // interval used in diff graph (in milliseconds)
 module.constant('diffGraphInterval', 120 * 1e3);
 
-var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, lessonService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle) {
+var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, lessonService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle, userService) {
 
   var tips = {
     jumping: [
@@ -74,12 +74,13 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
   //   });
   // };
     var message = 'My jumping score in last lesson was ' + lesson.score.toFixed(0) + '!';
-    var link = "http://fxe-gear.com";
+   // var link = "http://www.fxe-gear.com/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
+    var link = "http://dev17.nexgen.cz/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
     $scope.share = function () {
-        console.log(message);
-        $cordovaSocialSharing.shareViaFacebook(message, null, link);
+        $cordovaSocialSharing.shareViaFacebook(message, link, null);
     };
-  var prepareChartData = function () {
+
+    var prepareChartData = function () {
     // limit number of intervals for lessons longer than two hours
     var limitLessonLength = 3600 * 1e3;
 

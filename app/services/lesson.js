@@ -176,14 +176,14 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
             var mins = s % 60;
             var hrs = (s - mins) / 60;
 
-            if (hrs === 0)
-              hrs = "00";
+            if (hrs < 10)
+              hrs = "0"+hrs;
 
-            if (mins === 0)
-                mins = "00";
+            if (mins < 10)
+                mins = "0"+mins;
 
-            if (secs === 0)
-                secs = "00";
+            if (secs < 10)
+                secs = "0"+secs;
 
             lesson.duration_real  = hrs + ':' + mins + ':' + secs ;
       });

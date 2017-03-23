@@ -147,7 +147,6 @@ gulp.task('inject', ['templates', 'scripts', 'styles'], function () {
     'ng*.js',
     'stacktrace.min.js',
     'stack*.js',
-    'SocialSharing.js',
     '*.js',
     '**/*.css' // + CSS
   ].map(function (filename) {

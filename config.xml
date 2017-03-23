@@ -25,6 +25,13 @@
   <allow-navigation href="data:*"/>
   <allow-navigation href="http://0.0.0.0:8100"/>
   <allow-navigation href="http://0.0.0.0:8000"/>
+  <allow-navigation href="http://localhost:8000"/>
+  <allow-navigation href="http://10.0.75.1:8100"/>
+  <allow-navigation href="http://localhost:8100"/>
+  <allow-navigation href="http://127.0.0.1:8000"/>
+  <allow-navigation href="http://localhost:8001"/>
+  <allow-navigation href="http://192.168.88.167:8000"/>
+  <allow-navigation href="http://192.168.88.167:8001"/>
   <allow-intent href="http://*/*"/>
   <allow-intent href="https://*/*"/>
   <allow-intent href="tel:*"/>
@@ -121,4 +128,5 @@
     <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="Application needs determine your nearby events."/>
   </plugin>
   <plugin name="cordova-plugin-file-transfer" spec="~1.6.1"/>
+  <plugin name="SocialSharing-PhoneGap-Plugin" spec="https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin.git"/>
 </widget>
