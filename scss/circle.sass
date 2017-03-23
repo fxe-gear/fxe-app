@@ -1,0 +1,31 @@
+#svg
+    circle
+        transition: stroke-dashoffset 1s linear
+        stroke-width: 0.1em
+
+    #bar
+        stroke: transparent
+
+    #background
+          &.bronze
+              stroke: #aa591c
+
+          &.silver
+              stroke: #aaaaaa
+
+          &.gold
+              stroke: #aa9a22
+
+.score
+    position: relative
+
+    &__bar
+        position: absolute
+        width: 100%
+
+        &--first
+            top: 115px
+        &--second
+            top: 105px
+        &--third
+            top: 95px

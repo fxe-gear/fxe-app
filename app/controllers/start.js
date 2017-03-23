@@ -94,6 +94,7 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
     return fxeService.startMeasurement($scope.sport, onScoreChanged)
       .then(function () {
         $scope.running = true;
+        initCircles();
         timer = $interval(angular.noop, 500); // just to update duration
       })
       .catch(function (error) {
@@ -103,6 +104,27 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
         });
         throw error;
       });
+  };
+
+  var countCircleBar = function(val) {
+        return ((100-val)/100)*Math.PI*(90*2);
+  };
+
+  var initCircles = function () {
+      var circles = {};
+      circles.first = {};
+      circles.second = {};
+      circles.third = {};
+
+      circles.first.color = "bronze";
+      circles.second.color = "silver";
+      circles.third.color = "gold";
+
+      circles.first.bar = countCircleBar(20);
+      circles.second.bar = countCircleBar(40);
+      circles.third.bar = countCircleBar(60);
+
+      $scope.circles = circles;
   };
 
   var onScoreChanged = function (score, type) {
