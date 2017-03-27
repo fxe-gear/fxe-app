@@ -37,7 +37,7 @@ module.directive('animateOnChange', function ($animate, $timeout) {
   };
 });
 
-var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicPopover, $interval, $localStorage, fxeService, eventService, lessonService, userService) {
+var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicPopover, $interval, $localStorage, fxeService, eventService, lessonService, userService, $filter) {
   var timer = null;
   var batteryPopup = null;
 
@@ -106,25 +106,73 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
       });
   };
 
-  var countCircleBar = function(val) {
-        return ((100-val)/100)*Math.PI*(90*2);
+  var countCircleBar = function(val, diameter) {
+        if (typeof  diameter === "undefined") diameter = 90;
+        return ((100-val)/100)*Math.PI*(diameter*2);
   };
 
   var initCircles = function () {
+      new ConfettiCannon('confetti');
       var circles = {};
       circles.first = {};
       circles.second = {};
       circles.third = {};
 
       circles.first.color = "bronze";
-      circles.second.color = "silver";
-      circles.third.color = "gold";
+      circles.second.color = "";
+      circles.third.color = "";
 
-      circles.first.bar = countCircleBar(20);
-      circles.second.bar = countCircleBar(40);
-      circles.third.bar = countCircleBar(60);
+      circles.first.diameter = 55;
+      circles.second.diameter = 65;
+      circles.third.diameter = 76;
+
+      circles.first.bar = countCircleBar(0, circles.first.diameter);
+      circles.second.bar = countCircleBar(0, circles.second.diameter);
+      circles.third.bar = countCircleBar(0, circles.third.diameter);
 
       $scope.circles = circles;
+      $scope.previousScore = 0;
+
+      var rules = [];
+      // rules.push({
+      //     color: "bronze",
+      //     circle: circle.first,
+      //     rules : [{duration: 40*60*1000, score: 64}, {duration: 60*60*1000, score: 100}],
+      //     state: 0
+      // });
+      // rules.push({
+      //     color: "silver",
+      //     circle: circle.second,
+      //     rules : [{duration: 40*60*1000, score: 80}, {duration: 50*60*1000, score: 100}],
+      //     state: 0
+      // });
+      // rules.push({
+      //     color: "gold",
+      //     circle: circle.third,
+      //     rules : [{duration: 40*60*1000, score: 100}, {duration: 1440*60*1000, score: 100}],
+      //     state: 0
+      // });
+
+      rules.push({
+          color: "bronze",
+          circle: circles.first,
+          rules : [{duration: 60*1000, score: 1}, {duration: 2*60*1000, score: 2}],
+          state: 0
+      });
+      rules.push({
+          color: "silver",
+          circle: circles.second,
+          rules : [{duration: 3*60*1000, score: 3}, {duration: 5*60*1000, score: 5}],
+          state: 0
+      });
+      rules.push({
+          color: "gold",
+          circle: circles.third,
+          rules : [{duration: 4*60*1000, score: 8}, {duration: 1440*60*1000, score: 10}],
+          state: 0
+      });
+
+      $scope.rules = rules;
   };
 
   var onScoreChanged = function (score, type) {
@@ -134,6 +182,61 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
       time: Date.now()
     };
     $scope.lesson.score.push(scoreItem);
+    progressBar();
+  };
+
+  var progressBar = function () {
+      if (typeof $scope.rules === "undefined")
+          return;
+
+      var max = $filter('sumScore')($scope.lesson.score);
+
+      var duration = $scope.getDuration();
+
+      $scope.rules.some(function (rule, i, arr)  {
+          if (rule.state) {
+              return false;
+          }
+
+          if (duration < rule.rules[0].duration) {
+              var sub_rule = rule.rules[0];
+          } else if (duration < rule.rules[1].duration) {
+              var sub_rule = rule.rules[1];
+          }
+
+          if (typeof sub_rule !== "undefined") {
+              if (max < sub_rule.score) {
+                  var m = 0, s = 0;
+                  if ($scope.previousScore !== 0) {
+                      m = max - $scope.previousScore;
+                      s = sub_rule.score - $scope.previousScore;
+                  } else {
+                      m = max;
+                      s = sub_rule.score;
+                  }
+                  console.log($scope.previousScore);
+                  console.log("m =" + m);
+                  console.log("s =" + s);
+                  rule.circle.bar = countCircleBar(Math.round(m / s * 100), rule.circle.diameter);
+                  return true;
+              } else {
+                  rule.circle.bar = countCircleBar(100, rule.circle.diamater);
+                  rule.state = 1;
+                  $scope.previousScore = sub_rule.score;
+                  if (typeof  arr[i+1] !== "undefined") {
+                      arr[i+1].circle.color = arr[i+1].color;
+                  }
+                  setTimeout(function () {
+                      var x = document.getElementById('confetti').width/2;
+                      var y = document.getElementById('confetti').height/3;
+                      fire('confetti', x, y);
+                  }, 1500);
+                  return true;
+              }
+          } else {
+              return true;
+          }
+      });
   };
 
   $scope.stop = function () {

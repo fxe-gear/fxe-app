@@ -177,7 +177,7 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
             var hrs = (s - mins) / 60;
 
             if (hrs < 10)
-              hrs = "0"+hrs;
+                hrs = "0"+hrs;
 
             if (mins < 10)
                 mins = "0"+mins;

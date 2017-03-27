@@ -1,20 +1,20 @@
 #svg
-    circle
-        transition: stroke-dashoffset 1s linear
-        stroke-width: 0.1em
+    transform-origin: center
+    transform:  rotate(-90deg)
 
     #bar
         stroke: transparent
+        transition: stroke-dashoffset 1s linear
+        stroke-width: 0.1em
 
-    #background
-          &.bronze
-              stroke: #aa591c
+        &.bronze
+            stroke: #cd7f32
 
-          &.silver
-              stroke: #aaaaaa
+        &.silver
+            stroke: #c0c0c0
 
-          &.gold
-              stroke: #aa9a22
+        &.gold
+            stroke: #D3AF37
 
 .score
     position: relative
@@ -24,8 +24,20 @@
         width: 100%
 
         &--first
-            top: 115px
+            top: 106px
         &--second
-            top: 105px
+            top: 91px
         &--third
-            top: 95px
+            top: 76px
+
+#confetti
+    background: transparent
+    position: fixed
+    top: 0
+    left: 0
+    width: 100vw
+    height: 100vh
+
+
+
+
