@@ -14,11 +14,12 @@
     </div>
 
     <div ng-hide="!running">
+      <div class="trophy" ng-class="{'trophy--bronze': rules.getByColor('bronze').state === 1, 'trophy--silver': rules.getByColor('silver').state === 1, 'trophy--gold': rules.getByColor('gold').state === 1}"></div>
       <canvas id="confetti"></canvas>
       <div class="score">
           <div class="score__text">
               <div class="label">Your score:</div>
-              <div class="score" animate-on-change="lesson.score | sumScore">{{ lesson.score | sumScore | number:0 }}</div>
+              <div class="score" ng-class="{'score--tens': ( lesson.score | sumScore ) > 9, 'score--hundreds': ( lesson.score | sumScore ) > 99}" animate-on-change="lesson.score | sumScore">{{ lesson.score | sumScore | number:0 }}</div>
           </div>
           <div class="score__bar score__bar--first">
               <svg id="svg" width="120" height="120" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">

@@ -172,6 +172,12 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
           state: 0
       });
 
+      rules.getByColor = function (color) {
+            return $scope.rules.filter(function (val) {
+                return val.color === color;
+            })[0];
+      };
+
       $scope.rules = rules;
   };
 
@@ -214,9 +220,7 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
                       m = max;
                       s = sub_rule.score;
                   }
-                  console.log($scope.previousScore);
-                  console.log("m =" + m);
-                  console.log("s =" + s);
+
                   rule.circle.bar = countCircleBar(Math.round(m / s * 100), rule.circle.diameter);
                   return true;
               } else {
