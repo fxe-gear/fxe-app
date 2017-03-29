@@ -122,6 +122,20 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
     prepareChartData();
     $scope.tip = lesson.sport == 1 ? shuffle(tips.jumping)[0] : shuffle(tips.running)[0];
   });
+
+  $scope.getTrophy = function () {
+        var lesson = $scope.lesson;
+        var minutes = Math.round((lesson.start - lesson.end) / 1000 / 60);
+        var scorePerMinute = lesson.score / scorePerMinute;
+      
+        if ( scorePerMinute >  1.6 && minutes > 40 && scorePerMinute < 2 ) {
+            return "bronze";
+        } else if (scorePerMinute > 2 && scorePerMinute < 2.5 && minutes > 40 ) {
+            return "silver";
+        } else if ( scorePerMinute > 2.5 && minutes > 40 ) {
+            return "gold";
+        }
+    };
 };
 
 module.controller('LessonController', LessonController);

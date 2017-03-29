@@ -262,13 +262,35 @@ form {
   .time {
     font-size: 3rem;
     line-height: 1.4em;
-    margin-bottom: 1rem;
+    //margin-bottom: 1rem;
   }
   .score {
     font-size: 5rem;
     transition: transform 0.1s ease-out;
     &.fresh {
       transform: scale(1.4);
+    }
+  }
+  .trophy-detail {
+    display: none;
+    width: 45px;
+    height: 60px;
+    margin: 0;
+
+    &.bronze {
+        display: inline-block;
+        background:  url('../img/bronze.png');
+        background-size: contain;
+    }
+    &.silver {
+        display: inline-block;
+        background: url('../img/silver.png');
+        background-size: contain;
+    }
+    &.gold {
+        display: inline-block;
+        background:url('../img/gold.png');
+        background-size: contain;
     }
   }
   //.share {
