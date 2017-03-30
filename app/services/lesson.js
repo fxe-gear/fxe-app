@@ -167,6 +167,7 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
        lesson.duration = row.end_time - row.start_time;
 
       getScore(start).then(function (score) {
+            if (score.length === 0) return;
             var s = (score[score.length - 1].time - score[0].time);
 
             var ms = s % 1000;
@@ -186,6 +187,7 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
                 secs = "0"+secs;
 
             lesson.duration_real  = hrs + ':' + mins + ':' + secs ;
+            lesson.duration_real_time  = (score[score.length - 1].time - score[0].time) ;
       });
 
       if (withCompleteScore) {
