@@ -166,44 +166,49 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
       // add derived duration
        lesson.duration = row.end_time - row.start_time;
 
-      getScore(start).then(function (score) {
-            if (score.length === 0) return;
-            var s = (score[score.length - 1].time - score[0].time);
+      return getScore(start).then(function (score) {
+          if (score.length === 0) {
+              lesson.score = 0;
+              lesson.duration_real = getTimeString(lesson.duration);
+              lesson.duration_real_time = lesson.duration;
+              return lesson;
+          }
 
-            var ms = s % 1000;
-            s = (s - ms) / 1000;
-            var secs = s % 60;
-            s = (s - secs) / 60;
-            var mins = s % 60;
-            var hrs = (s - mins) / 60;
+          lesson.duration_real = getTimeString(score[score.length - 1].time - score[0].time);
+          lesson.duration_real_time  = (score[score.length - 1].time - score[0].time) ;
 
-            if (hrs < 10)
-                hrs = "0"+hrs;
-
-            if (mins < 10)
-                mins = "0"+mins;
-
-            if (secs < 10)
-                secs = "0"+secs;
-
-            lesson.duration_real  = hrs + ':' + mins + ':' + secs ;
-            lesson.duration_real_time  = (score[score.length - 1].time - score[0].time) ;
+          if (withCompleteScore) {
+              // select complete score if required
+              lesson.score = score;
+              return lesson;
+          } else {
+              // otherwise, only sum rows in current result
+              lesson.score = 0;
+              for (var i = 0; i < res.rows.length; i++) lesson.score += res.rows.item(i).score;
+              return lesson;
+          }
       });
-
-      if (withCompleteScore) {
-        // select complete score if required
-        return getScore(start).then(function (score) {
-          lesson.score = score;
-          return lesson;
-        });
-
-      } else {
-        // otherwise, only sum rows in current result
-        lesson.score = 0;
-        for (var i = 0; i < res.rows.length; i++) lesson.score += res.rows.item(i).score;
-        return lesson;
-      }
     });
+  };
+
+  var getTimeString = function (s) {
+      var ms = s % 1000;
+      s = (s - ms) / 1000;
+      var secs = s % 60;
+      s = (s - secs) / 60;
+      var mins = s % 60;
+      var hrs = (s - mins) / 60;
+
+      if (hrs < 10)
+          hrs = "0"+hrs;
+
+      if (mins < 10)
+          mins = "0"+mins;
+
+      if (secs < 10)
+          secs = "0"+secs;
+
+      return hrs + ':' + mins + ':' + secs ;
   };
 
   var getLessonsBetween = function (date1, date2) {

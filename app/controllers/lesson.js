@@ -76,7 +76,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
     var message = 'My jumping score in last lesson was ' + lesson.score.toFixed(0) + '!';
    // var link = "http://www.fxe-gear.com/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
     var link = "http://dev17.nexgen.cz/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
-    console.log("http://dev17.nexgen.cz/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id);
+
     $scope.share = function () {
         $cordovaSocialSharing.shareViaFacebook(message, link, null);
     };
@@ -127,7 +127,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
         var lesson = $scope.lesson;
         var minutes = Math.round((lesson.start - lesson.end) / 1000 / 60);
         var scorePerMinute = lesson.score / scorePerMinute;
-      
+
         if ( scorePerMinute >  1.6 && minutes > 40 && scorePerMinute < 2 ) {
             return "bronze";
         } else if (scorePerMinute > 2 && scorePerMinute < 2.5 && minutes > 40 ) {

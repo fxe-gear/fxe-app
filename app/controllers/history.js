@@ -150,7 +150,7 @@ var HistoryController = function ($scope, $ionicListDelegate, $cordovaDatePicker
     for (var i = 0; i < $scope.lessons.length; i++) {
       var lesson = $scope.lessons[i];
       $scope.summary.score += lesson.score;
-      $scope.summary.duration += lesson.duration;
+      $scope.summary.duration += lesson.duration_real_time;
     }
   };
 
@@ -166,7 +166,8 @@ var HistoryController = function ($scope, $ionicListDelegate, $cordovaDatePicker
   var reloadLessons = function () {
     // load lessons for current date interval
     return lessonService.getLessonsBetween($scope.startDate.getTime(), $scope.endDate.getTime())
-      .then(function (lessons) {
+       .then(function (lessons) {
+
         $scope.lessons.length = 0;
         for (var i = 0; i < lessons.length; i++) $scope.lessons.push(lessons[i]);
 
