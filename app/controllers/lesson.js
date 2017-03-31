@@ -125,11 +125,8 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
   });
 
   var getTrophy = function (lesson) {
-        var minutes = Math.floor((lesson.start - lesson.end) / 1000 / 60);
-        var scorePerMinute = lesson.score / scorePerMinute;
-
-        console.log(minutes);
-        console.log(scorePerMinute);
+        var minutes = Math.floor((lesson.end - lesson.start) / 1000 / 60);
+        var scorePerMinute = lesson.score / minutes;
 
         if ( scorePerMinute >  1.6 && minutes > 40 && scorePerMinute < 2 ) {
             return "bronze";
