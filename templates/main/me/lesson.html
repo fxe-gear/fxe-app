@@ -3,7 +3,7 @@
 
     <div class="info">
       <div class="label">Your score:</div>
-      <div class="score">{{ ::lesson.score | number:0 }} <div class="trophy-detail" ng-class="getTrophy(lesson)"></div></div>
+      <div class="score">{{ ::lesson.score | number:0 }} <div class="trophy-detail {{ trophy }}"></div></div>
 
       <div class="label">Time:</div>
       <div class="time">{{ ::lesson.duration_real }}</div>

@@ -6,7 +6,7 @@ var module = angular.module('fxe.controllers.lesson', []);
 module.constant('diffGraphInterval', 120 * 1e3);
 
 var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, lessonService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle, userService) {
-
+    console.log("lesson");
   var tips = {
     jumping: [
       'When you jump on a high intensity. Focus on impacting on flat foot. That way you will save you will put less stress on your calves and put it on your thighs. That way you will be able to perform better and longer.',
@@ -76,6 +76,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
     var message = 'My jumping score in last lesson was ' + lesson.score.toFixed(0) + '!';
    // var link = "http://www.fxe-gear.com/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
     var link = "http://dev17.nexgen.cz/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
+   // console.log(link);
 
     $scope.share = function () {
         $cordovaSocialSharing.shareViaFacebook(message, link, null);
@@ -123,10 +124,12 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
     $scope.tip = lesson.sport == 1 ? shuffle(tips.jumping)[0] : shuffle(tips.running)[0];
   });
 
-  $scope.getTrophy = function () {
-        var lesson = $scope.lesson;
-        var minutes = Math.round((lesson.start - lesson.end) / 1000 / 60);
+  var getTrophy = function (lesson) {
+        var minutes = Math.floor((lesson.start - lesson.end) / 1000 / 60);
         var scorePerMinute = lesson.score / scorePerMinute;
+
+        console.log(minutes);
+        console.log(scorePerMinute);
 
         if ( scorePerMinute >  1.6 && minutes > 40 && scorePerMinute < 2 ) {
             return "bronze";
@@ -136,6 +139,8 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
             return "gold";
         }
     };
+
+    $scope.trophy = getTrophy(lesson);
 };
 
 module.controller('LessonController', LessonController);

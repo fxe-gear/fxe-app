@@ -134,43 +134,43 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
       $scope.previousScore = 0;
 
       var rules = [];
-      // rules.push({
-      //     color: "bronze",
-      //     circle: circle.first,
-      //     rules : [{duration: 40*60*1000, score: 64}, {duration: 60*60*1000, score: 100}],
-      //     state: 0
-      // });
-      // rules.push({
-      //     color: "silver",
-      //     circle: circle.second,
-      //     rules : [{duration: 40*60*1000, score: 80}, {duration: 50*60*1000, score: 100}],
-      //     state: 0
-      // });
-      // rules.push({
-      //     color: "gold",
-      //     circle: circle.third,
-      //     rules : [{duration: 40*60*1000, score: 100}, {duration: 1440*60*1000, score: 100}],
-      //     state: 0
-      // });
-
       rules.push({
           color: "bronze",
-          circle: circles.first,
-          rules : [{duration: 60*1000, score: 1}, {duration: 2*60*1000, score: 2}],
+          circle: circle.first,
+          rules : [{duration: 40*60*1000, score: 64}, {duration: 60*60*1000, score: 100}],
           state: 0
       });
       rules.push({
           color: "silver",
-          circle: circles.second,
-          rules : [{duration: 3*60*1000, score: 3}, {duration: 5*60*1000, score: 5}],
+          circle: circle.second,
+          rules : [{duration: 40*60*1000, score: 80}, {duration: 50*60*1000, score: 100}],
           state: 0
       });
       rules.push({
           color: "gold",
-          circle: circles.third,
-          rules : [{duration: 4*60*1000, score: 8}, {duration: 1440*60*1000, score: 10}],
+          circle: circle.third,
+          rules : [{duration: 40*60*1000, score: 100}, {duration: 1440*60*1000, score: 100}],
           state: 0
       });
+
+      // rules.push({
+      //     color: "bronze",
+      //     circle: circles.first,
+      //     rules : [{duration: 60*1000, score: 1}, {duration: 2*60*1000, score: 2}],
+      //     state: 0
+      // });
+      // rules.push({
+      //     color: "silver",
+      //     circle: circles.second,
+      //     rules : [{duration: 3*60*1000, score: 3}, {duration: 5*60*1000, score: 5}],
+      //     state: 0
+      // });
+      // rules.push({
+      //     color: "gold",
+      //     circle: circles.third,
+      //     rules : [{duration: 4*60*1000, score: 8}, {duration: 1440*60*1000, score: 10}],
+      //     state: 0
+      // });
 
       rules.getByColor = function (color) {
             return $scope.rules.filter(function (val) {
