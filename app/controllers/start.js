@@ -136,19 +136,19 @@ var StartController = function ($scope, $rootScope, $state, $ionicPopup, $ionicP
       var rules = [];
       rules.push({
           color: "bronze",
-          circle: circle.first,
+          circle: circles.first,
           rules : [{duration: 40*60*1000, score: 64}, {duration: 60*60*1000, score: 100}],
           state: 0
       });
       rules.push({
           color: "silver",
-          circle: circle.second,
+          circle: circles.second,
           rules : [{duration: 40*60*1000, score: 80}, {duration: 50*60*1000, score: 100}],
           state: 0
       });
       rules.push({
           color: "gold",
-          circle: circle.third,
+          circle: circles.third,
           rules : [{duration: 40*60*1000, score: 100}, {duration: 1440*60*1000, score: 100}],
           state: 0
       });

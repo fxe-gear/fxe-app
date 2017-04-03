@@ -16,6 +16,8 @@ cd fxe-app
 npm install
 bower install
 gulp
+   
+?? cordova plugin add https://github.com/EddyVerbruggen/SocialSharing-PhoneGap-Plugin.git
 ```
 
 ## Development
