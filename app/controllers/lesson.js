@@ -6,7 +6,6 @@ var module = angular.module('fxe.controllers.lesson', []);
 module.constant('diffGraphInterval', 120 * 1e3);
 
 var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, lessonService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle, userService) {
-    console.log("lesson");
   var tips = {
     jumping: [
       'When you jump on a high intensity. Focus on impacting on flat foot. That way you will save you will put less stress on your calves and put it on your thighs. That way you will be able to perform better and longer.',
