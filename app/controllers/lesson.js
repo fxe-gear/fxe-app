@@ -6,7 +6,6 @@ var module = angular.module('fxe.controllers.lesson', []);
 module.constant('diffGraphInterval', 120 * 1e3);
 
 var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, lessonService, diffGraphInterval, msToDateFilter, dateFilter, lesson, shuffle, userService) {
-    console.log("lesson");
   var tips = {
     jumping: [
       'When you jump on a high intensity. Focus on impacting on flat foot. That way you will save you will put less stress on your calves and put it on your thighs. That way you will be able to perform better and longer.',
@@ -125,11 +124,8 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
   });
 
   var getTrophy = function (lesson) {
-        var minutes = Math.floor((lesson.start - lesson.end) / 1000 / 60);
-        var scorePerMinute = lesson.score / scorePerMinute;
-
-        console.log(minutes);
-        console.log(scorePerMinute);
+        var minutes = Math.floor(lesson.duration / 1000 / 60);
+        var scorePerMinute = lesson.score / minutes;
 
         if ( scorePerMinute >  1.6 && minutes > 40 && scorePerMinute < 2 ) {
             return "bronze";
