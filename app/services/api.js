@@ -3,9 +3,9 @@
 var module = angular.module('fxe.services.api', []);
 
 //module.constant('baseURL', '/api');
-module.constant('baseURL', 'http://dev17.nexgen.cz/api/v2');
+//module.constant('baseURL', 'http://dev17.nexgen.cz/api/v2');
 // module.constant('baseURL', 'http://private-855a4-fxe.apiary-mock.com');
-// module.constant('baseURL', 'http://www.fxe-gear.com/api/v1');
+ module.constant('baseURL', 'https://www.fxe-gear.com/api/v2');
 
 module.config(function ($httpProvider) {
 
