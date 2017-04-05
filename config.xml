@@ -99,6 +99,7 @@
     <splash density="port-xxhdpi" src="resources/android/splash/drawable-port-xxhdpi-screen.png"/>
     <splash density="port-xxxhdpi" src="resources/android/splash/drawable-port-xxxhdpi-screen.png"/>
     <config-file parent="manifest" target="AndroidManifest.xml">
+    <preference name="android-targetSdkVersion" value="22"/>
       <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     </config-file>
   </platform>
