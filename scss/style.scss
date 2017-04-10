@@ -279,12 +279,12 @@ form {
 
     &.bronze {
         display: inline-block;
-        background:  url('../img/bronze.png');
+        background:  url('../img/bronze-ribon.png');
         background-size: contain;
     }
     &.silver {
         display: inline-block;
-        background: url('../img/silver.png');
+        background: url('../img/silver-medail.png');
         background-size: contain;
     }
     &.gold {
@@ -354,10 +354,10 @@ form {
     background-size: 15% !important;
 
     &--bronze {
-        background: url('../img/bronze.png') no-repeat center;
+        background: url('../img/bronze-ribon.png') no-repeat center;
     }
     &--silver {
-        background: url('../img/silver.png') no-repeat center;
+        background: url('../img/silver-medail.png') no-repeat center;
     }
     &--gold {
         background: url('../img/gold.png') no-repeat center;
