@@ -279,17 +279,17 @@ form {
 
     &.bronze {
         display: inline-block;
-        background:  url('../img/bronze-ribon.png');
+        background:  url('../img/bronze-ribon.png') no-repeat;
         background-size: contain;
     }
     &.silver {
         display: inline-block;
-        background: url('../img/silver-medail.png');
+        background: url('../img/silver-medail.png') no-repeat;
         background-size: contain;
     }
     &.gold {
         display: inline-block;
-        background:url('../img/gold.png');
+        background:url('../img/gold.png') no-repeat;
         background-size: contain;
     }
   }
