@@ -75,7 +75,7 @@ var LessonController = function ($scope, $cordovaSocialSharing, $ionicPopup, les
     var message = 'My jumping score in last lesson was ' + lesson.score.toFixed(0) + '!';
     var link = "https://www.fxe-gear.com/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
    // var link = "http://dev17.nexgen.cz/en/lesson/detail?l="+lesson.start+"&u="+userService.getUser().id;
-   // console.log(link);
+    console.log(link);
 
     $scope.share = function () {
         $cordovaSocialSharing.shareViaFacebook(message, link, null);

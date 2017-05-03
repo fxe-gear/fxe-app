@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.fxe.fxe" version="1.0.4" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
+<widget id="com.fxe.fxe" version="1.0.10" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
   <name>FXE</name>
   <description>Official companion app for FXE® sensor.</description>
   <author email="info@fxe-gear.com" href="https://fxe-gear.com/">FXE</author>
@@ -99,7 +99,7 @@
     <splash density="port-xxhdpi" src="resources/android/splash/drawable-port-xxhdpi-screen.png"/>
     <splash density="port-xxxhdpi" src="resources/android/splash/drawable-port-xxxhdpi-screen.png"/>
     <config-file parent="manifest" target="AndroidManifest.xml">
-    <preference name="android-targetSdkVersion" value="22"/>
+      <preference name="android-targetSdkVersion" value="22"/>
       <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
     </config-file>
   </platform>

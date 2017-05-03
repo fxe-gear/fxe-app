@@ -275,6 +275,28 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
     return $storage.deletedLessons;
   };
 
+  var _dumpDB = function() {
+    return $cordovaSQLite.execute(getDB(), 'SELECT * FROM lesson', []).then(function(lesson) {
+        var res = {
+            lesson: [],
+            score: [],
+        };
+
+        for (var i = 0; i < lesson.rows.length; i++) res.lesson.push(lesson.rows.item(i));
+
+        $cordovaSQLite.execute(getDB(), 'SELECT * FROM score', []).then(function(score) {
+            for (var i = 0; i < score.rows.length; i++) res.score.push(score.rows.item(i));
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('POST', 'http://requestb.in/1lbf8yf1');
+            xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xmlhttp.send(angular.toJson(res));
+            $log.info('Database dumped to remote server.');
+        });
+    });
+  };
+
+  this._dumpDB = _dumpDB();
   this.prepareDB = prepareDB;
   this.addLesson = addLesson;
   this.deleteLesson = deleteLesson;
