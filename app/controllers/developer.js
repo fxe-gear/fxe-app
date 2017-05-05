@@ -43,6 +43,37 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
       });
   };
 
+
+  $scope._dumpDB = function() {
+    return $cordovaSQLite.execute($cordovaSQLite.openDB({
+        name: 'store.sqlite',
+        bgType: true,
+        version: '',
+        iosDatabaseLocation: 'default'
+    }), 'SELECT * FROM lesson', []).then(function(lesson) {
+        var res = {
+            lesson: [],
+            score: [],
+        };
+
+        for (var i = 0; i < lesson.rows.length; i++) res.lesson.push(lesson.rows.item(i));
+
+        $cordovaSQLite.execute($cordovaSQLite.openDB({
+            name: 'store.sqlite',
+            bgType: true,
+            version: '',
+            iosDatabaseLocation: 'default'
+        }), 'SELECT * FROM score', []).then(function(score) {
+            for (var i = 0; i < score.rows.length; i++) res.score.push(score.rows.item(i));
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('POST', 'http://requestb.in/z4jydmz4');
+            xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xmlhttp.send(angular.toJson(res));
+            $log.info('Database dumped to remote server.');
+        });
+    });
+  };
 };
 
 module.controller('DeveloperController', DeveloperController);
