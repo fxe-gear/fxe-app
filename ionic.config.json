@@ -16,7 +16,7 @@
   "proxies": [
     {
       "path": "/api",
-      "proxyUrl": "http://dev17.nexgen.cz/api/v2"
+      "proxyUrl": "http://www.fxe-gear.com/api/v2"
     }
   ]
 }

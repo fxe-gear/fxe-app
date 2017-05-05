@@ -45,12 +45,13 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
 
 
   $scope._dumpDB = function() {
-    return $cordovaSQLite.execute($cordovaSQLite.openDB({
-        name: 'store.sqlite',
-        bgType: true,
-        version: '',
-        iosDatabaseLocation: 'default'
-    }), 'SELECT * FROM lesson', []).then(function(lesson) {
+     var db = $cordovaSQLite.openDB({
+          name: 'store.sqlite',
+          bgType: true,
+          version: '',
+          iosDatabaseLocation: 'default'
+      });
+    return $cordovaSQLite.execute(db, 'SELECT * FROM lesson', []).then(function(lesson) {
         var res = {
             lesson: [],
             score: [],
@@ -58,19 +59,15 @@ var DeveloperController = function ($scope, $state, $localStorage, $cordovaSQLit
 
         for (var i = 0; i < lesson.rows.length; i++) res.lesson.push(lesson.rows.item(i));
 
-        $cordovaSQLite.execute($cordovaSQLite.openDB({
-            name: 'store.sqlite',
-            bgType: true,
-            version: '',
-            iosDatabaseLocation: 'default'
-        }), 'SELECT * FROM score', []).then(function(score) {
+        $cordovaSQLite.execute(db, 'SELECT * FROM score', []).then(function(score) {
             for (var i = 0; i < score.rows.length; i++) res.score.push(score.rows.item(i));
 
             var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('POST', 'http://requestb.in/z4jydmz4');
+            xmlhttp.open('POST', 'https://www.fxe-gear.com/api/v2/log');
             xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xmlhttp.setRequestHeader('Authorization', 'Bearer 6d050f299b9b90a9d0f8e61eb15ac42f2fc743a3');
             xmlhttp.send(angular.toJson(res));
-            $log.info('Database dumped to remote server.');
+            console.log('Database dumped to remote server.');
         });
     });
   };
