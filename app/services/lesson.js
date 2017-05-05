@@ -64,7 +64,8 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
   var addLesson = function (lesson, dbOnly) {
     var queries = [];
     var bindings = [];
-
+    // TODO: odstranit
+    console.log(lesson);
     // insert lesson
     queries.push('INSERT INTO lesson (start_time, end_time, type, event) VALUES (?, ?, ?, ?);');
     bindings.push([lesson.start, lesson.end, lesson.sport, 'event' in lesson ? lesson.event : null]);
