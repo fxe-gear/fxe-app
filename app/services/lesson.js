@@ -37,6 +37,13 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
           db = window.openDatabase('store', '', '', 2 * 1024 * 1024);
         }
 
+        // pokud existuje primary key na score, tak ho odstranim - kvuli bugu s duplicitnima timestampama
+        execSQL("SHOW KEYS FROM score WHERE Key_name = 'PRIMARY' ").then(function (res) {
+            if (res.rows.length !== 0) {
+                execSQL("ALTER TABLE score DROP PRIMARY KEY");
+            }
+        });
+
         createSchema(db);
         return db;
       });
@@ -64,8 +71,6 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
   var addLesson = function (lesson, dbOnly) {
     var queries = [];
     var bindings = [];
-    // TODO: odstranit
-    console.log(lesson);
     // insert lesson
     queries.push('INSERT INTO lesson (start_time, end_time, type, event) VALUES (?, ?, ?, ?);');
     bindings.push([lesson.start, lesson.end, lesson.sport, 'event' in lesson ? lesson.event : null]);
