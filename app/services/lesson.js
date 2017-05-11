@@ -37,13 +37,6 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
           db = window.openDatabase('store', '', '', 2 * 1024 * 1024);
         }
 
-        // pokud existuje primary key na score, tak ho odstranim - kvuli bugu s duplicitnima timestampama
-        execSQL("SHOW KEYS FROM score WHERE Key_name = 'PRIMARY' ").then(function (res) {
-            if (res.rows.length !== 0) {
-                execSQL("ALTER TABLE score DROP PRIMARY KEY");
-            }
-        });
-
         createSchema(db);
         return db;
       });
@@ -65,7 +58,34 @@ module.service('lessonService', function ($ionicPlatform, $cordovaSQLite, $local
 
   var createSchema = function (db) {
     $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS lesson (start_time DATETIME PRIMARY KEY, end_time DATETIME, type TINYINT NOT NULL, event INT);');
-    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME, score FLOAT NOT NULL, type TINYINT, PRIMARY KEY (start_time, time));');
+    $cordovaSQLite.execute(db, 'CREATE TABLE IF NOT EXISTS score (start_time DATETIME NOT NULL, time DATETIME, score FLOAT NOT NULL, type TINYINT);');
+
+    // pokud existuje primary key na score, tak ho odstranim - kvuli bugu s duplicitnima timestampama
+    $cordovaSQLite.execute(db, "PRAGMA table_info(score)").then(function (res) {
+        var pk = false;
+        for (var i = 0; i < res.rows.length; i++) {
+            var row = res.rows.item(i);
+            if (row.pk > 0) {
+                pk = true;
+                break;
+            }
+        }
+
+        if (!pk) {
+              return;
+        }
+
+        $log.info("Removing score primary key");
+        db.transaction(function (tx) {
+            tx.executeSql('DROP TABLE IF EXISTS score_copy');
+            tx.executeSql('CREATE TABLE score_copy (start_time DATETIME NOT NULL, time DATETIME, score FLOAT NOT NULL, type TINYINT)');
+            tx.executeSql('INSERT INTO score_copy (start_time, time, score, type) SELECT start_time, time, score, type FROM score');
+            tx.executeSql('DROP TABLE score');
+            tx.executeSql('ALTER TABLE score_copy RENAME TO score');
+        },  function(error) {
+            console.log('Transaction ERROR: ' + error.message);
+        });
+    });
   };
 
   var addLesson = function (lesson, dbOnly) {
