@@ -3,7 +3,7 @@
 // inspired by http://engineering.talis.com/articles/client-side-error-logging/
 
 var loggingModule = angular.module('fxe.services.logging', []);
-var LOG_URL = 'http://www.fxe-gear.com/api/v1/log';
+var LOG_URL = 'http://www.fxe-gear.com/api/v2/log';
 
 loggingModule.factory('$exceptionHandler', function ($log) {
   return function remoteExceptionLogger(exception, cause) {
